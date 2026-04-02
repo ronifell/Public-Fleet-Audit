@@ -40,11 +40,11 @@
         <span class="m1-hub-tile-title">Conformidade de Dados e Anti-Fraude</span>
       </button>
       <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-map')">
-        <span class="m1-hub-tile-kicker">Siga Frota — Ativos</span>
+        <span class="m1-hub-tile-kicker">GESTÃO DE PATRIMÔNIO</span>
         <span class="m1-hub-tile-title">Vistoria e Censo (Fé Pública AP 04)</span>
       </button>
       <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
-        <span class="m1-hub-tile-kicker">Siga Frota — Ativos</span>
+        <span class="m1-hub-tile-kicker">GESTÃO DE PATRIMÔNIO</span>
         <span class="m1-hub-tile-title">Relatório Pericial e Saneamento</span>
       </button>
     </nav>
@@ -77,12 +77,14 @@
             </div>
           </div>
         </div>
-        <p class="m1-eyebrow">{{ isFuelModuleView ? 'Siga Frota — Combustível' : 'Siga Frota — Ativos' }}</p>
+        <p class="m1-eyebrow">{{ isFuelModuleView ? 'Siga Frota — Combustível' : 'GESTÃO DE PATRIMÔNIO' }}</p>
         <h2 class="m1-title">{{ moduleTitleLine }}</h2>
         <p class="m1-subtitle">{{ moduleSubtitle }}</p>
       </div>
       <div class="m1-hero-actions">
-        <button nz-button nzType="default" class="milestone-back-btn" (click)="goToHub()">Centro de governança</button>
+        <button nz-button nzType="default" class="milestone-back-btn" (click)="goToHub()">
+          {{ isAssetsModuleView ? 'Painel do Patrimônio' : 'Centro de governança' }}
+        </button>
         <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
           {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
         </button>
@@ -150,22 +152,41 @@
           <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
         </nz-card>
         <nz-card class="side-card m1-side-panel" *ngIf="selectedMapRecord">
-          <h4 class="m1-card-title">Painel lateral de auditoria</h4>
-          <p><strong>Placa:</strong> {{ selectedMapRecord.placa }}</p>
-          <p><strong>Motorista:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
-          <p><strong>Litros:</strong> {{ selectedMapRecord.volumeLitros }}</p>
-          <p><strong>Distância:</strong> {{ getMapDistanceMeters(selectedMapRecord) | number: '1.0-0' }} m</p>
-          <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
-            {{
-              isAutomaticDeduction(selectedMapRecord)
-                ? 'Dedução automática (>500 m)'
-                : 'Sem dedução automática (≤500 m)'
-            }}
-          </p>
+          <h4 class="m1-card-title">
+            {{ activeView === 'assets-map' ? 'Painel de registro e conservação' : 'Painel lateral de auditoria' }}
+          </h4>
+
+          <ng-container *ngIf="activeView === 'fuel-map'">
+            <p><strong>Placa:</strong> {{ selectedMapRecord.placa }}</p>
+            <p><strong>Motorista:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
+            <p><strong>Litros:</strong> {{ selectedMapRecord.volumeLitros }}</p>
+            <p><strong>Distância:</strong> {{ getMapDistanceMeters(selectedMapRecord) | number: '1.0-0' }} m</p>
+            <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
+              {{
+                isAutomaticDeduction(selectedMapRecord)
+                  ? 'Dedução automática (>500 m)'
+                  : 'Sem dedução automática (≤500 m)'
+              }}
+            </p>
+          </ng-container>
+
+          <ng-container *ngIf="activeView === 'assets-map'">
+            <p><strong>Nº de registro / tombamento:</strong> {{ selectedMapRecord.placa }}</p>
+            <p><strong>Responsável / curador:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
+            <p><strong>Estado de conservação:</strong> {{ patrimonyConservationPercent(selectedMapRecord) }}</p>
+            <p>
+              <strong>Perímetro de proteção:</strong> {{ getMapDistanceMeters(selectedMapRecord) | number: '1.0-0' }} m
+              <span class="m1-side-hint">(referência ao limite delimitado)</span>
+            </p>
+            <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
+              {{ patrimonyLocationStatusMessage(selectedMapRecord) }}
+            </p>
+          </ng-container>
 
           <div class="record-list">
             <button nz-button nzBlock nzSize="small" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">
-              {{ r.transacaoId }} - {{ r.placa }}
+              <ng-container *ngIf="activeView === 'fuel-map'">{{ r.transacaoId }} — {{ r.placa }}</ng-container>
+              <ng-container *ngIf="activeView === 'assets-map'">{{ r.transacaoId }} · Reg. {{ r.placa }}</ng-container>
             </button>
           </div>
         </nz-card>
@@ -325,7 +346,7 @@
 
   <nz-modal
     [nzVisible]="pinDetailModalVisible"
-    nzTitle="Ativo / equipamento"
+    [nzTitle]="activeView === 'assets-map' ? 'Bem patrimonial' : 'Ativo / equipamento'"
     [nzFooter]="null"
     nzCentered
     (nzOnCancel)="closePinDetailModal()"

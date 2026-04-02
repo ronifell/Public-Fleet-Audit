@@ -562,6 +562,18 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   padding: 1.35rem 1.5rem;
 }
 
+.m1-side-hint {
+  display: inline;
+  margin-left: 0.25rem;
+  font-weight: 400;
+  font-size: 0.85em;
+  color: var(--m1-muted, #64748b);
+}
+
+.m1-wrapper.dark .m1-side-hint {
+  color: #94a3b8;
+}
+
 .m1-integrity-card ::ng-deep .ant-card-body {
   padding: 1.35rem 1.5rem;
 }

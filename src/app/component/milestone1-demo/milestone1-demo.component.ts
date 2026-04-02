@@ -214,9 +214,9 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       case 'fuel-integrity':
         return 'Siga Frota | Combustível — Conformidade de Dados e Anti-Fraude';
       case 'assets-map':
-        return 'Siga Frota | Ativos — Vistoria e Censo (Fé Pública AP 04)';
+        return 'Patrimônio Histórico | Inventário e Monitoramento';
       case 'assets-report':
-        return 'Siga Frota | Ativos — Relatório Pericial e Saneamento';
+        return 'Patrimônio Histórico | Relatório Pericial e Saneamento';
       default:
         return '';
     }
@@ -227,7 +227,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
     }
     if (this.isAssetsModuleView) {
-      return 'Inventário físico, localização por GPS e rastreabilidade dos equipamentos.';
+      return 'Patrimônio histórico — inventário, vistoria e monitoramento por georreferenciamento.';
     }
     return 'Centro de governança — Inovathec Soluções Ltda.';
   }
@@ -411,15 +411,15 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   get auditTickerAssets(): string {
-    const labels = ['GERADOR-01', 'TRATOR-05', 'RETRO-02', 'BOMBA-03', 'CAMINHÃO-07'];
+    const labels = ['MONUMENTO-01', 'EDIFÍCIO-H', 'SÍTIO-03', 'MUSEU-07', 'CENTRO-12'];
     const items = (this.demoData?.resultados_motor_glosa || []).slice(0, 4);
     const parts: string[] = [];
     items.forEach((r, i) => {
       const tag = labels[i % labels.length];
-      parts.push(`[${tag}] Local confirmado via GPS (${r.placa})…`);
-      parts.push(`[${tag}] Checklist OK — SHA-256 validado…`);
+      parts.push(`[${tag}] Localização confirmada — reg. ${r.placa}…`);
+      parts.push(`[${tag}] Vistoria registrada — SHA-256 validado…`);
     });
-    return parts.join('   •   ') || '[ATIVOS] Monitoramento em tempo real…';
+    return parts.join('   •   ') || '[PATRIMÔNIO] Monitoramento em tempo real…';
   }
 
   get auditTickerText(): string {
@@ -446,9 +446,28 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   getMapTooltipText(record: MotorResult): string {
     const distance = this.getMapDistanceMeters(record);
+    const m = Math.round(distance);
+    if (this.activeView === 'assets-map') {
+      return this.isAutomaticDeduction(record)
+        ? `Fora do perímetro delimitado – ${m} m`
+        : `Localização confirmada – ${m} m (dentro da área delimitada)`;
+    }
     return this.isAutomaticDeduction(record)
-      ? `Dedução automática – ${Math.round(distance)} m`
-      : `Dentro do limite – ${Math.round(distance)} m`;
+      ? `Dedução automática – ${m} m`
+      : `Dentro do limite – ${m} m`;
+  }
+
+  /** Índice simulado de conservação para o painel de patrimônio (demo). */
+  patrimonyConservationPercent(record: MotorResult): string {
+    const p = 62 + (record.id * 13) % 34;
+    return `${p}% (índice simulado)`;
+  }
+
+  patrimonyLocationStatusMessage(record: MotorResult): string {
+    if (this.isAutomaticDeduction(record)) {
+      return 'Fora da área delimitada — verificar deslocamento do bem.';
+    }
+    return 'Localização confirmada — dentro da área delimitada.';
   }
 
   selectRecord(record: MotorResult): void {
@@ -583,14 +602,20 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       const isSelected = this.selectedMapRecord?.id === record.id;
       const color = automaticDeduction ? '#d7263d' : '#1f8b4c';
 
-      const postoIcon = L.divIcon({ className: 'marker marker-posto', html: '<span>⛽</span>', iconSize: [26, 26] });
+      const postoGlyph = assetMode ? this.patrimonyReferenceIcon(idx) : '⛽';
+      const postoIcon = L.divIcon({
+        className: 'marker marker-posto',
+        html: `<span>${postoGlyph}</span>`,
+        iconSize: [26, 26],
+      });
       const op = this.isAssetOperational(record);
       const pulseClass = assetMode && op ? ' asset-pulse' : '';
       const dropClass = assetMode ? ' asset-drop' : '';
       const assetLabel = assetMode ? this.assetIconLabel(idx) : 'A/E';
+      const pinTitle = assetMode ? 'Bem patrimonial' : 'Ativo / equipamento';
       const assetHtml = isSelected
-        ? `<span class="asset-pin asset-pin-selected${pulseClass}${dropClass}" style="animation-delay:${idx * 0.07}s" title="Ativo / equipamento" aria-label="Ativo / equipamento">${assetLabel}</span>`
-        : `<span class="asset-pin${pulseClass}${dropClass}" style="animation-delay:${idx * 0.07}s" title="Ativo / equipamento" aria-label="Ativo / equipamento">${assetLabel}</span>`;
+        ? `<span class="asset-pin asset-pin-selected${pulseClass}${dropClass}" style="animation-delay:${idx * 0.07}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`
+        : `<span class="asset-pin${pulseClass}${dropClass}" style="animation-delay:${idx * 0.07}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`;
       const assetIcon = L.divIcon({
         className: 'marker marker-asset',
         html: assetHtml,
@@ -618,7 +643,13 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private assetIconLabel(index: number): string {
-    const icons = ['🚜', '⚡', '🛠', '🚚', '🔧'];
+    const icons = ['🏛', '🏢', '📍', '⛪', '🗿'];
+    return icons[index % icons.length];
+  }
+
+  /** Ponto de referência no mapa de patrimônio (sem posto de combustível). */
+  private patrimonyReferenceIcon(index: number): string {
+    const icons = ['🏛', '🏛', '📍', '⛪', '🏢'];
     return icons[index % icons.length];
   }
 
