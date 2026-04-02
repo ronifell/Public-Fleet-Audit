@@ -248,26 +248,16 @@ body, app-root {
     }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 0.5rem;
-
+/* Hide scrollbars everywhere; wheel / touch / keyboard scrolling unchanged */
+* {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and legacy Edge */
 }
 
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    background: transparent;
-
-}
-
-::-webkit-scrollbar-thumb {
-    background: $hover-color;
-    border-radius: 20px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #999999;
-
+*::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Chromium Edge */
+    width: 0;
+    height: 0;
 }
 
 .two-col-form {
