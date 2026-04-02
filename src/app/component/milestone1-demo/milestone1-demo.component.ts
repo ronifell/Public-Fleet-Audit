@@ -226,8 +226,8 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   getMapTooltipText(record: MotorResult): string {
     const distance = this.getMapDistanceMeters(record);
     return this.isAutomaticDeduction(record)
-      ? `AUTOMATIC DEDUCTION - ${Math.round(distance)}m`
-      : `Dentro do limite - ${Math.round(distance)}m`;
+      ? `Dedução automática – ${Math.round(distance)} m`
+      : `Dentro do limite – ${Math.round(distance)} m`;
   }
 
   selectRecord(record: MotorResult): void {
@@ -255,17 +255,17 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         (row) =>
           `<tr><td>${row.date}</td><td>${row.department}</td><td>${row.plate}</td><td>${row.liters}</td><td>R$ ${row.amount.toFixed(
             2
-          )}</td><td>${row.calculatedHash}</td><td>${row.verified ? 'Verified / Immutable' : 'Review'}</td></tr>`
+          )}</td><td>${row.calculatedHash}</td><td>${row.verified ? 'Verificado / imutável' : 'Em revisão'}</td></tr>`
       )
       .join('');
     const html = `
-      <html><head><title>SIG-Frota Integrity Report</title></head><body>
-      <h2>Integrity Report - Milestone 1 (Mock PDF)</h2>
+      <html><head><title>Relatório de integridade SIG-Frota</title></head><body>
+      <h2>Relatório de integridade – Painel de auditoria (PDF simulado)</h2>
       <table border="1" cellpadding="6" cellspacing="0">
-      <tr><th>Date</th><th>Department</th><th>Plate</th><th>Liters</th><th>Amount</th><th>SHA-256</th><th>Status</th></tr>
+      <tr><th>Data</th><th>Departamento</th><th>Placa</th><th>Litros</th><th>Valor</th><th>SHA-256</th><th>Situação</th></tr>
       ${rows}
       </table>
-      <p><strong>Integrity statement:</strong> all rows include SHA-256 digest simulation for immutability audit.</p>
+      <p><strong>Declaração de integridade:</strong> todas as linhas incluem simulação de hash SHA-256 para auditoria de imutabilidade.</p>
       </body></html>
     `;
     const popup = window.open('', '_blank');
@@ -282,7 +282,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     }
     this.map = L.map('milestone-map', { zoomControl: true }).setView([-15.601411, -56.097892], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (contribuintes)',
     }).addTo(this.map);
 
     this.map.on('moveend', () => this.renderViewportMarkers());
@@ -325,8 +325,8 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
       const postoIcon = L.divIcon({ className: 'marker marker-posto', html: '<span>⛽</span>', iconSize: [26, 26] });
       const assetHtml = isSelected
-        ? '<span class="asset-pin asset-pin-selected" title="Asset / Equipment" aria-label="Asset / Equipment">A/E</span>'
-        : '<span class="asset-pin" title="Asset / Equipment" aria-label="Asset / Equipment">A/E</span>';
+        ? '<span class="asset-pin asset-pin-selected" title="Ativo / equipamento" aria-label="Ativo / equipamento">A/E</span>'
+        : '<span class="asset-pin" title="Ativo / equipamento" aria-label="Ativo / equipamento">A/E</span>';
       const assetIcon = L.divIcon({
         className: 'marker marker-asset',
         html: assetHtml,
@@ -385,7 +385,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private mockDepartment(index: number): string {
-    const departments = ['Operacoes', 'Saude', 'Educacao', 'Infraestrutura', 'Administracao'];
+    const departments = ['Operações', 'Saúde', 'Educação', 'Infraestrutura', 'Administração'];
     return departments[index % departments.length];
   }
 
