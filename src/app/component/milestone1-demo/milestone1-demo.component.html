@@ -109,12 +109,12 @@
           <div class="roi-bars">
             <div class="bar-row">
               <span>Gasto bruto</span>
-              <div class="bar"><div class="bar-fill bar-fill--blue" [style.width.%]="roiGrossBarPercent"></div></div>
+              <div class="bar"><div class="bar-fill bar-fill--gasto-bruto" [style.width.%]="roiGrossBarPercent"></div></div>
               <strong>R$ {{ grossSpending | number: '1.2-2' }}</strong>
             </div>
             <div class="bar-row">
               <span>Gasto real</span>
-              <div class="bar"><div class="bar-fill bar-fill--green bar-fill--actual" [style.width.%]="roiActualBarPercent"></div></div>
+              <div class="bar"><div class="bar-fill bar-fill--gasto-real" [style.width.%]="roiActualBarPercent"></div></div>
               <strong>R$ {{ actualSpending | number: '1.2-2' }}</strong>
             </div>
           </div>

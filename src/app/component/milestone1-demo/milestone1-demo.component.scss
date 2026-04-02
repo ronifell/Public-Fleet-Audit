@@ -452,7 +452,7 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
 }
 
 .bar {
-  height: 12px;
+  height: 14px;
   background: rgba(15, 23, 42, 0.08);
   border-radius: 999px;
   overflow: hidden;
@@ -462,15 +462,9 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   background: rgba(148, 163, 184, 0.15);
 }
 
-.bar > div {
+.roi-bars .bar > .bar-fill {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%);
-  transition: width 0.4s ease;
-}
-
-.bar > .actual {
-  background: linear-gradient(90deg, #047857 0%, #10b981 100%);
 }
 
 .highlight,
@@ -1529,20 +1523,146 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   }
 }
 
-/* ——— KPI bar chart animation ——— */
-.bar-fill {
+/* ——— ROI bars: slow “fill”, flowing-water gradients (distinct palettes) ——— */
+.roi-bars .bar-fill {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   height: 100%;
   border-radius: 999px;
-  transition: width 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 2.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
-.bar-fill--blue {
-  background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%);
+.roi-bars .bar-fill--gasto-real {
+  transition-delay: 0.4s;
 }
 
-.bar-fill--green,
-.bar-fill--actual {
-  background: linear-gradient(90deg, #047857 0%, #10b981 100%);
+/* Gasto bruto: cool indigo → sapphire → sky (depth / “volume”) */
+.bar-fill--gasto-bruto {
+  background: linear-gradient(
+    95deg,
+    #312e81 0%,
+    #4338ca 18%,
+    #2563eb 42%,
+    #0ea5e9 68%,
+    #38bdf8 88%,
+    #7dd3fc 100%
+  );
+  background-size: 240% 100%;
+  animation: m1-roi-water-flow-a 3.8s ease-in-out infinite;
+}
+
+/* Gasto real: deep teal → jade → mint (clearly different from blue bar) */
+.bar-fill--gasto-real {
+  background: linear-gradient(
+    95deg,
+    #134e4a 0%,
+    #0f766e 22%,
+    #0d9488 48%,
+    #14b8a6 72%,
+    #5eead4 92%,
+    #ccfbf1 100%
+  );
+  background-size: 240% 100%;
+  animation: m1-roi-water-flow-b 4.4s ease-in-out infinite;
+}
+
+/* Shimmer wave over the fill */
+.bar-fill--gasto-bruto::after,
+.bar-fill--gasto-real::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.35) 48%,
+    rgba(255, 255, 255, 0.12) 52%,
+    rgba(255, 255, 255, 0) 65%,
+    transparent 100%
+  );
+  background-size: 180% 100%;
+  animation: m1-roi-water-shine 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.bar-fill--gasto-real::after {
+  animation-duration: 2.6s;
+  animation-delay: 0.35s;
+}
+
+@keyframes m1-roi-water-flow-a {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes m1-roi-water-flow-b {
+  0%,
+  100% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes m1-roi-water-shine {
+  0% {
+    background-position: -60% 50%;
+    opacity: 0.5;
+  }
+  45% {
+    opacity: 0.95;
+  }
+  100% {
+    background-position: 160% 50%;
+    opacity: 0.45;
+  }
+}
+
+.m1-wrapper.dark .roi-bars .bar-fill {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.m1-wrapper.dark .bar-fill--gasto-bruto::after,
+.m1-wrapper.dark .bar-fill--gasto-real::after {
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0.06) 54%,
+    rgba(255, 255, 255, 0) 62%,
+    transparent 100%
+  );
+  background-size: 180% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roi-bars .bar-fill {
+    transition-duration: 0.01ms;
+    transition-delay: 0s !important;
+  }
+
+  .bar-fill--gasto-bruto,
+  .bar-fill--gasto-real {
+    animation: none !important;
+    background-size: 100% 100%;
+  }
+
+  .bar-fill--gasto-bruto::after,
+  .bar-fill--gasto-real::after {
+    animation: none !important;
+    display: none;
+  }
 }
 
 .irregularity-row {
