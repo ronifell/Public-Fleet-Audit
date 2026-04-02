@@ -1,6 +1,8 @@
 :host {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-height: 0;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
@@ -103,19 +105,23 @@ nz-header {
 }
 
 nz-content {
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
   /* Allow the main column to shrink below wide table min-content so overflow stays inside this scroll area */
   min-width: 0;
   max-width: 100%;
 }
 
 .inner-content {
+  /* Extra bottom space: OS gesture bar / home indicator (env is 0 on many Android browsers without viewport-fit) */
   padding: 2%;
+  padding-bottom: calc(2% + env(safe-area-inset-bottom, 0px));
   height: 100%;
   min-height: fit-content;
   min-width: 0;
   max-width: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -124,6 +130,12 @@ nz-content {
     display: none;
     width: 0;
     height: 0;
+  }
+}
+
+@media only screen and (max-width: 576px) {
+  .inner-content {
+    padding-bottom: calc(2% + env(safe-area-inset-bottom, 0px) + 1.25rem);
   }
 }
 

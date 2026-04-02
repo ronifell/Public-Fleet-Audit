@@ -35,13 +35,20 @@ $dimension3: 0.5rem;
 }
 
 /* Styles */
+html {
+  height: 100%;
+  height: -webkit-fill-available;
+}
+
 body, app-root {
     // background-color: $primary;
     background-image: $primary;
     height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
     overflow: hidden;
     margin: 0;
-    
 }
 
 // :host {
