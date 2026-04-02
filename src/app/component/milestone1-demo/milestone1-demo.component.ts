@@ -216,7 +216,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       case 'assets-map':
         return 'Patrimônio Histórico | Inventário e Monitoramento';
       case 'assets-report':
-        return 'Patrimônio Histórico | Relatório Pericial e Saneamento';
+        return 'Relatório de Patrimônio Histórico';
       default:
         return '';
     }
@@ -225,6 +225,9 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   get moduleSubtitle(): string {
     if (this.isFuelModuleView) {
       return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
+    }
+    if (this.activeView === 'assets-report') {
+      return 'Módulo de Integridade de Patrimônio — consolidação de bens tombados e validação documental.';
     }
     if (this.isAssetsModuleView) {
       return 'Patrimônio histórico — inventário, vistoria e monitoramento por georreferenciamento.';
@@ -411,13 +414,13 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   get auditTickerAssets(): string {
-    const labels = ['MONUMENTO-01', 'EDIFÍCIO-H', 'SÍTIO-03', 'MUSEU-07', 'CENTRO-12'];
+    const labels = ['PREDIO-01', 'MONUMENTO-05', 'SITIO-03', 'MUSEU-07', 'CENTRO-12'];
     const items = (this.demoData?.resultados_motor_glosa || []).slice(0, 4);
     const parts: string[] = [];
     items.forEach((r, i) => {
       const tag = labels[i % labels.length];
-      parts.push(`[${tag}] Localização confirmada — reg. ${r.placa}…`);
-      parts.push(`[${tag}] Vistoria registrada — SHA-256 validado…`);
+      parts.push(`[${tag}] Localização confirmada — tombo ${r.placa}…`);
+      parts.push(`[${tag}] Registro auditado — SHA-256 (cadeia de integridade)…`);
     });
     return parts.join('   •   ') || '[PATRIMÔNIO] Monitoramento em tempo real…';
   }
