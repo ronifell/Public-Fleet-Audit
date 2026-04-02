@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment.development';
+import { environment } from 'src/environments/environment';
 import { PageRequest } from '../model/page-request';
 import { PageResponse } from '../model/page-response';
 import { VehicleTravel } from '../model/vehicle-travel';

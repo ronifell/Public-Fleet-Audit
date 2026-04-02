@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { PageResponse } from '../model/page-response';
 import { PageRequest } from '../model/page-request';
 import { Group } from '../model/group';
-import { environment } from 'src/environments/environment.development';
+import { environment } from 'src/environments/environment';
 
 
 @Injectable({

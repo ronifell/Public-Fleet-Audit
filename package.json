@@ -5,11 +5,14 @@
     "ng": "ng",
     "start": "ng serve --host 127.0.0.1",
     "start:ssl": "ng serve --ssl --host 127.0.0.1",
-    "build": "ng build",
+    "build": "node scripts/build.cjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/common": "^16.2.0",
