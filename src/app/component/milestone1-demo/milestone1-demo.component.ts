@@ -208,15 +208,15 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   get moduleTitleLine(): string {
     switch (this.activeView) {
       case 'governance':
-        return 'Siga Frota | Combustível — Governança';
+        return 'Siga Frota | Combustível — Monitoramento e Inteligência Fiscal';
       case 'fuel-map':
-        return 'Siga Frota | Combustível — Auditoria geográfica';
+        return 'Siga Frota | Combustível — Georreferenciamento de Prova';
       case 'fuel-integrity':
-        return 'Siga Frota | Combustível — Integridade e relatórios';
+        return 'Siga Frota | Combustível — Conformidade de Dados e Anti-Fraude';
       case 'assets-map':
-        return 'Siga Frota | Ativos — Gestão e GPS';
+        return 'Siga Frota | Ativos — Vistoria e Censo (Fé Pública AP 04)';
       case 'assets-report':
-        return 'Siga Frota | Ativos — Relatório';
+        return 'Siga Frota | Ativos — Relatório Pericial e Saneamento';
       default:
         return '';
     }

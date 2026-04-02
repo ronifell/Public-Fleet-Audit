@@ -29,23 +29,23 @@
     <nav class="m1-hub-grid" aria-label="Módulos SIG-Frota">
       <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('governance')">
         <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
-        <span class="m1-hub-tile-title">Painel de governança</span>
+        <span class="m1-hub-tile-title">Monitoramento e Inteligência Fiscal</span>
       </button>
       <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-map')">
         <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
-        <span class="m1-hub-tile-title">Auditoria geográfica</span>
+        <span class="m1-hub-tile-title">Georreferenciamento de Prova</span>
       </button>
       <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-integrity')">
         <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
-        <span class="m1-hub-tile-title">Integridade e relatórios</span>
+        <span class="m1-hub-tile-title">Conformidade de Dados e Anti-Fraude</span>
       </button>
       <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-map')">
         <span class="m1-hub-tile-kicker">Siga Frota — Ativos</span>
-        <span class="m1-hub-tile-title">Gestão de ativos</span>
+        <span class="m1-hub-tile-title">Vistoria e Censo (Fé Pública AP 04)</span>
       </button>
       <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
         <span class="m1-hub-tile-kicker">Siga Frota — Ativos</span>
-        <span class="m1-hub-tile-title">Relatório de ativos</span>
+        <span class="m1-hub-tile-title">Relatório Pericial e Saneamento</span>
       </button>
     </nav>
 
@@ -135,7 +135,7 @@
 
       <section *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'" class="map-layout">
         <nz-card class="map-card m1-map-card">
-          <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Mapa de ativos e equipamentos' : 'Mapa de detecção de fraudes' }}</h4>
+          <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Vistoria e Censo (Fé Pública AP 04)' : 'Georreferenciamento de Prova' }}</h4>
           <div class="map-wrap">
             <div
               class="map-tooltip-corner"
@@ -173,7 +173,7 @@
 
       <section *ngIf="activeView === 'fuel-integrity'" class="integrity-layout">
         <nz-card class="m1-integrity-card">
-          <h4 class="m1-card-title m1-integrity-heading">Integridade e relatórios</h4>
+          <h4 class="m1-card-title m1-integrity-heading">Conformidade de Dados e Anti-Fraude</h4>
           <div class="filters m1-filters">
             <div class="filter-field">
               <span class="filter-label">Data</span>
@@ -292,7 +292,7 @@
 
       <section *ngIf="activeView === 'assets-report'" class="m1-assets-report">
         <nz-card class="m1-assets-report-card">
-          <h4 class="m1-card-title">Relatório de inventário físico</h4>
+          <h4 class="m1-card-title">Relatório Pericial e Saneamento</h4>
           <p class="m1-assets-report-lead">
             Consolidação de equipamentos rastreados por GPS e validação documental (simulação para apresentação SIG-Frota).
           </p>
