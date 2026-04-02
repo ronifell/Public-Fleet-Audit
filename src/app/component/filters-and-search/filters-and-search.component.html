@@ -1,0 +1,39 @@
+<div nz-row nzJustify="space-between" nzAlign="middle">
+    <div nz-col [nzLg]="{ span: 7 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+        <h2 nz-typography *ngIf="tabTitle">{{tabTitle}}</h2>
+        <nz-divider></nz-divider>
+    </div>
+    
+    <div nz-col [nzXl]="{ span: 9 }" [nzLg]="{ span: 10 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+        <nz-row nzAlign="middle" nzJustify="end">
+            <nz-col nzFlex="5">
+                <ng-template #suffixIconSearch>
+                    <span nz-icon nzType="search"></span>
+                </ng-template>
+                
+                <nz-input-group class="input" [nzSize]="'large'" [nzPrefix]="suffixIconSearch">
+                    <input type="text" nz-input placeholder="busca"
+                    #searchTerm="ngModel"
+                    ngModel
+                    (ngModelChange)="search(searchTerm.value)"/>
+                </nz-input-group>   
+                
+            </nz-col>
+            <nz-col *ngIf="filterList.length > 0" nzFlex="1">
+                <button [nzSize]="'large'" nzType="primary" nz-button nz-popover [(nzPopoverVisible)]="visible" nzPopoverTrigger="click" [nzPopoverContent]="contentTemplate" nzPopoverPlacement="bottomRight" >
+                    Filtros<span nz-icon nzType="filter" nzTheme="outline"></span>
+                </button> 
+                <ng-template #contentTemplate>
+                    <div class="filters-popover">
+                        <nz-checkbox-wrapper style="width: 100%;">
+                            <div nz-row>
+                              <div *ngFor="let filter of filterList" nz-col nzSpan="8"><label nz-checkbox nzValue="A" [ngModel]="true">{{filter.name}}</label></div>
+                            </div>
+                          </nz-checkbox-wrapper>
+                    </div>
+                </ng-template>  
+            </nz-col>
+    
+        </nz-row>
+    </div>
+</div>

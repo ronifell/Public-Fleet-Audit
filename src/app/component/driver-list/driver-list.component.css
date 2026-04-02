@@ -1,0 +1,69 @@
+.card-driver {
+    min-height: 28vh;
+    width: 100%;
+    height: auto;
+    background-color: white;
+    border-radius: 20px;
+    margin-top: 5vh;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+    
+    .main-card-driver {
+        width: 100%;
+        height: 80%;
+
+        .main-card-driver-image{
+            height: 8em;
+            margin-top: auto;
+            margin-bottom: auto;
+            svg {
+                height: 100%;
+                width: 100%;
+            }
+        }
+
+        .main-card-driver-list-info {
+            padding-top: 2em;
+
+            #main-card-driver-list-info-span-text {
+                padding-left: 0.3em;
+                width: 14em;
+            }
+        }
+    }
+
+    .footer-card-driver {
+        width: 100%;
+        height: 20%;
+
+        #footer-card-driver-name h5{
+            text-align: center;
+        }
+
+        #footer-card-driver-status{
+            text-align: end !important;
+            
+            nz-tag {
+                margin-right: 4em;
+            }
+        }
+    }
+}
+
+.card-driver:hover {
+    transition: 0.4s; 
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    cursor: pointer;
+}
+
+.button-new-driver{
+    margin-top: 4vh;
+    padding-right: 6vw;
+}
+
+.add-button {
+    border-radius: 16px;
+    width: 100%;
+    height: 7vh;
+    background-color: #0250A2;
+    color: white;
+}

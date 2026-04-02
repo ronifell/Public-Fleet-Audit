@@ -1,0 +1,50 @@
+<app-filters-and-search 
+    [tabTitle]="'Lista de Usuarios'" 
+></app-filters-and-search>
+
+<br>
+    
+<nz-row nzJustify="end">
+    <nz-col [nzXs]="24" [nzSm]="8">
+        <button routerLink="/user/form" nz-button nzType="primary" nzBlock>Adicionar Usuario</button>
+    </nz-col>
+</nz-row>
+
+<br>
+
+<nz-row [nzGutter]="[20, 20]">
+    <nz-col *ngFor="let user of userList" [nzXs]="24" [nzMd]="12" (click)="goToItem(user)">
+        <nz-row class="element">
+            <nz-row class="main-element">
+                <nz-col nzSpan="8">
+                    <span id="icon-user" nz-icon nzType="user" nzTheme="outline"></span>
+                </nz-col>
+                <div nz-col nzSpan="16" id="infos">
+                    <nz-row nzGutter="16">
+                        <nz-col [nzXs]="24" [nzXl]="6">
+                            <nz-row>
+                                <span>Permissões: </span>
+                            </nz-row>
+                        </nz-col>
+                        <nz-col [nzXs]="24" [nzXl]="18">
+                            <nz-row id="permissions">
+                                <nz-tag id="tag" *ngFor="let group of user.groups">{{ group.name }}</nz-tag>
+                            </nz-row>
+                        </nz-col>
+                    </nz-row>
+                    <nz-row>
+                        <span>Matricula: {{ user.registrationNumber }}</span>
+                    </nz-row>
+                </div>
+            </nz-row>
+            <nz-row class="footer-element" nzJustify="space-between" nzAlign="middle">
+                <nz-col nzJustify="center" nzSpan="8" id="text-footer">
+                    <span>{{ user.userName }}</span>
+                </nz-col>
+                <nz-col nzSpan="16" id="text-footer-rigth">
+                    <span><nz-tag nzColor="{{tagColor(user.status)}}">{{ translateStatus(user.status) }}</nz-tag></span>
+                </nz-col>
+            </nz-row>
+        </nz-row>
+    </nz-col>
+</nz-row>

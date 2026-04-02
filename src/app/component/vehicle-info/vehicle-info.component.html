@@ -1,0 +1,82 @@
+<div class="content">
+    <div class="top-content">
+        <nz-row nzJustify="space-between">
+            <nz-col>
+                <nz-avatar [nzSize]="180" nzIcon="car" style="background-color: rgb(128, 166, 255);"></nz-avatar>
+            </nz-col>
+            <nz-col nzOrder="3" [nzLg]="{ span: 12, order: 2}" [nzXl]="{ span: 12, order: 2 }">
+                <nz-row id="infos-user">
+                    <nz-col nzSpan="24">
+                        <span id="user-name">{{vehicle.carModel.name}}</span>
+                    </nz-col>
+                    <nz-col nzSpan="24">
+                        <span id="full-name"><span id="detail-info">Placa: </span>{{vehicle.licensePlate}}</span>
+                    </nz-col>
+                    <nz-col nzSpan="24">
+                        <nz-tag id="ativo" nzColor="{{vehicle.active === true ? 'green' : 'default'}}">{{vehicle.active === true ? 'Ativo' : 'Desativado'}}</nz-tag>
+                        <nz-tag id="status">{{vehicle.status === "AVAILABLE" ? 'Livre' : 'Ocupado'}}</nz-tag>
+                    </nz-col>
+                </nz-row>
+            </nz-col>
+            <nz-col nzOrder="2" [nzLg]="{ order: 3 }" [nzXl]="{ span: 4, order: 3}">
+                <nz-row nzJustify="end">
+                    <button id="button-discontinue" nz-button nzShape="round" (click)="discontinueItem(vehicle)">
+                        <span>Dar como descontinuado</span>
+                        <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    </button>
+                </nz-row>
+                <nz-row nzJustify="end">
+                    <button id="button-edit" nz-button nzShape="round" (click)="goToItem(vehicle)">
+                        <span>Editar</span>
+                        <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    </button>
+                </nz-row>
+            </nz-col>
+        </nz-row>
+    </div>
+    <nz-row>
+        <nz-tabset id="tabs-options" nzSize="large" nzType="card">
+            <nz-tab nz-row nzTitle="Carro">
+                <nz-row class="body-content">
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Tipo de veiculo: </span><b>{{vehicle.type.name}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Km rodados: </span><b>{{vehicle.drivenQuilometers}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Tipos de combustiveis: </span><b *ngFor="let fuel of vehicle.fuels">{{fuel.name}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Motorista fixo: </span><b>{{vehicle.fixedDriver}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Ano do veiculo: </span><b>{{vehicle.manufacturingDate | date: 'dd/MM/yyyy'}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Numero de passageiros: </span><b>{{vehicle.passengersAmount}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Chassi: </span><b>{{vehicle.chassi}}</b></span>
+                    </nz-col>
+                </nz-row>
+            </nz-tab>
+            <nz-tab nz-row nzTitle="Detalhes">
+                <nz-row class="body-content">
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Patrimonio: </span><b>{{vehicle.patrimony}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Data de aquisição: </span><b>{{vehicle.purchaseDate | date: 'dd/MM/yyyy'}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Renavam: </span><b>{{vehicle.renavam}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Numero de aquisição: </span><b>{{vehicle.acquisitionProcessNumber}}</b></span>
+                    </nz-col>
+                </nz-row>
+            </nz-tab>
+        </nz-tabset>
+    </nz-row>
+</div>

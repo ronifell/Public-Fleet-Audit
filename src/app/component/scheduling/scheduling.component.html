@@ -1,0 +1,52 @@
+<app-just-heading [tabTitle]="'Lista de Agendamentos'"></app-just-heading>
+
+<div>
+    <nz-row nz-footer class="button-new-scheduling" nzJustify="end" nzAlign="bottom">
+        <nz-col>
+            <button routerLink="/schedules/form" nz-button [nzSize]="'large'" nzType="primary">
+                <span nz-icon nzType="user-add" nzTheme="outline"></span>
+                Adicionar Novo Agendamento
+            </button>
+        </nz-col>
+    </nz-row>
+</div>
+
+<div style="background: #ECECEC;" class="calendar-container">
+    
+    <div nz-row class="custom-row" *ngIf="canShowCards">
+        <div nz-col [nzSpan]="24" class="card-column" *ngFor="let item of cards">
+            <nz-card [nzTitle]="tituloTemplate">
+                <ng-template #tituloTemplate>
+                    <i nz-icon nzType="file-text"></i> Processo: {{ item.processNumber || 'N/A' }}
+                </ng-template>
+
+                <p>
+                    <strong>Período:</strong> 
+                    {{ item.startDate | date:'dd/MM/yyyy' }} à {{ item.endDate | date:'dd/MM/yyyy' }}
+                </p>
+                <p>
+                    <strong>Horários:</strong> 
+                    Ida: {{ item.startTime | slice:0:5 }} - 
+                    Volta: {{ item.endTime | slice:0:5 }}
+                </p>
+                <p>
+                    <strong>Trajeto:</strong> 
+                    {{ item.arrival }} <i nz-icon nzType="arrow-right"></i> {{ item.departure }}
+                </p>
+                <p *ngIf="item.vehicle">
+                    <strong>Veículo:</strong> {{ item.vehicle.carModel.name }} ({{ item.vehicle.licensePlate }})
+                </p>
+            </nz-card>
+        </div>
+    </div>
+    
+    <nz-calendar class="calend" (nzSelectChange)="selectChange($event)">
+        <ul *nzDateCell="let date" class="events">
+            <ng-container *ngIf="canShowDates">
+                <li *ngFor="let item of dates[date.getMonth() + '-' + date.getDate()]">
+                    <nz-badge [nzStatus]="item?.type" [nzText]="item?.content"></nz-badge>
+                </li>
+            </ng-container>
+        </ul>
+    </nz-calendar>
+</div>

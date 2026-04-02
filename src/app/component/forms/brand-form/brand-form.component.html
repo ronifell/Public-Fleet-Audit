@@ -1,0 +1,19 @@
+<app-form-component
+    [formTitle]="'Cadastrar nova marca'"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <nz-row formData [formGroup]="validateForm">
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Nome da marca / fabricante</nz-form-label>
+            <nz-form-control>
+                <input nz-input 
+                    formControlName="name"
+                    nz-col 
+                    nzSize="large" 
+                    nzSpan="24" 
+                    placeholder="Preencha com o nome da marca"/>
+            </nz-form-control>
+        </nz-form-item>
+    </nz-row>
+</app-form-component>

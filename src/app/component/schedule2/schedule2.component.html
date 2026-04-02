@@ -1,0 +1,140 @@
+<app-filters-and-search [tabTitle]="'Lista de Agendamentos'">
+</app-filters-and-search>
+
+<nz-row nzAlign="middle" style="background-color: #fff;">
+    <nz-col [nzLg]="{ span: 17 }" [nzMd]="{ span: 15 }" [nzSm]="{ span: 24 }">
+        <nz-card [nzBordered]="false" class="my-3">
+            <nz-row [nzGutter]="16" nzAlign="bottom">
+                <nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+                    <label class="d-block mb-1">Data Início</label>
+                    <nz-date-picker nzFormat="dd/MM/yyyy" nzPlaceHolder="Selecione o início"
+                        style="width: 100%;"></nz-date-picker>
+                </nz-col>
+
+                <nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+                    <label class="d-block mb-1">Data Fim</label>
+                    <nz-date-picker nzFormat="dd/MM/yyyy" nzPlaceHolder="Selecione o fim"
+                        style="width: 100%;"></nz-date-picker>
+                </nz-col>
+
+                <nz-col [nzSpan]="7" [nzXs]="24" [nzSm]="8">
+                    <button nz-button nzType="primary" nzBlock [nzLoading]="isLoading">
+                        <span nz-icon nzType="search"></span> Verificar Disponibilidade
+                    </button>
+                </nz-col>
+            </nz-row>
+        </nz-card>
+    </nz-col>
+    <nz-col [nzLg]="{ span: 6  }" [nzMd]="{ span: 9 }" [nzSm]="{ span: 24 }" nzAlign="center">
+        <button routerLink="./form" nz-button>Adicionar novo agendamento</button>
+    </nz-col>
+</nz-row>
+
+<ng-container *ngIf="schedulesList.length > 0; else emptyState">
+
+    <ng-container *ngFor="let section of scheduleSections">
+        <ng-container *ngIf="section.items.length > 0">
+
+            <nz-row class="section-header-row">
+                <nz-col nzSpan="24">
+                    <div class="schedule-section-header" [ngClass]="section.key">
+                        <div class="schedule-section-title">
+                            {{ section.title }}
+                        </div>
+                        <div class="schedule-section-subtitle">
+                            {{ section.subtitle }}
+                        </div>
+                    </div>
+                </nz-col>
+            </nz-row>
+
+            <nz-row nzGutter="10">
+                <nz-col [nzLg]="{ span: 24 }" [nzMd]="{ span: 12 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }"
+                    *ngFor="let item of section.items" (click)="goToItem(item)">
+                    <nz-row class="schedule" nzAlign="middle">
+                        <nz-col id="schedule-img" [nzLg]="{ span: 5 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }"
+                            [nzXs]="{ span: 24 }">
+                            <span id="icon-car" nz-icon nzType="schedule" nzTheme="outline"></span>
+                        </nz-col>
+
+                        <nz-col id="schedule-details" [nzLg]="{ span: 17 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }"
+                            [nzXs]="{ span: 24 }">
+
+                            <nz-row>
+                                <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }"
+                                    [nzXs]="{ span: 24 }">
+                                    <nz-row>
+                                        <nz-col nzSpan="13">
+                                            <span id="schedule-details-text">Trajeto:</span>
+                                        </nz-col>
+                                        <nz-col nzSpan="11">
+                                            <span id="schedule-details-text-value">{{ item.arrival }} - {{
+                                                item.departure }}</span>
+                                        </nz-col>
+                                    </nz-row>
+                                    <nz-divider></nz-divider>
+                                </nz-col>
+                                <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }"
+                                    [nzXs]="{ span: 24 }">
+                                    <nz-row>
+                                        <nz-col nzSpan="13">
+                                            <span id="schedule-details-text">Período:</span>
+                                        </nz-col>
+                                        <nz-col nzSpan="11">
+                                            <span id="schedule-details-text-value">
+                                                {{ item.startDate | date: 'dd/MM/yyyy' }} - {{ item.endDate | date:
+                                                'dd/MM/yyyy' }}
+                                            </span>
+                                        </nz-col>
+                                    </nz-row>
+                                    <nz-divider></nz-divider>
+                                </nz-col>
+                            </nz-row>
+
+                            <nz-row>
+                            </nz-row>
+
+                            <nz-row>
+                                <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }"
+                                    [nzXs]="{ span: 24 }">
+                                    <nz-row>
+                                        <nz-col nzSpan="13">
+                                            <span id="schedule-details-text">Status:</span>
+                                        </nz-col>
+                                        <nz-col nzSpan="11">
+                                            <span class="status-badge" [class]="getStatusClass(item.status)">
+                                                {{ item.status }}
+                                            </span>
+                                        </nz-col>
+                                    </nz-row>
+                                    <nz-divider></nz-divider>
+                                </nz-col>
+
+                                <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }"
+                                    [nzXs]="{ span: 24 }">
+                                    <nz-row>
+                                        <nz-col nzSpan="13">
+                                            <span id="schedule-details-text">Usuário:</span>
+                                        </nz-col>
+                                        <nz-col nzSpan="11">
+                                            <span id="schedule-details-text-value">{{ item.requestUser?.fullName
+                                                }}</span>
+                                        </nz-col>
+                                    </nz-row>
+                                    <nz-divider></nz-divider>
+                                </nz-col>
+                            </nz-row>
+
+                        </nz-col>
+                    </nz-row>
+                </nz-col>
+            </nz-row>
+
+        </ng-container>
+    </ng-container>
+
+</ng-container>
+
+<ng-template #emptyState>
+    <nz-empty nzNotFoundContent="Nenhum agendamento encontrado."></nz-empty>
+</ng-template>

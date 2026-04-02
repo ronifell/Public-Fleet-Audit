@@ -1,0 +1,26 @@
+nz-row {
+  width: 100%;
+}
+
+.permission_item:hover{
+  transition: 0.4s; 
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  cursor: pointer;
+}
+
+.permission_item {
+  border-radius: 16px;
+  padding-left: 3%;
+  padding-right: 3%;
+  padding-top: 1%;
+  border:1px solid rgb(210, 210, 210);
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+  min-height: 80px;
+
+  #name_permission {
+    text-align: center;
+  }
+  #description_permission {
+    color: rgb(95, 95, 95);
+  }
+}

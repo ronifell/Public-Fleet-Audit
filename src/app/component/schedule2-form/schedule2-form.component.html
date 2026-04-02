@@ -1,0 +1,179 @@
+<app-form-component [tabTitle]="isEditMode ? 'Gerenciar Agendamento' : 'Novo Agendamento'" [validateForm]="validateForm"
+    (validForm)="validInput($event)">
+
+    <nz-row class="forms-data" formData [formGroup]="validateForm" [nzGutter]="[16, 0]">
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 24}" style="margin-bottom: 24px;" *ngIf="isEditMode">
+            <nz-card [nzBordered]="true" nzTitle="Situação do Agendamento" [nzExtra]="extraTemplate">
+                <nz-row [nzGutter]="16" nzAlign="middle">
+
+                    <nz-col [nzXs]="24" [nzSm]="canWrite ? 12 : 24">
+                        <span style="font-weight: 600; margin-right: 8px;">Estado Atual:</span>
+                        <nz-tag
+                            [nzColor]="validateForm.get('status')?.value === 'AGENDADO' ? 'green' : (validateForm.get('status')?.value === 'SOLICITADO' ? 'orange' : 'default')">
+                            {{ validateForm.get('status')?.value }}
+                        </nz-tag>
+                    </nz-col>
+
+                    <nz-col [nzXs]="24" [nzSm]="12" *ngIf="canWrite">
+                        <nz-form-item style="margin-bottom: 0;">
+                            <nz-form-label nzNoColon>Alterar para</nz-form-label>
+                            <nz-form-control>
+                                <nz-select formControlName="status" style="width: 100%;">
+                                    <nz-option *ngFor="let s of statusOptions" [nzLabel]="s.label" [nzValue]="s.value">
+                                    </nz-option>
+                                </nz-select>
+                            </nz-form-control>
+                        </nz-form-item>
+                    </nz-col>
+                </nz-row>
+            </nz-card>
+            <ng-template #extraTemplate>
+                <span *ngIf="schedule.id" style="color: #888;">ID: {{ schedule.id }}</span>
+            </ng-template>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 24}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col nzRequired>Quantidade de passageiros</nz-form-label>
+                <nz-form-control nzErrorTip="Informe a quantidade de passageiros">
+                    <input nz-input formControlName="passengersAmount" placeholder="Ex: 4" [mask]="'0*'" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col nzRequired>Data de ida</nz-form-label>
+                <nz-form-control nzErrorTip="Data de ida é obrigatória">
+                    <nz-date-picker nz-col nzSpan="24" formControlName="startDate" [nzPlacement]="'bottomRight'"
+                        (ngModelChange)="changeStartDate($event)" nzFormat="dd/MM/yyyy"
+                        nzPlaceHolder="Selecione a data">
+                    </nz-date-picker>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col nzRequired>Data de volta</nz-form-label>
+                <nz-form-control [nzErrorTip]="dateErrorTpl">
+                    <nz-date-picker nz-col nzSpan="24" formControlName="endDate" [nzPlacement]="'bottomRight'"
+                        (ngModelChange)="changeEndDate($event)" nzFormat="dd/MM/yyyy" nzPlaceHolder="Selecione a data">
+                    </nz-date-picker>
+
+                    <ng-template #dateErrorTpl let-control>
+                        <ng-container *ngIf="control.hasError('required')">Data de volta é obrigatória.</ng-container>
+                        <ng-container *ngIf="control.hasError('dateRange')">A volta não pode ser antes da
+                            ida.</ng-container>
+                    </ng-template>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Horário de ida</nz-form-label>
+                <nz-form-control>
+                    <nz-time-picker nz-col nzSpan="24" formControlName="startTime" nzFormat="HH:mm"
+                        [nzPlaceHolder]="'Selecione o horário'">
+                    </nz-time-picker>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Horário de volta</nz-form-label>
+                <nz-form-control>
+                    <nz-time-picker nz-col nzSpan="24" formControlName="endTime" nzFormat="HH:mm"
+                        [nzPlaceHolder]="'Selecione o horário'">
+                    </nz-time-picker>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Nome do responsável</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="personInChargeName" placeholder="ex: André Nogueira" mask="P*"
+                        [patterns]="customPatterns" [dropSpecialCharacters]="false" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Telefone do responsável</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="personInChargePhone" placeholder="ex: 4002-8922"
+                        mask="(00) 0 0000-0000" prefix="+55 " type="tel" [dropSpecialCharacters]="false" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Saindo de</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="arrival" placeholder="ex: Rio Branco" mask="P*"
+                        [patterns]="customPatterns" [dropSpecialCharacters]="false" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Voltando para</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="departure" placeholder="ex: Feijó" mask="P*"
+                        [patterns]="customPatterns" [dropSpecialCharacters]="false" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 24}">
+            <nz-divider></nz-divider>
+        </nz-col>
+
+        <ng-container *ngIf="canWrite">
+            <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 24}" *ngIf="!areDatesSelected">
+                <nz-alert nzType="warning" nzMessage="Atenção" [nzDescription]="canWrite 
+                        ? 'Para selecionar o motorista e o veículo, informe primeiro as datas de ida e volta acima.' 
+                        : 'Para selecionar o veículo, informe primeiro as datas de ida e volta acima.'" nzShowIcon>
+                </nz-alert>
+            </nz-col>
+    
+            <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Motorista escolhido</nz-form-label>
+                    <nz-form-control>
+                        <nz-select (ngModelChange)="changeDriver($event)" [compareWith]="compareFn" formControlName="driver"
+                            nzAllowClear [nzPlaceHolder]="!areDatesSelected ? 'Defina as datas primeiro' : 'Selecione um motorista'">
+    
+                            <nz-option *ngFor="let option of driversList" [nzLabel]="option?.name ? option.name : ''"
+                                [nzValue]="option">
+                            </nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+    
+            <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col nzRequired>Veículo escolhido</nz-form-label>
+                    <nz-form-control nzErrorTip="O veículo é obrigatório">
+                        <nz-select (ngModelChange)="changeVehicle($event)" [compareWith]="compareFn" formControlName="vehicle" 
+                            nzAllowClear [nzPlaceHolder]="!areDatesSelected ? 'Defina as datas primeiro' : 'Selecione um veículo'">
+    
+                            <nz-option *ngFor="let option of vehiclesList"
+                                [nzLabel]="option?.carModel?.name ? option.carModel.name : ''" [nzValue]="option">
+                            </nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </ng-container>
+
+    </nz-row>
+</app-form-component>

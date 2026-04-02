@@ -1,0 +1,8 @@
+export enum ETravelStatus {
+    SCHEDULED = "AGENDADO",
+    ON_GOING = "EM_ANDAMENTO",
+    DELAYED = "ATRASADO",
+    ENDED = "ENCERRADO",
+    CANCELED = "CANCELADO",
+    DENIED = "NEGADO"
+}

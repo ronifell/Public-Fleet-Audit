@@ -1,0 +1,170 @@
+<app-form-component
+    [formTitle]="'Formulário de Manutenção'"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <nz-form-item formData [formGroup]="validateForm" [nzGutter]="[12, 6]">
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Código da transação</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="codOS" placeholder="Código"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Data da OS</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="dataOS"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>Data de aprovação</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="dataAprovacaoOS"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>Data da finalização</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="dataFinalizacaoOS"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>Data da entrega</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="dataEntregaVeiculo"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>Data do orçamento</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="dataOrcamentoOS"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>Data da rejeita</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="dataRejeitaOS"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>Data do cancelamento</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="dataCancelamentoOS"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="16">
+            <nz-form-label>Placa do carro</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="placa" placeholder="ABC1D23"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="8">
+            <nz-form-label>Prefixo</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="prefixo" placeholder="ex: 68"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Marca</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="marca" placeholder="ex: FORD"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Modelo</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="modelo" placeholder="ex: RANGER XL CD4 22"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12">
+            <nz-form-label>Cidade</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="cidade" placeholder="Ex: RIO BRANCO"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Base</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="base" placeholder="Ex: SUB-PREFEITURACZS"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Subunidade</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="subunidade" placeholder="Ex: SUB-PREFEITURACZS"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Status da OS</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="status" placeholder="Ex: ORÇAMENTAÇÃO RESPONDIDA"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Posto</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="posto" placeholder="Ex: SEU ZÉ AUTO PEÇAS"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Optante Simples Nacional</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="optanteSimplesNacional" placeholder="Ex: NÃO/SIM"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="8">
+            <nz-form-label>Valor das Peças</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="valorPecas" placeholder="Ex: 900.00"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="8">
+            <nz-form-label>Valor da Mão de Obra</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="valorMaoDeObra" placeholder="Ex: 1600.00"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="8">
+            <nz-form-label>Valor Total</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="valorTotal" placeholder="Ex: 2500.00"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24">
+            <nz-form-label>Situação da OS</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="situacaoOS" placeholder="Opcional"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24">
+            <nz-form-label>Status da Situação da OS</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <textarea nz-input formControlName="statusSituacaoOS" nzSize="large" placeholder="Opcional"></textarea>
+            </nz-form-control>
+        </nz-col>
+        
+    </nz-form-item>
+</app-form-component>

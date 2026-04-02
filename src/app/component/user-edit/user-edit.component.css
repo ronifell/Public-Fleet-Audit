@@ -1,0 +1,126 @@
+.content {
+    background-color: white;
+    width: 100%;
+    min-height: 88vh;
+    height: auto;
+    border-radius: 16px;
+
+    span {
+        font-family: 'Times New Roman';
+    }
+
+    .top-content {
+        padding: 5% 3% 0 3%;
+
+        #infos-user {
+            padding-top: 2%;
+            padding-left: 2%;
+
+            nz-col {
+                margin-bottom: 1%;
+            }
+
+            #user-name {
+                font-size: 48px;
+                line-height: auto;
+            }
+            #full-name {
+                font-size: 28px;
+                line-height: 0;
+            }
+            #ativo, #status {
+                border-radius: 16px;
+                width: 100px;
+                height: 35px;
+                text-align: center;
+                text-justify: distribute;
+                padding-top: 7px;
+            }
+        }
+    }
+
+    #tabs-options {
+        width: 100%;
+
+        .body-content {
+            padding: 0 3% 0 3%;
+
+            #body-text {
+                font-size: 18px;
+            }
+
+            #permissions-list {
+                border-radius: 16px;
+                width: 100px;
+                height: 35px;
+                text-align: center;
+                text-justify: distribute;
+                padding-top: 7px;
+            }
+        }
+    }
+}
+
+
+
+
+
+
+/* .edit:hover {
+    cursor: pointer;
+}
+
+.content {
+    background-color: white;
+    border-radius: 16px;
+    width: 100%;
+    min-height: 85vh;
+    height: auto;
+
+    nz-tabset {
+        width: 100%;
+    }
+
+    nz-row {
+        width: 100%;
+    }
+
+    #top-content { 
+        width: 100%;
+        height: 17vh;
+        margin: 2% 2% 0 2%;
+
+        h3 { 
+            text-align: center;
+        }
+
+        #icon-user{
+            width: 130px;
+            height: 130px;
+
+            svg {
+                width: 130px;
+                height: 130px;  
+            }
+        }
+
+        #text-edit {
+            font-size: 18px;
+        }
+        
+        #icon-edit {
+            width: 28px;
+            height: 28px;
+
+
+            svg {
+                width: 28px;
+                height: 28px;  
+            }
+        }
+    }
+
+    #main-content {
+        height: 50vh;
+    }
+} */

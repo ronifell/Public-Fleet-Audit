@@ -1,0 +1,173 @@
+.schedule:hover{
+    transition: 0.4s; 
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    cursor: pointer;
+}
+
+.schedule {
+    width: 100%;
+    min-height: 25vh;
+    height: auto;
+    border-radius: 16px;
+    background-color: white;
+    margin-top: 2vh;
+    margin-bottom: 3vh;
+    box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+    
+
+
+    #schedule-img {
+        background-color: #F7F7F7;
+        border-radius: 16px;
+        /* height: 89%; */
+        margin: 1% 0px 1% 0px;
+
+        #icon-car {
+            height: 100%;
+            width: 100%;
+            
+            svg {
+                height: 100px;
+                width: 100px;
+            }
+        }
+    }
+
+    #schedule-details {
+        margin-left: 2vw;
+
+        #schedule-details-text{
+            list-style-type: none;
+            color: #242525;
+            font-family: Inter;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+            text-transform: capitalize; 
+            
+        }
+        #schedule-details-text-value{
+            list-style-type: none;
+            color: #8388A2;
+            font-family: Inter;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: normal;
+            text-transform: capitalize; 
+            
+        }
+        
+        nz-divider {
+            margin-top: 0px;
+            margin-bottom: 1vh;
+            min-width: 80%;
+            width: 80%;
+        }
+    }
+}
+
+button {
+    border-radius: 16px;
+    width: 100%;
+    height: 7vh;
+    background-color: #0250A2;
+    color: white;
+}
+
+
+.section-header-row {
+    margin-top: 24px;
+    margin-bottom: 12px;
+}
+
+.schedule-section-header {
+    border-left: 6px solid #1890ff;
+    background: #f5f9ff;
+    padding: 16px 18px;
+    border-radius: 8px;
+}
+
+.schedule-section-header.historico {
+    border-left-color: #8c8c8c;
+    background: #fafafa;
+}
+
+.schedule-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #262626;
+    line-height: 1.2;
+}
+
+.schedule-section-subtitle {
+    margin-top: 4px;
+    font-size: 14px;
+    color: #595959;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    border: 1px solid transparent;
+}
+
+.status-solicitado {
+    background-color: #fff7e6;
+    color: #d48806;
+    border-color: #ffd591;
+}
+
+.status-agendado {
+    background-color: #f6ffed;
+    color: #389e0d;
+    border-color: #b7eb8f;
+}
+
+.status-em-andamento {
+    background-color: #e6f7ff;
+    color: #096dd9;
+    border-color: #91d5ff;
+}
+
+.status-finalizado {
+    background-color: #f0f5ff;
+    color: #1d39c4;
+    border-color: #adc6ff;
+}
+
+.status-cancelado {
+    background-color: #fff1f0;
+    color: #cf1322;
+    border-color: #ffa39e;
+}
+
+.status-recusado {
+    background-color: #fff2f0;
+    color: #a8071a;
+    border-color: #ffccc7;
+}
+
+.status-nao-iniciado {
+    background-color: #fafafa;
+    color: #595959;
+    border-color: #d9d9d9;
+}
+
+.status-expirado {
+    background-color: #f9f0ff;
+    color: #531dab;
+    border-color: #d3adf7;
+}
+
+.status-default {
+    background-color: #f5f5f5;
+    color: #434343;
+    border-color: #d9d9d9;
+}

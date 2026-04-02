@@ -1,0 +1,75 @@
+nz-steps, steps-options {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.events {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+.events .ant-badge-status {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.notes-month {
+  text-align: center;
+  font-size: 28px;
+}
+
+.notes-month section {
+  font-size: 28px;
+}
+
+.custom-row {
+  /* flex-wrap: wrap; */
+  margin: 1rem 0rem 0rem 1rem;
+  border-radius: 0.5rem;
+}
+
+.card-column {
+  /* flex: 1; */
+  max-width: 100%;
+  /* margin-bottom: 0.5rem;  */
+}
+
+.events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.events .ant-badge-status {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+
+.notes-month {
+  text-align: center;
+  font-size: 28px;
+}
+
+.notes-month section {
+  font-size: 28px;
+}
+
+.calendar-container {
+  display: flex;
+  flex-direction: row;
+  border-radius: 0.5rem;
+}
+
+.calend {
+  /* width: 120rem; */
+  margin: 1rem;
+  border-radius: 0.5rem;
+}
+

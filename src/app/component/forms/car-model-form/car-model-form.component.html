@@ -1,0 +1,71 @@
+<app-form-component
+    [formTitle]="'Cadastrar novo modelo de carro'"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <nz-row [nzGutter]="[16, 0]" formData [formGroup]="validateForm">
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Marca</nz-form-label>
+                <nz-form-control>
+                    <nz-select formControlName="brand" nzAllowClear 
+                    nzPlaceHolder="Marca / Fabricante">
+                        <nz-option *ngFor="let brand of brandList" [nzLabel]="brand.name" [nzValue]="brand"></nz-option>
+                    </nz-select>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Modelo</nz-form-label>
+                <nz-form-control>
+                    <input nz-input 
+                    formControlName="name" 
+                    placeholder="Modelo do carro"/>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Ano</nz-form-label>
+                <nz-form-control>
+                    <nz-date-picker nz-col nzSpan="24" nzMode="year" formControlName="year"
+                        [nzPlacement]="'topRight'"></nz-date-picker>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label>Categoria da CNH</nz-form-label>
+                <nz-form-control>
+                    <nz-select [nzOptions]="licenseValues" formControlName="requiredLicense" nzAllowClear nzPlaceHolder="Choose">
+                    </nz-select>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Capacidade do tanque</nz-form-label>
+                <nz-form-control>
+                    <input nz-input 
+                    formControlName="fuelCapacity"
+                    mask="000.00"
+                    [dropSpecialCharacters]="false"
+                    />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Força do motor</nz-form-label>
+                <nz-form-control>
+                    <input nz-input 
+                    formControlName="enginePower"
+                    mask="0.0"
+                    [dropSpecialCharacters]="false"
+                    />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+    </nz-row>
+</app-form-component>

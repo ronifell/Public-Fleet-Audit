@@ -1,0 +1,42 @@
+<div class="content">
+    <div class="top-content">
+        <nz-row nzJustify="space-between">
+            <nz-col>
+                <nz-avatar [nzSize]="180" nzIcon="schedule" style="background-color: rgb(128, 166, 255);" ></nz-avatar>
+            </nz-col>
+            <nz-col nzOrder="3" [nzLg]="{ span: 12, order: 2}" [nzXl]="{ span: 12, order: 2 }">
+                <nz-row id="infos-user">
+                    <nz-col nzSpan="24">
+                        <span id="user-name">Processo: {{schedule.processNumber}}</span>
+                    </nz-col>
+                    <nz-col nzSpan="24">
+                        <nz-tag id="status">{{schedule.status}}</nz-tag>
+                    </nz-col>
+                </nz-row>
+            </nz-col>
+            <nz-col nzOrder="2" [nzLg]="{ order: 3 }" [nzXl]="{ span: 4, order: 3}">
+                <nz-row nzJustify="end">
+                    <button nz-button nzShape="round" >
+                        <span>Editar</span>
+                        <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    </button>
+                </nz-row>
+            </nz-col>
+        </nz-row>
+    </div>
+    <nz-row>
+        <nz-tabset id="tabs-options" nzSize="large" nzType="card">
+            <nz-tab nz-row nzTitle="Sobre">
+                <nz-row class="body-content">
+                    <nz-col nzSpan="12"><span id="infos">Percurso: {{schedule.departure}} --> {{schedule.arrival}}</span></nz-col>
+                    <nz-col nzSpan="12"><span id="infos">Datas: {{schedule.startDate}} --> {{schedule.endDate}}</span></nz-col>
+                    <nz-col nzSpan="12"><span id="infos">Horarios: {{schedule.startTime}} --> {{schedule.endTime}}</span></nz-col>
+                    <nz-col nzSpan="12"><span id="infos">Número de passageiros: {{schedule.passengersAmount}}</span></nz-col>
+                    <nz-col nzSpan="12"><span id="infos">Responsavel pela viagem: {{schedule.personInChargeName ? schedule.personInChargeName : "Não preenchido"}}</span></nz-col>
+                    <nz-col nzSpan="12"><span id="infos">Número do responsavel: {{schedule.personInChargePhone ? schedule.personInChargePhone : "Não preenchido"}}</span></nz-col>
+                    <nz-col nzSpan="12"><span id="infos">Unidade demandante: {{schedule.plaintiffUnit ? schedule.plaintiffUnit : "Não preenchido"}}</span></nz-col>
+                </nz-row>
+            </nz-tab>
+        </nz-tabset>
+    </nz-row>
+</div>

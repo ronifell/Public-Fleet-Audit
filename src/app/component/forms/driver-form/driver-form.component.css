@@ -1,0 +1,22 @@
+nz-steps, steps-options {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.phone-array {
+    margin-bottom: 24px;
+}
+
+.remove-button {
+    margin-top: 8px;
+    color: white;
+    background-color: #ff4d4f;
+}
+.remove-button:hover {
+    background-color: #ff7875;
+}
+
+.error-message {
+    color: red;
+  }
+  

@@ -1,0 +1,65 @@
+<div class="content">
+    <div class="top-content">
+        <nz-row nzJustify="space-between">
+            <nz-col>
+                <nz-avatar [nzSize]="180" nzIcon="user" style="background-color: rgb(128, 166, 255);"></nz-avatar>
+            </nz-col>
+            <nz-col nzOrder="3" [nzLg]="{ span: 12, order: 2}" [nzXl]="{ span: 12, order: 2 }">
+                <nz-row id="infos-user">
+                    <nz-col nzSpan="24">
+                        <span id="user-name">{{user.userName}}</span>
+                    </nz-col>
+                    <nz-col nzSpan="24">
+                        <span id="full-name">{{user.fullName}}</span>
+                    </nz-col>
+                    <nz-col nzSpan="24">
+                        <nz-tag id="ativo" nzColor="{{user.active === true ? 'green' : 'default'}}">{{user.active === true ? 'Ativo' : 'Desativado'}}</nz-tag>
+                        <nz-tag id="status">{{user.status === "AVAILABLE" ? 'Livre' : 'Ocupado'}}</nz-tag>
+                    </nz-col>
+                </nz-row>
+            </nz-col>
+            <nz-col nzOrder="2" [nzLg]="{ order: 3 }" [nzXl]="{ span: 4, order: 3}">
+                <nz-row nzJustify="end">
+                    <button nz-button nzShape="round" (click)="goToItem(user)" [disabled]="isAdmin == true? false : true">
+                        <span>Editar</span>
+                        <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    </button>
+                </nz-row>
+            </nz-col>
+        </nz-row>
+    </div>
+    <div class="card-container" style="width: 100%; padding: 20px;">
+        <nz-descriptions nzTitle="Detalhes de Acesso" nzBordered [nzColumn]="1" nzLayout="vertical" nzSize="default">
+
+            <nz-descriptions-item nzTitle="Grupos de Usuário" [nzSpan]="1">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <nz-tag *ngFor="let group of user.groups" nzColor="blue"
+                        style="margin: 4px; font-size: 14px; padding: 4px 12px;">
+                        <i nz-icon nzType="team"></i> {{ group.name }}
+                    </nz-tag>
+                </div>
+            </nz-descriptions-item>
+
+            <nz-descriptions-item nzTitle="Permissões Ativas" [nzSpan]="1">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <nz-tag *ngFor="let perm of user.permissions" nz-popover [nzPopoverContent]="perm.name"
+                        style="margin: 4px;">
+                        {{ perm.description }}
+                    </nz-tag>
+                </div>
+            </nz-descriptions-item>
+
+        </nz-descriptions>
+    </div>
+</div>
+
+<!--
+    topcontent:
+        -processnumber
+        -status
+    details:
+        -arivel
+        -departure
+        -
+
+-->

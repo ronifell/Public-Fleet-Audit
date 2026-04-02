@@ -1,0 +1,1119 @@
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m1-wrapper {
+  --m1-radius: 1rem;
+  --m1-radius-lg: 1.25rem;
+  --m1-text-muted: #64748b;
+  --m1-border: rgba(15, 23, 42, 0.08);
+  --m1-accent: #0f766e;
+  --m1-accent-blue: #2563eb;
+  --m1-accent-amber: #d97706;
+  --m1-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 14px 44px -12px rgba(15, 23, 42, 0.14);
+  --m1-shadow-hover: 0 8px 32px -8px rgba(15, 23, 42, 0.18);
+
+  padding: clamp(1rem, 3vw, 1.75rem);
+  max-width: 1400px;
+  margin: 0 auto;
+  background: #f1f5f9;
+  background-image:
+    radial-gradient(ellipse 100% 90% at 100% -15%, rgba(15, 118, 110, 0.1) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(37, 99, 235, 0.07) 0%, transparent 48%);
+  color: #0f172a;
+  min-height: 100vh;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.m1-wrapper.dark {
+  --m1-text-muted: #94a3b8;
+  --m1-border: rgba(148, 163, 184, 0.18);
+  --m1-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  --m1-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.4);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.22) 0%, transparent 42%),
+    radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.1) 0%, transparent 38%),
+    radial-gradient(circle at 15% 20%, #1f2937 0%, #111827 45%, #0b1220 100%);
+  color: #e5e7eb;
+}
+
+.m1-wrapper.dark,
+.m1-wrapper.dark h1,
+.m1-wrapper.dark h2,
+.m1-wrapper.dark h3,
+.m1-wrapper.dark h4,
+.m1-wrapper.dark h5,
+.m1-wrapper.dark p,
+.m1-wrapper.dark span,
+.m1-wrapper.dark label,
+.m1-wrapper.dark small,
+.m1-wrapper.dark strong,
+.m1-wrapper.dark td,
+.m1-wrapper.dark th,
+.m1-wrapper.dark li {
+  color: #e5e7eb;
+}
+
+.m1-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--m1-border);
+}
+
+.m1-hero-main {
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.m1-eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--m1-accent);
+}
+
+.m1-wrapper.dark .m1-eyebrow {
+  color: #5eead4;
+}
+
+.m1-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 4.2vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  color: #0f172a;
+}
+
+.m1-wrapper.dark .m1-title {
+  color: #f8fafc;
+  text-shadow: 0 1px 20px rgba(15, 23, 42, 0.55);
+}
+
+.m1-subtitle {
+  margin: 0;
+  max-width: 40rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .m1-subtitle {
+  color: #94a3b8;
+}
+
+.m1-tabs {
+  margin-bottom: 1.5rem;
+}
+
+.m1-tabs-track {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--m1-border);
+  border-radius: 999px;
+  box-shadow: var(--m1-shadow);
+}
+
+.m1-wrapper.dark .m1-tabs-track {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+/* Pill tabs: round buttons inside the track */
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn {
+  border-radius: 999px !important;
+  height: 38px;
+  padding: 0 1.2rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+  border: none !important;
+  box-shadow: none !important;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default {
+  background: transparent !important;
+  color: #475569 !important;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default:hover {
+  background: rgba(15, 23, 42, 0.06) !important;
+  color: #0f172a !important;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-primary,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-primary {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #115e59 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35) !important;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-primary:hover,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* Dark mode: main section tabs — explicit class beats ng-zorro light theme */
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-default,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-default {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-default:focus,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-default:focus {
+  background-color: #1e293b !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark .m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default,
+.m1-wrapper.dark .m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.m1-wrapper.dark .m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-wrapper.dark .m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-primary {
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 45%, #0d9488 100%) !important;
+  background-color: #0f766e !important;
+  border-color: transparent !important;
+  color: #f0fdfa !important;
+  box-shadow: 0 4px 20px rgba(20, 184, 166, 0.35) !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:focus,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:focus {
+  background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%) !important;
+  background-color: #0d9488 !important;
+  color: #fff !important;
+}
+
+/* Theme toggle — light */
+:host ::ng-deep .m1-theme-toggle.ant-btn {
+  border-radius: 999px !important;
+  height: 40px;
+  padding: 0 1.25rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  border: 1px solid var(--m1-border) !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #334155 !important;
+  box-shadow: var(--m1-shadow);
+  align-self: center;
+}
+
+:host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+:host ::ng-deep .m1-theme-toggle.ant-btn:focus {
+  border-color: rgba(15, 118, 110, 0.35) !important;
+  color: #0f766e !important;
+}
+
+/* Dark mode: theme toggle */
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn,
+.m1-wrapper.dark ::ng-deep .m1-theme-toggle.ant-btn {
+  background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%) !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35);
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+.m1-wrapper.dark ::ng-deep .m1-theme-toggle.ant-btn:focus,
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:focus {
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+/* Dark mode: TXN list (Geographic Audit side panel) */
+.m1-wrapper.dark :host ::ng-deep .record-list .ant-btn,
+.m1-wrapper.dark ::ng-deep .record-list .ant-btn {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .record-list .ant-btn:hover,
+.m1-wrapper.dark :host ::ng-deep .record-list .ant-btn:focus {
+  border-color: #6366f1 !important;
+  color: #f8fafc !important;
+  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%) !important;
+}
+
+.grid.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1rem;
+  min-width: 0;
+}
+
+.grid.cards > nz-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.grid.cards ::ng-deep nz-card.ant-card {
+  max-width: 100%;
+  border-radius: var(--m1-radius-lg);
+  border: 1px solid var(--m1-border);
+  box-shadow: var(--m1-shadow);
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
+.grid.cards ::ng-deep nz-card.ant-card:hover {
+  box-shadow: var(--m1-shadow-hover);
+}
+
+.m1-stat-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-stat-fleet ::ng-deep .ant-card {
+  border-top: 3px solid #0d9488;
+}
+
+.m1-stat-liters ::ng-deep .ant-card {
+  border-top: 3px solid #2563eb;
+}
+
+.m1-stat-savings ::ng-deep .ant-card {
+  border-top: 3px solid #d97706;
+}
+
+.m1-wrapper.dark .m1-stat-fleet ::ng-deep .ant-card {
+  border-top-color: #2dd4bf;
+}
+
+.m1-wrapper.dark .m1-stat-liters ::ng-deep .ant-card {
+  border-top-color: #60a5fa;
+}
+
+.m1-wrapper.dark .m1-stat-savings ::ng-deep .ant-card {
+  border-top-color: #fbbf24;
+}
+
+.m1-stat-label {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .m1-stat-label {
+  color: #94a3b8;
+}
+
+.m1-stat-value {
+  font-size: clamp(1.65rem, 3.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.m1-wrapper.dark .m1-stat-value {
+  color: #f8fafc;
+}
+
+.m1-stat-unit,
+.m1-currency {
+  font-size: 0.55em;
+  font-weight: 600;
+  opacity: 0.85;
+  vertical-align: baseline;
+}
+
+.m1-card-title {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.m1-wrapper.dark .m1-card-title {
+  color: #f8fafc;
+}
+
+.m1-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+}
+
+.m1-wrapper.dark .m1-badge {
+  background: rgba(94, 234, 212, 0.15);
+  color: #5eead4;
+}
+
+.m1-roi-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-irregularities-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-target {
+  font-weight: 500;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.m1-integrity-heading {
+  margin-bottom: 1.25rem;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.loading-text {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .loading-text {
+  color: #94a3b8;
+}
+
+.m1-map-footnote {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .m1-map-footnote {
+  color: #94a3b8;
+}
+
+.roi-bars .bar-row {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.bar {
+  height: 12px;
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.m1-wrapper.dark .bar {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.bar > div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 100%);
+  transition: width 0.4s ease;
+}
+
+.bar > .actual {
+  background: linear-gradient(90deg, #047857 0%, #10b981 100%);
+}
+
+.highlight,
+.m1-roi-highlight {
+  margin: 1rem 0 0;
+  font-size: 0.9375rem;
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.m1-wrapper.dark .highlight,
+.m1-wrapper.dark .m1-roi-highlight {
+  color: #5eead4;
+}
+
+.irregularity-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  font-size: 0.875rem;
+}
+
+.irregularity-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.m1-wrapper.dark .irregularity-row {
+  border-bottom-color: #334155;
+}
+
+.map-layout {
+  --milestone-map-height: 420px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.map-layout ::ng-deep nz-card.ant-card,
+.integrity-layout ::ng-deep nz-card.ant-card {
+  border-radius: var(--m1-radius-lg);
+  border: 1px solid var(--m1-border);
+  box-shadow: var(--m1-shadow);
+  transition: box-shadow 0.25s ease;
+}
+
+.map-layout ::ng-deep nz-card.ant-card:hover,
+.integrity-layout ::ng-deep nz-card.ant-card:hover {
+  box-shadow: var(--m1-shadow-hover);
+}
+
+.map-wrap {
+  position: relative;
+}
+
+.map-tooltip-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  max-width: min(320px, 85%);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  pointer-events: none;
+}
+
+.m1-wrapper.dark .map-tooltip-corner {
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+#milestone-map {
+  height: var(--milestone-map-height);
+  width: 100%;
+  border-radius: var(--m1-radius);
+  box-shadow: inset 0 0 0 1px var(--m1-border);
+  overflow: hidden;
+}
+
+.m1-map-card ::ng-deep .ant-card-body,
+.m1-side-panel ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-integrity-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-filters {
+  padding: 1rem 1.15rem;
+  margin: 0 0 1.25rem;
+  background: rgba(15, 23, 42, 0.03);
+  border-radius: var(--m1-radius);
+  border: 1px solid var(--m1-border);
+}
+
+.m1-wrapper.dark .m1-filters {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: #334155;
+}
+
+.map-layout .side-card ::ng-deep .ant-card-body {
+  min-height: var(--milestone-map-height);
+  box-sizing: border-box;
+}
+
+:host ::ng-deep #milestone-map .asset-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #0f172a;
+  border: 1px solid #94a3b8;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+}
+
+:host ::ng-deep #milestone-map .asset-pin.asset-pin-selected {
+  background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #2563eb;
+  color: #1e3a8a;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.m1-wrapper.dark :host ::ng-deep #milestone-map .asset-pin {
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  color: #f8fafc;
+  border-color: #64748b;
+}
+
+.m1-wrapper.dark :host ::ng-deep #milestone-map .asset-pin.asset-pin-selected {
+  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
+  border-color: #818cf8;
+  color: #e0e7ff;
+}
+
+.pin-detail-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pin-detail-photo-placeholder {
+  aspect-ratio: 4 / 3;
+  max-height: 200px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px dashed #64748b;
+  box-sizing: border-box;
+}
+
+.pin-detail-gps {
+  margin: 0;
+  font-weight: 600;
+  color: #15803d;
+  font-size: 0.95rem;
+}
+
+.m1-wrapper.dark .pin-detail-gps {
+  color: #86efac;
+}
+
+.pin-detail-hash {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pin-detail-hash code {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  word-break: break-all;
+  color: #334155;
+  background: #f1f5f9;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.m1-wrapper.dark .pin-detail-hash code {
+  color: #e2e8f0;
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.record-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.deduction {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.no-deduction {
+  color: #14532d;
+  font-weight: 600;
+}
+
+.m1-wrapper.dark .no-deduction {
+  color: #86efac;
+}
+
+.integrity-layout .filters {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.integrity-layout .filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.integrity-layout .filter-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.m1-wrapper.dark .integrity-layout .filter-label {
+  color: #e2e8f0;
+}
+
+.integrity-layout .filter-control {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: 40px;
+  min-height: 40px;
+  line-height: 1.25;
+}
+
+.integrity-layout .filter-control[type='date'] {
+  padding: 0.25rem 0.5rem;
+}
+
+.integrity-layout select.filter-control {
+  padding: 0.25rem 0.75rem;
+}
+
+.integrity-layout .filter-actions {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 0;
+}
+
+.integrity-layout {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.integrity-layout ::ng-deep nz-card.ant-card {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-layout ::ng-deep .ant-card-body {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.integrity-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* nz-table horizontal scroll: pin scroll viewport to card width (flex min-width:auto otherwise grows with table) */
+.integrity-table-wrap ::ng-deep .ant-spin-nested-loading,
+.integrity-table-wrap ::ng-deep .ant-spin-container {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-table-wrap ::ng-deep .ant-table {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-table-wrap ::ng-deep nz-table-inner-scroll.ant-table-container {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.integrity-table-wrap ::ng-deep .ant-table-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Narrow viewports: same pattern as dashboard cards — no 960px-wide table */
+.integrity-mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-mobile-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  background: #fafafa;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m1-wrapper.dark .integrity-mobile-card {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: #334155;
+}
+
+.integrity-mobile-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.m1-wrapper.dark .integrity-mobile-card-head {
+  border-bottom-color: #334155;
+}
+
+.integrity-mobile-plate {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.m1-wrapper.dark .integrity-mobile-plate {
+  color: #f8fafc;
+}
+
+.integrity-mobile-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.integrity-mobile-dl {
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.integrity-mobile-dl-row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 32%) 1fr;
+  gap: 0.5rem;
+  align-items: start;
+  font-size: 0.875rem;
+  min-width: 0;
+}
+
+.integrity-mobile-dl-row dt {
+  margin: 0;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.m1-wrapper.dark .integrity-mobile-dl-row dt {
+  color: #94a3b8;
+}
+
+.integrity-mobile-dl-row dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+  color: #111827;
+}
+
+.m1-wrapper.dark .integrity-mobile-dl-row dd {
+  color: #e5e7eb;
+}
+
+.integrity-mobile-dl-hash .integrity-mobile-hash {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  word-break: break-all;
+  white-space: pre-wrap;
+  color: #374151;
+}
+
+.m1-wrapper.dark .integrity-mobile-dl-hash .integrity-mobile-hash {
+  color: #cbd5e1;
+}
+
+.integrity-mobile-empty {
+  margin: 0.5rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.m1-wrapper.dark .integrity-mobile-empty {
+  color: #94a3b8;
+}
+
+.integrity-layout .cell-nowrap {
+  white-space: nowrap;
+}
+
+.hash {
+  font-family: monospace;
+  font-size: 11px;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verified {
+  color: #166534;
+  font-weight: 600;
+}
+
+.m1-wrapper.dark .verified {
+  color: #86efac;
+}
+
+.m1-wrapper.dark .hash {
+  color: #d1d5db;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-card,
+.m1-wrapper.dark ::ng-deep .ant-card {
+  background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-card-head,
+.m1-wrapper.dark ::ng-deep .ant-card-head,
+.m1-wrapper.dark :host ::ng-deep .ant-card-body,
+.m1-wrapper.dark ::ng-deep .ant-card-body {
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-card-head-title,
+.m1-wrapper.dark ::ng-deep .ant-card-head-title,
+.m1-wrapper.dark :host ::ng-deep .ant-typography,
+.m1-wrapper.dark ::ng-deep .ant-typography,
+.m1-wrapper.dark :host ::ng-deep .ant-statistic-content,
+.m1-wrapper.dark ::ng-deep .ant-statistic-content {
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-table,
+.m1-wrapper.dark ::ng-deep .ant-table,
+.m1-wrapper.dark :host ::ng-deep .ant-table-thead > tr > th,
+.m1-wrapper.dark ::ng-deep .ant-table-thead > tr > th,
+.m1-wrapper.dark :host ::ng-deep .ant-table-tbody > tr > td,
+.m1-wrapper.dark ::ng-deep .ant-table-tbody > tr > td {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+/* nz-table pagination — dark mode (avoid white prev/next/page buttons) */
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item a,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item a {
+  color: #e2e8f0 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item-active,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item-active {
+  background: #312e81 !important;
+  border-color: #6366f1 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item-active a,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item-active a {
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-next .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-disabled .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-disabled .ant-pagination-item-link {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-options,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-options {
+  color: #e2e8f0;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-btn-default,
+.m1-wrapper.dark ::ng-deep .ant-btn-default {
+  background: #1f2937;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.m1-wrapper.dark :host ::ng-deep input,
+.m1-wrapper.dark ::ng-deep input,
+.m1-wrapper.dark :host ::ng-deep select,
+.m1-wrapper.dark ::ng-deep select {
+  background: #111827;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+@media (max-width: 1024px) {
+  /* Single column: avoids 2+1 KPI layout and half-width last card on tablets / large phones */
+  .grid.cards {
+    grid-template-columns: 1fr;
+  }
+
+  .grid.cards .span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .roi-bars .bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .m1-title {
+    font-size: 1.35rem;
+  }
+
+  .m1-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .m1-tabs-track {
+    width: 100%;
+    justify-content: stretch;
+    border-radius: var(--m1-radius-lg);
+  }
+
+  .m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn,
+  .m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .m1-tab-btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .integrity-layout .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .integrity-layout .filter-field {
+    width: 100%;
+  }
+
+  .integrity-layout .filter-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .integrity-layout .filter-actions button {
+    width: 100%;
+  }
+}

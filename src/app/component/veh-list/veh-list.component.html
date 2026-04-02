@@ -1,0 +1,121 @@
+<app-filters-and-search 
+        [tabTitle]="'Lista de veiculos'"
+        (eventSearch)="getVehicleSearch($event)"
+></app-filters-and-search>
+
+<nz-row *ngIf="this.addButton">
+    <nz-col [nzLg]="{ span: 6, offset: 18 }" [nzMd]="{ span: 9, offset: 15 }" [nzSm]="{ span: 12, offset: 12 }" [nzXs]="{ span: 24, offset: 0 }">
+        <button routerLink="/vehicle/form" nz-button class="add-button">Adicionar novo veiculo</button>
+    </nz-col>
+</nz-row>
+<nz-row nzGutter="10">
+    <nz-col [nzLg]="{ span: 24 }" [nzMd]="{ span: 12 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }" *ngFor="let item of vehicleList" (click)="goToItem(item)">
+        <nz-row class="vehicle" nzAlign="middle">
+            <nz-col id="vehicle-img" [nzLg]="{ span: 5 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                <span id="icon-car" nz-icon nzType="car" nzTheme="outline"></span>
+            </nz-col>
+            <nz-col id="vehicle-details" [nzLg]="{ span: 17 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                <nz-row>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">Modelo:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{ item.carModel.name }}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">Placa:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{item.licensePlate}}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                </nz-row>
+
+                <nz-row>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">Ano aquisição:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{ item.purchaseDate | date: 'dd/MM/yyyy' }}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">Ano de Fabricação:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{ item.manufacturingDate | date: 'dd/MM/yyyy' }}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                </nz-row>
+
+                <nz-row>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">Kilometragem:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{ item.drivenQuilometers }}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">Status:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{ item.status }}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                </nz-row>
+
+                <nz-row>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">RENAVAM:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{ item.renavam }}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                    <nz-col [nzLg]="{ span: 12 }" [nzMd]="{ span: 24 }" [nzSm]="{ span: 24 }" [nzXs]="{ span: 24 }">
+                        <nz-row>
+                            <nz-col nzSpan="13">
+                                <span id="vehicle-details-text">Tipo:</span>
+                            </nz-col>
+                            <nz-col nzSpan="11">
+                                <span id="vehicle-details-text-value">{{ item.type.name }}</span>
+                            </nz-col>
+                        </nz-row>
+                        <nz-divider></nz-divider>
+                    </nz-col>
+                </nz-row>
+            </nz-col>
+        </nz-row>
+    </nz-col>
+</nz-row>
+

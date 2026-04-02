@@ -1,0 +1,34 @@
+/* div {
+    border: solid black 1px;
+} */
+
+.input {
+    border-radius: 15px 15px 15px 15px;
+    z-index: 1;
+}
+
+h2 {
+    padding-left: 2vw;
+    color: white;
+    text-shadow: 4px 3px 10px rgba(71, 88, 161, 1);
+    margin-top: 24px;
+
+}
+
+nz-divider {
+    margin-top: 0px;
+    border-top: 1px solid rgb(255, 255, 255);
+}
+
+button {
+    border-radius: 0px 15px 15px 0px;
+    width: 100px;
+    left: -10px;
+    text-align: center;
+    padding: 0;
+    z-index: 2;
+}
+
+.filters-popover {
+    width: 40vw;
+}

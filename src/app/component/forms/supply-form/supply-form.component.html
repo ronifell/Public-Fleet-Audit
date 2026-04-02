@@ -1,0 +1,179 @@
+<app-form-component
+    [formTitle]="'Formulário de Abastecimento'"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <nz-form-item formData [formGroup]="validateForm" [nzGutter]="[12, 6]">
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Código da transação</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="cod_transaction" placeholder="Código"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Data da transação</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-date-picker nz-col nzSpan="24" nzShowTime nzFormat="yyyy-MM-dd HH:mm:ss" formControlName="transaction_date" (nzOnOk)="changeValueToString($event)"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12" nzMd="8">
+            <nz-form-label>Placa do carro</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="license_plate" placeholder="ABC1D23"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12" nzMd="8">
+            <nz-form-label>Ano do carro</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="year" placeholder="ex: 2004"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12" nzMd="8">
+            <nz-form-label>Matrícula</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="matricula" placeholder="ex: 198324"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12">
+            <nz-form-label>Nome do motorista</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="driver_name" placeholder="Ex: João Maria"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Modelo do carro</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="car_model" placeholder="Ex: MMC/L200 4X4 GL"/>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzSm="12" nzLg="6">
+            <nz-form-label>Tipo de combustível</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <nz-select formControlName="fuel_type" nzAllowClear nzPlaceHolder="Combustíveis">
+                    <nz-option *ngFor="let fuel of fuelsList" [nzLabel]="fuel.name" [nzValue]="fuel.name"></nz-option>
+                </nz-select>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzSm="12" nzLg="6">
+            <nz-form-label>Litros abastecidos</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="liters" placeholder="Ex: 32"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12" nzLg="6">
+            <nz-form-label>Valor do litro</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="value_liter" placeholder="Ex: 7.09"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12" nzLg="6">
+            <nz-form-label>Valor da emissão</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="emission_value" placeholder="Ex: 466.13"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>Hodômetro</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="hodometro" placeholder="Ex: 466.13"/>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>KM rodados ou horas trabalhadas</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="kms_or_hours" placeholder="Ex: 558"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12" nzLg="8">
+            <nz-form-label>KM/Litro ou Litros/hora</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="km_per_liter" placeholder="Ex: 8.49"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12" nzLg="6">
+            <nz-form-label>Código do estabelecimento</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="cod_estabelecimento" placeholder="Ex: 8.49"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzLg="18">
+            <nz-form-label>Nome do estabelecimento</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="nome_estabelecimento" placeholder="Ex: AUTO POSTO CRUZEIRO"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzLg="12">
+            <nz-form-label>Endereço</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="endereco" placeholder="Ex: AVENIDA GETULIO VARGAS 22"/>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Bairro</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="bairro" placeholder="Ex: Bosque"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="18">
+            <nz-form-label>Cidade</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="cidade" placeholder="Ex: Rio Branco"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="6">
+            <nz-form-label>UF</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="UF" placeholder="Ex: Acre"/>
+            </nz-form-control>
+        </nz-col>
+        
+        <nz-col nzXs="24" nzSm="12">
+            <nz-form-label>Forma de transação</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="forma_transacao" placeholder="Ex: POS"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzSm="12">
+            <nz-form-label>Série POS</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="serie_pos" placeholder="Ex: 96010144"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzLg="12">
+            <nz-form-label>Número do cartão</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="numero_cartao" placeholder="Ex: XXXXXXXXXXXXXXXX"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzLg="12">
+            <nz-form-label>Família do veículo</nz-form-label>
+            <nz-form-control nz-col nzSpan="24">
+                <input nz-input formControlName="familia_veiculo" placeholder="Ex: PICKUP MEDIA"/>
+            </nz-form-control>
+        </nz-col>
+        
+    </nz-form-item>
+</app-form-component>

@@ -1,0 +1,74 @@
+nz-steps, steps-options {
+    margin-top: 15px;
+    margin-bottom: 15px;
+
+}
+
+.main {
+    width: auto;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+}
+
+.left-login {
+    width: fit-content;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    flex-direction: column;
+    margin: 12px;
+}
+
+.right-login {
+    margin: 30px;
+    width: auto;
+    height: auto;
+    align-items: center;
+    justify-content: center;
+    justify-items: center;
+}
+
+.forms-data {
+    display: flex;
+    justify-content: space-around;
+    /* margin: 0.5em; */
+    align-items: center;
+}
+
+.left-login-image {
+    display: flex;
+    width: auto;
+    height: 200px;
+    align-items: center;
+    justify-content: center;
+    margin: 0.5em;
+}
+
+@media only screen and (max-width: 950px) {
+    .card-login {
+        width: 85%;
+    }
+}
+
+@media only screen and (max-width: 795px) {
+    .main {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      justify-items: center;
+      width: 85%;
+    }
+
+    .right-login {
+        width: 100%;
+        height: auto;
+    }
+}  
+
+.login-btn {
+    margin-bottom: 5px;
+    border-radius: 5px;
+}

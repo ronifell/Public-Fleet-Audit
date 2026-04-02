@@ -1,0 +1,181 @@
+<div class="limitador">
+    <nz-card class="container card-registros">
+        <!-- <nz-space>
+            <button *nzSpaceItem nz-button nzType="primary" nzShape="circle" (click)="showDefault()"
+                class="filter-button">
+                <span nz-icon nzType="filter" nzTheme="outline" class="filter-icon"></span>
+                <span class="filter-text">Filtros</span>
+            </button>
+        </nz-space> -->
+        <nz-space>
+            <button *nzSpaceItem nz-button nzType="primary" nzShape="circle" (click)="showDefault()"
+                class="filter-button">
+                <span nz-icon nzType="filter" nzTheme="outline" class="filter-icon"></span>
+                <span class="filter-text">Filtros</span>
+            </button>
+            <ng-container *ngIf="writeMaintenances">
+                <button *nzSpaceItem id="button-discontinue" nz-button nzShape="round"
+                    (click)="goToItem('maintenance/form')">
+                    <span>Nova manutenção</span>
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                </button>
+            </ng-container>
+            <ng-container *ngIf="writeSuppliers">
+                <button *nzSpaceItem id="button-edit" nz-button nzShape="round" (click)="goToItem('supply/form')">
+                    <span>Novo abastecimento</span>
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                </button>
+            </ng-container>
+        </nz-space>
+        <nz-drawer [nzSize]="size" [nzVisible]="visible" nzPlacement="right" [nzTitle]="" [nzExtra]="extra"
+            (nzOnClose)="close()">
+            <ng-container *nzDrawerContent>
+                <p>Selecione a data</p>
+                <nz-form-item>
+                    <nz-form-control>
+                        <nz-range-picker></nz-range-picker>
+                    </nz-form-control>
+                </nz-form-item>
+                <label>Selecione a cidade</label>
+                <select name="" id="">
+                    <option value="">Rio Branco</option>
+                    <option value="">Cruzeiro do Sul</option>
+                </select>
+            </ng-container>
+        </nz-drawer>
+        <ng-template #extra>
+            <button nz-button nzType="default" (click)="close()">Cancel</button>
+            &nbsp;
+            <button nz-button nzType="primary" (click)="close()">OK</button>
+        </ng-template>
+
+        <nz-tabset nzCentered nzType="card" class="tabset-general-registers">
+            <nz-tab *ngFor="let tab of tabs" [nzTitle]="titleTemplate">
+                <ng-template #titleTemplate>
+                    <span nz-icon [nzType]="tab.icon"></span>
+                    {{ tab.name }}
+                </ng-template>
+
+                <div *ngIf="tab.name == 'Manutenção' && showMaintenances">
+                    <nz-table [nzData]="maintenances" [nzFrontPagination]="false" #maintenanceTable class="jorge">
+                        <thead>
+                            <tr>
+                                <th>CodOS</th>
+                                <th>DATA OS</th>
+                                <th>DATA APROVAÇÃO OS</th>
+                                <th>DATA FINALIZAÇÃO OS</th>
+                                <th>DATA ENTREGA OS</th>
+                                <th>DATA ORÇAMENTO OS</th>
+                                <th>DATA REJEITA OS</th>
+                                <th>DATA CANCELAMENTO OS</th>
+                                <th>MARCA VEICULO</th>
+                                <th>MODELO VEICULO</th>
+                                <th>PLACA</th>
+                                <th>PREFIXO</th>
+                                <th>CIDADE</th>
+                                <th>BASE</th>
+                                <th>SUBUNIDADE</th>
+                                <th>STATUS</th>
+                                <th>POSTO</th>
+                                <th>OPTANTE SIMPLES NACIONAL</th>
+                                <th>VALOR PEÇAS</th>
+                                <th>VALOR MÃO DE OBRA</th>
+                                <th>VALOR TOTAL</th>
+                                <th>SITUAÇÃO OS</th>
+                                <th>STATUS SITUAÇÃO OS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of maintenances" (click)="editItem(data, 'maintenance/form')">
+                                <td>{{ data.codOS }}</td>
+                                <td>{{ data.dataOS | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.dataAprovacaoOS | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.dataFinalizacaoOS | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.dataEntregaVeiculo | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.dataOrcamentoOS | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.dataRejeitaOS | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.dataCancelamentoOS | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.marca }}</td>
+                                <td>{{ data.modelo }}</td>
+                                <td>{{ data.placa }}</td>
+                                <td>{{ data.prefixo }}</td>
+                                <td>{{ data.cidade }}</td>
+                                <td>{{ data.base }}</td>
+                                <td>{{ data.subunidade }}</td>
+                                <td>{{ data.status }}</td>
+                                <td>{{ data.posto }}</td>
+                                <td>{{ data.optanteSimplesNacional }}</td>
+                                <td>{{ data.valorPecas }}</td>
+                                <td>{{ data.valorMaoDeObra }}</td>
+                                <td>{{ data.valorTotal }}</td>
+                                <td>{{ data.situacaoOS }}</td>
+                                <td>{{ data.statusSituacaoOS }}</td>
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                </div>
+
+                <div *ngIf="tab.name == 'Abastecimento' && showSuppliers">
+                    <nz-table [nzData]="supplies" [nzFrontPagination]="false" #supplyTable class="jorge">
+                        <thead>
+                            <tr>
+                                <th>COD. TRANSAÇÃO</th>
+                                <th>DATA TRANSACAO</th>
+                                <th>PLACA</th>
+                                <th>MODELO VEICULO</th>
+                                <th>ANO VEICULO</th>
+                                <th>MATRÍCULA</th>
+                                <th>NOME MOTORISTA</th>
+                                <th>TIPO COMBUSTIVEL</th>
+                                <th>LITROS</th>
+                                <th>VALOR LITRO</th>
+                                <th>HODOMETRO</th>
+                                <th>KM RODADOS OU HORAS TRABALHADAS</th>
+                                <th>KM/LITRO OU LITROS/HORA</th>
+                                <th>VALOR EMISSÃO</th>
+                                <th>COD. ESTABELECIMENTO</th>
+                                <th>NOME ESTABELECIMENTO</th>
+                                <th>ENDERECO</th>
+                                <th>BAIRRO</th>
+                                <th>CIDADE</th>
+                                <th>UF</th>
+                                <th>FORMA TRANSAÇÃO</th>
+                                <th>SÉRIE POS</th>
+                                <th>NÚMERO CARTÃO</th>
+                                <th>FAMÍLIA VEÍCULO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of supplies" (click)="editItem(data, 'supply/form')">
+                                <td>{{ data.cod_transaction }}</td>
+                                <td>{{ data.transaction_date | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                                <td>{{ data.license_plate }}</td>
+                                <td>{{ data.car_model }}</td>
+                                <td>{{ data.year }}</td>
+                                <td>{{ data.matricula }}</td>
+                                <td>{{ data.driver_name }}</td>
+                                <td>{{ data.fuel_type }}</td>
+                                <td>{{ data.liters }}</td>
+                                <td>{{ data.value_liter }}</td>
+                                <td>{{ data.hodometro }}</td>
+                                <td>{{ data.kms_or_hours }}</td>
+                                <td>{{ data.km_per_liter }}</td>
+                                <td>{{ data.emission_value }}</td>
+                                <td>{{ data.cod_estabelecimento }}</td>
+                                <td>{{ data.nome_estabelecimento }}</td>
+                                <td>{{ data.endereco }}</td>
+                                <td>{{ data.bairro }}</td>
+                                <td>{{ data.cidade }}</td>
+                                <td>{{ data.UF }}</td>
+                                <td>{{ data.forma_transacao }}</td>
+                                <td>{{ data.serie_pos }}</td>
+                                <td>{{ data.numero_cartao }}</td>
+                                <td>{{ data.familia_veiculo }}</td>
+                            </tr>
+                        </tbody>
+                    </nz-table>
+                </div>
+            </nz-tab>
+        </nz-tabset>
+    </nz-card>
+</div>

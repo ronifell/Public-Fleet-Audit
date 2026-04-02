@@ -1,0 +1,39 @@
+nz-row {
+  width: 100%;
+}
+
+.group:hover{
+  transition: 0.4s; 
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  cursor: pointer;
+}
+
+.group {
+  width: 100%;
+  min-height: 25vh;
+  height: auto;
+  border-radius: 16px;
+  background-color: white;
+  margin-top: 2vh;
+  margin-bottom: 3vh;
+  padding-top: 2vh;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+
+  #description {
+    font-size: 16px;
+  }
+
+  #icon {
+    width: 100%;
+    height: 100%;
+
+    svg {
+      width: 100px;
+      height: 100px;
+    }
+  }
+
+  #name_group {
+    text-align: center;
+  }
+}

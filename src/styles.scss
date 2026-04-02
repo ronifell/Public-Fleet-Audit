@@ -1,0 +1,77 @@
+/* You can add global styles to this file, and also import other style files */
+@import "assets/css/style.scss";
+@import "leaflet/dist/leaflet.css";
+
+/* Flex layout: main shell width (see AppComponent :host for app-root). */
+nz-layout.layout-content {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Milestone 1 demo dark mode: shell controls (Back) — class toggled on body from Milestone1DemoComponent */
+body.milestone1-demo-dark .milestone-back-btn.ant-btn {
+  background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%) !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35);
+}
+
+body.milestone1-demo-dark .milestone-back-btn.ant-btn:hover,
+body.milestone1-demo-dark .milestone-back-btn.ant-btn:focus {
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+body.milestone1-demo-dark .milestone-back-btn.ant-btn .anticon {
+  color: #e2e8f0;
+}
+
+/* Milestone 1: inactive tab buttons (non-primary) — global override so ng-zorro cannot leave white background */
+body.milestone1-demo-dark app-milestone1-demo .tabs .ant-btn:not(.ant-btn-primary),
+body.milestone1-demo-dark app-milestone1-demo .tabs .m1-tab-btn.ant-btn-default {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+body.milestone1-demo-dark app-milestone1-demo .tabs .ant-btn:not(.ant-btn-primary):hover,
+body.milestone1-demo-dark app-milestone1-demo .tabs .ant-btn:not(.ant-btn-primary):focus {
+  background-color: #1e293b !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+/* Milestone 1: table pagination in dark mode (ng-zorro defaults can stay white) */
+body.milestone1-demo-dark app-milestone1-demo .ant-pagination .ant-pagination-item {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+body.milestone1-demo-dark app-milestone1-demo .ant-pagination .ant-pagination-item a {
+  color: #e2e8f0 !important;
+}
+
+body.milestone1-demo-dark app-milestone1-demo .ant-pagination .ant-pagination-item-active {
+  background: #312e81 !important;
+  border-color: #6366f1 !important;
+}
+
+body.milestone1-demo-dark app-milestone1-demo .ant-pagination .ant-pagination-item-active a {
+  color: #f8fafc !important;
+}
+
+body.milestone1-demo-dark app-milestone1-demo .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+body.milestone1-demo-dark app-milestone1-demo .ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+body.milestone1-demo-dark app-milestone1-demo .ant-pagination .ant-pagination-disabled .ant-pagination-item-link {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+}

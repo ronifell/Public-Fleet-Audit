@@ -1,0 +1,38 @@
+<app-form-component
+    [formTitle]="'Descontinuar veículo - ' + discontinuedVehicle.licensePlate"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <nz-form-item formData [formGroup]="validateForm" [nzGutter]="[12, 6]">
+        <nz-col nzSpan="24">
+            <nz-form-label>Número do contrato</nz-form-label>
+            <nz-form-control>
+                <input nz-input formControlName="processNumber" nzSize="large" 
+                placeholder="Número do processo de descontinuação"/>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label>Data do processo</nz-form-label>
+            <nz-form-control>
+                <nz-date-picker nz-col nzSpan="24" formControlName="date" [nzPlacement]="'bottomRight'"></nz-date-picker>
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="12">
+            <nz-form-label nz-col>Horário</nz-form-label>
+            <nz-form-control>
+                <input id="hora-cons" type="time" name="hora-cons" value="00:00" formControlName="time" />
+            </nz-form-control>
+        </nz-col>
+
+        <nz-col nzXs="24" nzMd="24">
+            <nz-form-label>Descrição</nz-form-label>
+            <nz-form-control>
+                <textarea nz-input formControlName="description" 
+                nzSize="large" placeholder="Opcional: Descrição da razão"></textarea>
+            </nz-form-control>
+        </nz-col>
+
+    </nz-form-item>
+</app-form-component>

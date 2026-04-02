@@ -1,0 +1,19 @@
+<app-form-component
+    [formTitle]="'Cadastrar novo tipo de combustível'"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <div nz-row formData [formGroup]="validateForm">
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Combustível</nz-form-label>
+            <nz-form-control>
+                <input nz-input 
+                    formControlName="name"
+                    nz-col 
+                    nzSize="large" 
+                    nzSpan="24" 
+                    placeholder="Preencha com o tipo de combustível"/>
+            </nz-form-control>
+        </nz-form-item>
+    </div>
+</app-form-component>

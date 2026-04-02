@@ -1,0 +1,77 @@
+<nz-row class="content">
+    <nz-row nzJustify="end" nzAlign="top" class="perfil-options">
+        <nz-col nzSpan="24">
+            <nz-row [nzGutter]="[0, 20]" nzAlign="top" nzJustify="end">
+                <nz-col [nzXs]="{ span: 7 }" [nzSm]="{ span: 4}">
+                    <button nz-button id="button-options" (click)="goToItem(driver)">
+                        <span nz-icon nzType="edit" nzTheme="outline">Editar</span>             
+                    </button>
+                </nz-col>
+            </nz-row>
+            <nz-row nzJustify="center" nzAlign="top" id="background-user">
+                <!-- user image  -->
+                <nz-col id="user-image">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="black" class="bi bi-person-fill" viewBox="0 0 16 16">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                    </svg>
+                </nz-col>
+            </nz-row>
+            <nz-row nzJustify="center" id="name">
+                <!-- user name  -->
+                <h3 nz-typography>{{driver.name}}</h3>  
+            </nz-row>
+        </nz-col>
+    </nz-row>
+    <nz-row class="pages-info">
+        <nz-tabset id="tabs-options" nzType="card">
+            <nz-tab nz-row nzTitle="Sobre">
+                <nz-row nz-form nzJustify="start" [nzGutter]="[20, 0]">
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">E-mail: {{ driver.email }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos" *ngFor="let phone of driver.phones" >Numeros: {{ phone.phone }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Data de nascimento: {{ driver.birthDate | date:'dd/MM/yyyy'}}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">RG: {{ driver.rg }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Naturalidade: {{ driver.naturality }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">CPF: {{ driver.cpf }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Nacionalidade: {{ driver.nationality }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Genero: {{ driver.gender }}</p>
+                    </nz-col>
+                </nz-row>
+            </nz-tab>
+            <nz-tab nzTitle="CNH">
+                <nz-row nz-form nzJustify="start" nzGutter="48">
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">CNH: {{ driver.licenseNumber }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Data de emissão: {{ driver.licenseIssueDate | date:'dd/MM/yyyy' }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Data de expiração: {{ driver.licenseExpireDate | date:'dd/MM/yyyy' }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Categoria: {{ driver.licenseCategory }}</p>
+                    </nz-col>
+                    <nz-col class="about-infos" [nzXs]="{ span: 24, offset: 1 }" [nzLg]="{ span: 11, offset: 1 }">
+                        <p id="infos">Status: {{ driver.status }}</p>
+                    </nz-col>
+                </nz-row>
+            </nz-tab>
+          </nz-tabset>
+    </nz-row>
+
+</nz-row>

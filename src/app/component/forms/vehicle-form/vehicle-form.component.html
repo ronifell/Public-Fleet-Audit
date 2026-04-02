@@ -1,0 +1,184 @@
+<app-form-component
+    [formTitle]="'Cadastrar novo veículo'"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <ng-container formData [formGroup]="validateForm">
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Marca</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                        [compareWith]="compareFn"
+                        formControlName="brand"
+                        (ngModelChange)="changeBrand($event)"
+                        nzAllowClear nzPlaceHolder="Marca do carro">
+                            <nz-option *ngFor="let option of brandList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Modelo</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                        [compareWith]="compareFn"
+                        formControlName="carModel" nzAllowClear nzPlaceHolder="Modelo do carro">
+                            <nz-option *ngFor="let option of modelsList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Tipo de veículo</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                            [compareWith]="compareFn"
+                            formControlName="type" nzAllowClear nzPlaceHolder="Tipo de veículo">
+                            <nz-option *ngFor="let option of typesList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Placa</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="licensePlate" 
+                        placeholder="AAA1A11"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Quantidade de passageiros</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="passengersAmount" 
+                        placeholder="Quantidade de passageiros do carro"
+                        mask="0*"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Patrimônio</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="patrimony"
+                        placeholder="R$ 0000000.00"
+                        mask="0*.00"
+                        prefix="R$ "/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="12">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Chassi</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="chassi"
+                        placeholder="9BWDA05X61TO50136"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="12">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Renavam</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="renavam"
+                        mask="00000000000"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>KMs rodados</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="drivenQuilometers"
+                        placeholder="12000 Km"
+                        mask="0* SS"
+                        sufix="Km"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Data de produção</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="manufacturingDate"
+                         [nzPlacement]="'topRight'" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Data de aquisição</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="purchaseDate"
+                         [nzPlacement]="'topRight'" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row>
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Número do processo de aquisição</nz-form-label>
+                <nz-form-control>
+                    <input nz-input 
+                    formControlName="acquisitionProcessNumber"
+                    placeholder="ex: 23107.011364/2024-27"
+                    mask="00000.000000/0000-00"/>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-row>
+        <label nz-checkbox formControlName="rented_vehicle" (ngModelChange)="checkButton()">
+            Veículo alugado
+        </label>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="12">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Motorista escohido</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                            (ngModelChange)="changeDriver($event)" 
+                            [compareWith]="compareFn"
+                            formControlName="fixedDriver" nzAllowClear nzPlaceHolder="Motorista fixo">
+                            <nz-option *ngFor="let option of driversList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-form-item id="new-item" [nzGutter]="[12, 6]">
+            <nz-col nzSpan="24">
+                <button nz-button nzType="primary" type="button" (click)="addField()">Novo item</button>
+            </nz-col>
+            <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}" [nzLg]="{span: 8}" formArrayName="fuels" *ngFor="let item of fuels.controls; let i = index">
+                <div [formGroupName]="i">
+                    <nz-form-control nz-col nzSpan="24">
+                        <nz-form-label nz-col>Combustível</nz-form-label>
+                        <nz-select formControlName="name" nzAllowClear nzPlaceHolder="Choose" (ngModelChange)="selectFuel()">
+                            <nz-option *ngFor="let fuel of fuelsList" [nzLabel]="fuel.name" [nzValue]="fuel" [nzHide]="selectedFuels.includes(fuel)"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                    <nz-col nzSpan="24">
+                        <button nz-button type="button" [nzType]="'dashed'" (click)="removeFuel(i)">Remover</button>
+                    </nz-col>
+                </div>
+            </nz-col>
+        </nz-form-item>
+    </ng-container>
+</app-form-component>

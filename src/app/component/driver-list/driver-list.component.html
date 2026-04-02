@@ -1,0 +1,48 @@
+<app-filters-and-search 
+    [tabTitle]="'Lista de Motoristas'" 
+    (eventSearch)="getDriverSearch($event)"
+></app-filters-and-search>
+
+<nz-row *ngIf="this.addButton">
+    <nz-col [nzLg]="{ span: 6, offset: 18 }" [nzMd]="{ span: 9, offset: 15 }" [nzSm]="{ span: 12, offset: 12 }" [nzXs]="{ span: 24, offset: 0 }">
+        <button routerLink="/driver/form" nz-button class="add-button">Adicionar novo motorista</button>
+    </nz-col>
+</nz-row>
+<nz-row>
+    <nz-col  [nzLg]="{ span: 11, offset: 1 }" [nzMd]="{ span: 24, offset: 0 }" [nzSm]="{ span: 24, offset: 0 }" [nzXs]="{ span: 24, offset: 0 }" *ngFor="let driver of driverList" class="card-driver" (click)="goToItem(driver)">
+        <nz-row  class="main-card-driver" >
+            <nz-col class="main-card-driver-image"  nzSpan="10">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="perfil-icon bi bi-person-fill" viewBox="0 0 16 16">
+                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
+                </svg>
+            </nz-col>
+            <nz-col class="main-card-driver-list-info"  nzSpan="14">
+                <nz-list>
+                    <nz-list-item>
+                        <span id="main-card-driver-list-info-span" nz-icon nzType="mail" nzTheme="outline"></span>
+                        <span id="main-card-driver-list-info-span-text">{{ driver.email }}</span>
+                    </nz-list-item>
+                    <nz-list-item>
+                        <span id="main-card-driver-list-info-span" nz-icon nzType="phone" nzTheme="outline"></span>
+                        <span id="main-card-driver-list-info-span-text">{{ driver.phones.length ? driver.phones[0].phone : '' }}</span>
+                    </nz-list-item>
+                    <nz-list-item>
+                        <span id="main-card-driver-list-info-span" nz-icon nzType="audit" nzTheme="outline"></span>
+                        <span id="main-card-driver-list-info-span-text">{{ driver.licenseCategory }}</span>
+                    </nz-list-item>
+                </nz-list>
+                
+            </nz-col>
+        </nz-row>
+        <nz-row class="footer-card-driver" >
+            <div id="footer-card-driver-name" nz-col nzSpan="10">
+                <h5 nz-typography>{{ driver.name }}</h5>
+            </div>
+            <div id="footer-card-driver-status" nz-col nzSpan="14">
+                <nz-tag [nzColor]="getColor(driver.status)"><span>{{ driver.status }}</span></nz-tag>
+            </div>
+        </nz-row>
+    </nz-col>
+</nz-row>
+
+

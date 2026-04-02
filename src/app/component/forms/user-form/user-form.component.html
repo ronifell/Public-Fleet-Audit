@@ -1,0 +1,90 @@
+<app-form-component
+        [formTitle]="user.id ? 'Edição de Usuario' : 'Formulario de Usuario'"
+        [validateForm]="validateForm"
+        (validForm)="validInput($event)"
+>
+    <div nz-row formData [formGroup]="validateForm">
+        <nz-form-item style="width: 100%;">
+            <nz-form-label nz-col [nzSpan]="24">
+                <span id="label">Permissões: </span>
+                <nz-tag nzSize="large" [nzMode]="isAdmin ? 'closeable' : 'default'" (nzOnClose)="onClosePermission(permission)" *ngFor="let permission of user_groups">{{permission.name}}</nz-tag>
+            </nz-form-label>
+              <nz-select
+                style="width: 100%;"
+                formControlName="groups"
+                nzMode="multiple"
+                nzPlaceHolder="Adicionar novas permissões"
+                nzSize="large"
+                >
+                <nz-option *ngFor="let group of groups" [nzLabel]="group.name" [nzValue]="group"></nz-option>
+              </nz-select>
+            </nz-form-item>
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Nome completo</nz-form-label>
+            <nz-form-control>
+                <input nz-input 
+                    formControlName="fullName"
+                    nzSize="large"  
+                    placeholder="Preencha com o nome completo do usuario"/>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Nome de Usuario</nz-form-label>
+            <nz-form-control>
+                <input nz-input 
+                    formControlName="userName"
+                    nzSize="large"  
+                    placeholder="Preencha com o nome de usuario"/>
+            </nz-form-control>
+        </nz-form-item>
+        <a *ngIf="this.user.id" nz-button nzType="primary" (click)="edit_password = !edit_password" nz-col nzSpan="24">{{edit_password === false ? 'Altera senha de usuario' : 'Cancelar alteração'}}</a>
+        <div *ngIf="edit_password === true" style="width: 100%;">
+            <label for="oldpassword">Senha antiga</label>
+            <input nzSize="large" nz-input type="text" placeholder="senha antiga" name="oldpassword" required [nzStatus]="oldpassword_input_validate" #oldpassword>
+        </div>
+        <nz-form-item *ngIf="edit_password === true || !this.user.id" nz-col nzSpan="24">
+
+            <nz-form-item>
+                <nz-form-label nzSpan="24">Senha</nz-form-label>
+                <nz-form-control nzErrorTip="Por favor, insira sua senha!">
+                    <nz-input-group [nzSuffix]="suffixTemplate">
+                        <input formControlName="password" [type]="passwordVisible ? 'text' : 'password'" nz-input
+                            placeholder="Sua senha" (ngModelChange)="updateConfirmValidator()" />
+                    </nz-input-group>
+                    <ng-template #suffixTemplate>
+                        <span nz-icon [nzType]="passwordVisible ? 'eye-invisible' : 'eye'"
+                            (click)="passwordVisible = !passwordVisible"></span>
+                    </ng-template>
+                </nz-form-control>
+            </nz-form-item>
+
+            <nz-form-item>
+                <nz-form-label nzSpan="24">Confirmar Senha</nz-form-label>
+                <nz-form-control [nzErrorTip]="errorTpl">
+                    <nz-input-group [nzSuffix]="confirmSuffixTemplate">
+                        <input formControlName="confirm" [type]="confirmPasswordVisible ? 'text' : 'password'" nz-input
+                            placeholder="Confirme sua senha" />
+                    </nz-input-group>
+                    <ng-template #confirmSuffixTemplate>
+                        <span nz-icon [nzType]="confirmPasswordVisible ? 'eye-invisible' : 'eye'"
+                            (click)="confirmPasswordVisible = !confirmPasswordVisible"></span>
+                    </ng-template>
+                    <ng-template #errorTpl let-control>
+                        <ng-container *ngIf="control.hasError('confirm')">As senhas não coincidem!</ng-container>
+                        <ng-container *ngIf="control.hasError('required')">Por favor, confirme sua senha!</ng-container>
+                    </ng-template>
+                </nz-form-control>
+            </nz-form-item>
+
+        </nz-form-item>
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Matricula</nz-form-label>
+            <nz-form-control>
+                <input nz-input 
+                    formControlName="registrationNumber"
+                    nzSize="large"  
+                    placeholder="Preencha com o email do usuario"/>
+            </nz-form-control>
+        </nz-form-item>
+    </div>
+</app-form-component>

@@ -1,0 +1,46 @@
+<app-form-component
+        [formTitle]="'Novo Grupo de permissões'"
+        [validateForm]="validateForm"
+        (validForm)="validInput($event)"
+>
+    <div nz-row formData [formGroup]="validateForm">
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Nome</nz-form-label>
+            <nz-form-control>
+                <input nz-input 
+                    formControlName="name"
+                    nzSize="large"  
+                    placeholder="Preencha com o nome do grupo"/>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Descrição</nz-form-label>
+            <nz-form-control>
+                <textarea nz-input
+                    nzAutosize
+                    formControlName="description"
+                    nzSize="large"
+                    placeholder="Adicione uma descrição">
+                </textarea>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item nz-col nzSpan="24">
+            <nz-form-label nz-col>Lista de permissões</nz-form-label>
+            <nz-row [nzGutter]="[10, 10]">
+                <nz-col nzSpan="6" *ngFor="let permission of permissions; index as i" (click)="addPermission(permission, i)">
+                    <nz-row class="permission_item">
+                        <nz-col nzSpan="22">
+                            <nz-row><span id="name_permission">{{permission.name}}</span></nz-row>
+                            <nz-row><span id="description_permission">{{permission.description}}</span></nz-row>
+                        </nz-col>
+                        <nz-col nzSpan="2">
+                            <label nz-checkbox 
+                            [ngModelOptions]="{standalone: true}"
+                            [ngModel]="checkboxStates.at(i)"></label>
+                        </nz-col>
+                    </nz-row>
+                </nz-col>
+            </nz-row>
+        </nz-form-item>
+    </div>
+</app-form-component>

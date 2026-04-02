@@ -1,0 +1,19 @@
+<app-filters-and-search [tabTitle]="'Combustíveis'" (eventSearch)="getFuelSearch($event)"></app-filters-and-search>
+
+<nz-row class="new-type" nzJustify="end">
+    <button nzSize="large" nzType="primary" nzShape="round" routerLink="/admin/fuel/form" nz-button>Novo combustível</button>
+</nz-row>
+
+<nz-row [nzGutter]="[24, 24]" class="items">
+    <nz-col nzLg="12" nzMd="24" nzSm="24" nzXs="24" *ngFor="let fuel of fuelList">
+        <nz-row class="item-type-content" nzJustify="center" nzAlign="middle">
+            <h3 nz-typography>
+                {{ fuel.name }}
+                <button nz-button nzSize="large" (click)="editItem(fuel)">
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    Editar
+                </button>
+            </h3> 
+        </nz-row>
+    </nz-col>
+</nz-row>

@@ -1,0 +1,171 @@
+<app-form-component
+        [tabTitle]="'Cadastro de motorista'"
+        [formTitle]="isFirstPage ? 'Dados cadastrais' : 'Dados da habilitação'"
+        [validateForm]="validateForm"
+        [showSubmitButton]="!isFirstPage"
+        (validForm)="validInput($event)"
+>
+    <div class="forms-data" formData [formGroup]="validateForm">
+        <div class="driver-data" *ngIf="isFirstPage">
+            <div nz-row>
+                <nz-form-item nz-col nzSpan="24" class="two-col-form">
+                    <nz-form-label nz-col>Nome</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input nz-col nzSize="large" nzSpan="24" formControlName="name" placeholder="Preencha com o nome do motorista"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            <div nz-row nzAlign="middle">
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>Data de Nascimento</nz-form-label>
+                    <nz-form-control>
+                      <nz-date-picker nz-col nzSpan="24" formControlName="birthDate" [nzPlacement]="'bottomRight'" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                      <div *ngIf="validateForm.get('birthDate')?.hasError('underAge')" class="error-message">
+                        O motorista deve ter pelo menos 18 anos.
+                      </div>
+                    </nz-form-control>
+                </nz-form-item>                  
+                <div nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-item nz-col nzSpan="24">
+                        <nz-form-label nz-col>Sexo</nz-form-label>
+                        <nz-form-control>
+                            <nz-radio-group nz-col nzSize="large" formControlName="gender">
+                                <label nz-radio nzValue="M">Masculino</label>
+                                <label nz-radio nzValue="F">Feminino</label>
+                            </nz-radio-group>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+            
+            <div nz-row>
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>CPF</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input formControlName="cpf" placeholder="XXX.XXX.XXX-XX" mask="000.000.000-00"/>
+                    </nz-form-control>
+                </nz-form-item>
+
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>RG</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input formControlName="rg" placeholder="XXXXXXX-X" mask="0000000-0"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+
+            <div nz-row>
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>Nacionalidade</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input formControlName="nationality" placeholder="Brasil" mask="S* S*"/>
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>Naturalidade</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input formControlName="naturality" placeholder="Rio Branco - Acre" [mask]="'S* S* - S*'"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+            
+            <div nz-row>
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>E-mail</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input formControlName="email" placeholder="exemplo@email.com" mask="S*@S*.S*"/>
+                    </nz-form-control>
+                </nz-form-item>
+                <nz-form-item nz-col nzSpan="12" class="two-col-form button-col">
+                    <div formArrayName="phones" *ngFor="let phone of phones.controls; let i = index" class="phone-array">
+                        <div [formGroupName]="i" nz-row nzJustify="center">
+                            <nz-form-label nz-col nzSpan="24" [attr.for]="'phone' + i">Telefone</nz-form-label>
+                            <nz-form-control>
+                                <input nz-input [attr.id]="'phone' + i" formControlName="phone" nzSize="large" placeholder="Preencha com o número de telefone"
+                                class="form-control"
+                                mask="(00) 0 0000-0000"
+                                prefix="+55 "
+                                type="tel"/>
+                            </nz-form-control>
+                            <nz-form-label nz-col nzSpan="24" [attr.for]="'phone' + i">descrição</nz-form-label>
+                            <nz-form-control>
+                                <input nz-input [attr.id]="'phone' + i" formControlName="description" nzSize="large" placeholder="Preencha com a descrição do telefone"/>
+                            </nz-form-control>
+                            <div nz-col nzSpan="24">
+                                <button nz-button [nzType]="'dashed'" type="button" (click)="removePhone(i)" class="remove-button">Remover</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div nz-row nzJustify="center">
+                        <button nz-button [nzType]="'primary'" nzShape="circle" (click)="addField()" type="button">+</button>
+                    </div>
+                </nz-form-item>
+            </div>
+        </div>
+
+        <div class="license-data" formData *ngIf="!isFirstPage">
+            <div nz-row>
+                <nz-form-item nz-col nzSpan="24" class="two-col-form">
+                    <nz-form-label nz-col>Número da CNH</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input nz-col nzSize="large" nzSpan="24" formControlName="licenseNumber" placeholder="Preencha com o numero da Carteira de Motorista do Condutor" mask="0000000000"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </div>
+
+            <div nz-row nzAlign="middle">
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>Data de emissão</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="licenseIssueDate" [nzPlacement]="'bottomRight'" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                        <div *ngIf="validateForm.get('licenseIssueDate')?.hasError('futureDate')" class="error-message">
+                          A data de emissão não pode ser no futuro.
+                        </div>
+                      </nz-form-control>
+                      
+                </nz-form-item>
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>Data de vencimento</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="licenseExpireDate" [nzPlacement]="'bottomRight'" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                        <div *ngIf="validateForm.get('licenseExpireDate')?.hasError('pastDate')" class="error-message">
+                          A data de vencimento não pode ser no passado.
+                        </div>
+                      </nz-form-control>
+                </nz-form-item>
+            </div>
+
+            <div nz-row nzAlign="middle">
+                <nz-form-item nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-label>Doc. de identidade/Órgão emissor/UF</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input formControlName="licenseIssuingBody" placeholder="XXXXXXX-X SEPC AC" mask="0000000-0 S* S*"/>
+                    </nz-form-control>
+                </nz-form-item>
+
+                <div nz-col nzSpan="12" class="two-col-form">
+                    <nz-form-item nz-col>
+                        <nz-form-label>Categoria da CNH</nz-form-label>
+                        <nz-form-control>
+                            <nz-select [nzOptions]="licenseOptions" formControlName="licenseCategory" nzAllowClear nzPlaceHolder="Choose">
+                            </nz-select>
+                        </nz-form-control>
+                    </nz-form-item>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nz-steps definedSteps
+            [nzCurrent]="pageIndex" 
+            (nzIndexChange)="onIndexChange($event)" >
+        <nz-step nzTitle="Dados do motorista"></nz-step>
+        <nz-step nzTitle="Dados da carteira"></nz-step>
+    </nz-steps>
+
+    <div class="two-buttons-hub" buttonsHub>
+        <button nz-button [nzSize]="'large'" *ngIf="!isFirstPage" (click)="onIndexChange(0)">Anterior</button>
+        <button nz-button [nzSize]="'large'" nzType="primary" *ngIf="isFirstPage" (click)="onIndexChange(1)">Próximo</button>
+    </div>
+    
+</app-form-component>

@@ -1,0 +1,81 @@
+.content {
+    background-color: white;
+    width: 100%;
+    min-height: 88vh;
+    height: auto;
+    border-radius: 16px;
+
+    span {
+        font-family: 'Times New Roman';
+    }
+
+    .top-content {
+        padding: 5% 3% 0 3%;
+
+        #infos-user {
+            padding-top: 2%;
+            padding-left: 2%;
+
+            nz-col {
+                margin-bottom: 1%;
+            }
+
+            #detail-info {
+                color: rgb(78, 78, 78);
+            }
+
+            #user-name {
+                font-size: 48px;
+                line-height: auto;
+            }
+            #full-name {
+                font-size: 28px;
+                line-height: 0;
+            }
+            #ativo, #status {
+                border-radius: 16px;
+                width: 100px;
+                height: 35px;
+                text-align: center;
+                text-justify: distribute;
+                padding-top: 7px;
+            }
+        }
+
+        #button-edit {
+            position: absolute;
+        }
+    }
+
+    #tabs-options {
+        width: 100%;
+
+        .body-content {
+            padding: 0 3% 0 3%;
+
+            #detail-info {
+                color: rgb(78, 78, 78);
+            }
+
+            span {
+                font-family: 'Times New Roman';
+                font-size: 18px;
+            }
+
+            #body-text {
+                font-size: 18px;
+            }
+
+            #permissions-list {
+                border-radius: 16px;
+                width: 100px;
+                height: 35px;
+                text-align: center;
+                text-justify: distribute;
+                padding-top: 7px;
+            }
+
+            
+        }
+    }
+}

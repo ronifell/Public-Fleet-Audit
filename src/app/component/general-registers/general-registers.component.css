@@ -1,0 +1,58 @@
+.jorge {
+  overflow-x: scroll;
+  border-radius: 2rem;
+}
+
+/*  As duas de baixo foram um teste de limitação  */
+/* .card-registros{
+    width: 80%;
+    max-width: 1980px;
+} */
+
+/* .limitador {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 1920px;
+} */
+
+.filter-icon {
+  /* float: right; */    
+}
+
+.filter-button {
+  /* display: flex; */
+  align-items: center;
+  padding: 6px;
+  border-radius: 16px;
+  width: 5rem;
+}
+
+.filter-icon {
+  /* margin-right: 6px; */
+}
+
+.filter-text {
+  /* display: none; */
+}
+
+.container {
+  max-width: 100vw;
+  border-radius: 1.5rem;
+}
+
+.uploadsTab {
+  width: 100%;
+  display: flex;
+}
+
+td:nth-child(even){
+  background-color: #f3f5f6;
+}
+
+
+/* Correção extra para garantir que a aba não estoure */
+.ant-tabs-content {
+    max-width: 100vw; /* Ou 100% dependendo do contexto do flex */
+}

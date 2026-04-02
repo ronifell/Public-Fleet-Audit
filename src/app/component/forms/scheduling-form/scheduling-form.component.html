@@ -1,0 +1,149 @@
+
+<app-form-component 
+        [tabTitle]="'Novo agendamento'"
+        [formTitle]="'Processo SEI'" 
+        [validateForm]="validateForm"
+        (validForm)="validInput($event)"
+>
+    <nz-row class="forms-data" formData [formGroup]="validateForm" [nzGutter]="[16, 0]">
+        <nz-col nzSpan="24">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Processo do SEI</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="processNumber" placeholder="ex: 23107.011364/2024-27"
+                    class="form-control"
+                    mask="00000.000000/0000-00"
+                    />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Unidade demandante</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="plaintiffUnit" placeholder="ex: Cursos/centros/pessoas" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Quantidade de passageiros</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="passengersAmount" placeholder="Ex: 12"
+                        [mask]="'0*'" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Data de ida</nz-form-label>
+                <nz-form-control>
+                    <nz-date-picker nz-col nzSpan="24" formControlName="startDate" [nzPlacement]="'bottomRight'" (ngModelChange)="changeStartDate($event)" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Horário de ida</nz-form-label>
+                <nz-form-control>
+                    <input id="hora-cons" type="time" name="hora-cons" value="00:00" formControlName="startTime" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Data de volta</nz-form-label>
+                <nz-form-control>
+                    <nz-date-picker nz-col nzSpan="24" formControlName="endDate" [nzPlacement]="'bottomRight'" (ngModelChange)="changeEndDate($event)" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Horário de volta</nz-form-label>
+                <nz-form-control>
+                    <input id="hora-cons" type="time" name="hora-cons" value="00:00" formControlName="endTime" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Nome do responsável</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="personInChargeName"  placeholder="ex: André Nougueira" [specialCharacters]="[' ']" mask="S* S* S*"/>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Telefone do responsável</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="personInChargePhone" placeholder="ex: 4002-8922"
+                    class="form-control"
+                    mask="(00) 0 0000-0000"
+                    prefix="+55 "
+                    type="tel" />
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Saindo de</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="arrival" placeholder="ex: Rio Branco" mask="S* S*"/>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}">
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Voltando de</nz-form-label>
+                <nz-form-control>
+                    <input nz-input formControlName="departure" placeholder="ex: Feijó" mask="S* S*"/>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-col>
+        <nz-col nzSpan="24">
+            <nz-row [nzGutter]="[12, 6]" nzAlign="middle">
+                <nz-col>
+                    <button nz-button nzType="primary" type="button" (click)="addField()">Novo item</button>
+                </nz-col>
+            </nz-row>
+        </nz-col>
+        <nz-form-item id="new-item" nz-col nzSpan="24">
+            <nz-row [nzGutter]="[12, 6]">
+                <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}" [nzLg]="{span: 8}" formArrayName="travels" *ngFor="let item of travels.controls; let i = index">
+                    <div [formGroupName]="i">
+                        
+                        <nz-form-control nz-col nzSpan="24">
+                            <nz-form-label nz-col [attr.for]="'item' + i">Carro</nz-form-label>
+                            <nz-select formControlName="vehicle" nzAllowClear nzPlaceHolder="Choose" (ngModelChange)="selectVehicles($event, item)">
+                                <nz-option *ngFor="let option of vehiclesOptions" [nzLabel]="option.licensePlate + ' - ' + option.carModel.name" [nzValue]="option"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+
+                        <nz-form-control nz-col nzSpan="24">
+                            <nz-form-label nz-col>Motorista</nz-form-label>
+                            <nz-select formControlName="driver" nzAllowClear nzPlaceHolder="Choose" (ngModelChange)="selectDrivers()">
+                                <nz-option *ngFor="let option of driversOptions" [nzLabel]="option.name" [nzValue]="option" [nzHide]="fixedDrivers.includes(option)"></nz-option>
+                            </nz-select>
+                        </nz-form-control>
+
+                        <nz-form-label nz-col>Quantidade de passageiros</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="passengersAmount" placeholder="ex:12"/>
+                        </nz-form-control>
+
+                        <nz-form-label nz-col>Valor da diária</nz-form-label>
+                        <nz-form-control>
+                            <input nz-input formControlName="diaryValue" placeholder="R$ 0000.00"/>
+                        </nz-form-control>
+                        <div>
+                            <button nz-button type="button" [nzType]="'dashed'" (click)="removeItem(i)">Remover</button>
+                        </div>
+                    </div>
+                </nz-col>
+            </nz-row>
+        </nz-form-item>
+    </nz-row>
+
+</app-form-component>

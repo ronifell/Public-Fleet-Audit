@@ -1,0 +1,22 @@
+<nz-row>
+  <nz-col nzSpan="24">
+    <h4>{{ this.textoAssinatura }}</h4>
+  </nz-col>
+  <nz-col nzSpan="24">
+    <canvas
+      #canvas
+      width="500"
+      height="250"
+      ></canvas>
+    <p class="error-message" *ngIf="signatureNeeded">Assinatura necessária</p>
+  </nz-col>
+  <nz-col nzSpan="24">
+    <div *ngIf="signatureNeeded === false">
+      <p>Enviado</p>
+    </div>
+    <div class="buttons flex justify-between">
+      <button (click)="clearPad()" type="button">Limpar</button>
+      <button (click)="savePad()" type="button">Salvar</button>
+    </div>
+  </nz-col>
+</nz-row>

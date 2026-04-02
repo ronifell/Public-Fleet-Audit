@@ -1,0 +1,49 @@
+<app-just-heading 
+    [tabTitle]="'Lista de Grupos de permissões'" 
+></app-just-heading>
+
+<nz-row nzJustify="end" *ngIf="postGroups">
+  <nz-col nzSpan="8">
+    <button nz-button nzBlock="true" nzType="primary" routerLink="/admin/permissions/form">Adicionar novo grupo de permissões</button>
+  </nz-col>
+</nz-row>
+
+<nz-row nzGutter="16" *ngIf="putGroups">
+  <nz-col nzSpan="12" *ngFor="let group of groups" (click)="goToItem(group)">
+    <nz-row class="group">
+      <nz-row nzGutter="5">
+        <nz-col nzSpan="8">
+          <span id="icon" nz-icon nzType="group" nzTheme="outline"></span>
+        </nz-col>
+        <nz-col nzSpan="16">
+          <span id="description"><b>Descrição:</b><br> {{group.description}}</span>
+        </nz-col>
+      </nz-row>
+      <nz-row>
+        <nz-col id="name_group" nzSpan="8">
+          {{group.name}}
+        </nz-col>
+      </nz-row>
+    </nz-row>
+  </nz-col>
+</nz-row>
+
+<nz-row nzGutter="16" *ngIf="!putGroups && showGroups">
+  <nz-col nzSpan="12" *ngFor="let group of groups">
+    <nz-row class="group">
+      <nz-row nzGutter="5">
+        <nz-col nzSpan="8">
+          <span id="icon" nz-icon nzType="group" nzTheme="outline"></span>
+        </nz-col>
+        <nz-col nzSpan="16">
+          <span id="description"><b>Descrição:</b><br> {{group.description}}</span>
+        </nz-col>
+      </nz-row>
+      <nz-row>
+        <nz-col id="name_group" nzSpan="8">
+          {{group.name}}
+        </nz-col>
+      </nz-row>
+    </nz-row>
+  </nz-col>
+</nz-row>

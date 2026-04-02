@@ -1,0 +1,22 @@
+<app-filters-and-search [tabTitle]="'Modelos de carro'" (eventSearch)="getVehicleModelSearch($event)"></app-filters-and-search>
+
+<nz-row class="new-type" nzJustify="end">
+    <button nzSize="large" nzType="primary" nzShape="round" 
+    (click)="goToForm()" nz-button>
+        Novo Modelo
+    </button>
+</nz-row>
+
+<nz-row [nzGutter]="[24, 24]" class="items">
+    <nz-col nzLg="12" nzXs="24" *ngFor="let model of modelList">
+        <nz-row class="item-type-content" nzJustify="center" nzAlign="middle">
+            <h3 nz-typography>
+                {{ model.name }}
+                <button nz-button nzSize="large" (click)="editItem(model)">
+                    <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    Editar
+                </button>
+            </h3> 
+        </nz-row>
+    </nz-col>
+</nz-row>

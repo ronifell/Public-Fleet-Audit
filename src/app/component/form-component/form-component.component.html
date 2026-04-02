@@ -1,0 +1,35 @@
+<div class="display-form">
+
+    <ng-content *ngIf="loginButton" select="[loginButton]"></ng-content>
+
+    <div class="form-tab" *ngIf="tabTitle">
+        <p>{{ tabTitle }}</p>
+    </div>
+
+    <form nz-form [ngClass]="!tabTitle ? 'no-tab-table' : ''" (ngSubmit)="submitForm()">
+        <div class="title">
+            <p>{{ formTitle }}</p>
+        </div>
+
+        <ng-content select="[formData]"></ng-content>
+    </form>
+
+    <ng-content select="[definedSteps]"></ng-content>
+
+    <div class="buttons">
+        <span>
+            <ng-content select="[buttonsHub]"></ng-content>
+        </span>
+        <div nz-row buttonsHub class="right-btn" *ngIf="showSubmitButton">
+            <nz-form-control nzSpan="12" class="submit-btn">
+                <button nz-button [nzSize]="'large'" 
+                    type="button"
+                    (click)="submitForm()"
+                    nzType="primary" 
+                    class="concluir"
+                >Concluir</button>
+            </nz-form-control>
+        </div>
+    </div>
+
+</div>

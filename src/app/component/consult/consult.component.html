@@ -1,0 +1,59 @@
+<app-filters-and-search 
+    [tabTitle]="'Consultar Disponibilidade'" 
+    (eventSearch)="getVehicleSearch($event)"
+> </app-filters-and-search>
+
+<nz-card [nzBordered]="false" class="mb-3" style="background: #f9f9f9;">
+    <nz-row [nzGutter]="16" nzAlign="bottom">
+        
+        <nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <label class="d-block mb-1">Data Início</label>
+            <nz-date-picker [(ngModel)]="startDate" nzFormat="dd/MM/yyyy" nzPlaceHolder="Selecione o início" style="width: 100%;"></nz-date-picker>
+        </nz-col>
+
+        <nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <label class="d-block mb-1">Data Fim</label>
+            <nz-date-picker [(ngModel)]="endDate" nzFormat="dd/MM/yyyy" nzPlaceHolder="Selecione o fim" style="width: 100%;"></nz-date-picker>
+        </nz-col>
+
+        <nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <button nz-button nzType="primary" nzBlock (click)="consultarDisponibilidade()" [nzLoading]="isLoading">
+                <span nz-icon nzType="search"></span> Verificar Disponibilidade
+            </button>
+        </nz-col>
+    </nz-row>
+</nz-card>
+<nz-row [nzGutter]="[16, 16]"> 
+    <nz-col [nzSpan]="24" *ngFor="let item of vehicleList" (click)="goToItem(item)">
+        <nz-card [nzHoverable]="true" class="vehicle-card">
+            <nz-row nzAlign="middle">
+                
+                <nz-col [nzXs]="4" [nzSm]="3" [nzMd]="2" class="text-center">
+                    <span nz-icon nzType="car" nzTheme="outline" style="font-size: 32px; color: #1890ff;"></span>
+                </nz-col>
+
+                <nz-col [nzXs]="20" [nzSm]="12" [nzMd]="10">
+                    <h4 class="mb-0" style="font-weight: bold;">{{ item.carModel.name }}</h4>
+                    <span class="text-muted">{{ item.type.name }}</span>
+                </nz-col>
+
+                <nz-col [nzXs]="24" [nzSm]="9" [nzMd]="12" class="info-secondary">
+                    <nz-tag [nzColor]="'blue'">{{ item.licensePlate }}</nz-tag>
+                    <span nz-typography nzType="secondary" class="ml-2">
+                        <i nz-icon nzType="team"></i> {{ item.passengersAmount }} Lugares
+                    </span>
+                    
+                    <nz-badge [nzStatus]="item.status === eStatus.AVAILABLE ? 'success' : 'processing'"
+                        [nzText]="traduzirStatus(item.status)" class="ml-3"> 
+                    </nz-badge>
+                </nz-col>
+
+            </nz-row>
+        </nz-card>
+    </nz-col>
+</nz-row>
+
+<nz-empty 
+    *ngIf="vehicleList.length === 0 && !isLoading && consultaRealizada" 
+    nzNotFoundContent="Nenhum veículo disponível neste período.">
+</nz-empty>

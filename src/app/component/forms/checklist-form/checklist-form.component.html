@@ -1,0 +1,273 @@
+<app-form-component 
+        [tabTitle]="'Checklist de Viagem do veículo'"
+        [formTitle]="isFirstPage ? 'Dados da viagem' : 'Verificação de partes'" 
+        [validateForm]="[travelForm, checklistForm]"
+        (validForm)="validInput($event)"
+        >
+
+    <div class="forms-data" formData>
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Legendas para uso abaixo:   INF: Informação    C: Conforme     NC: Não Conforme    NA: Não se Aplica    NP: Não Preenchido</nz-form-label>
+            </nz-form-item>
+
+        <nz-row [formGroup]="travelForm" [nzGutter]="[12, 8]" class="travel-bg">
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Combustível</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select formControlName="fuel" nzAllowClear>
+                        <nz-option *ngFor="let fuel of fuelsList" [nzLabel]="fuel.name" [nzValue]="fuel"></nz-option>
+                    </nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">KMs de Saída</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <input nz-input formControlName="departureQuilometers"/>
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">KMs de Chegada</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <input nz-input formControlName="arrivalQuilometers"/>
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">KMs dirigidos</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <input nz-input formControlName="drivenQuilometers"/>
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Quantidade gasta de combustível</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <input nz-input formControlName="usedFuelAmount"/>
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Registro</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <input nz-input formControlName="registry"/>
+                </nz-form-control>
+            </nz-col>
+        </nz-row>
+            
+        <nz-row [formGroup]="checklistForm" [nzGutter]="[8, 16]">
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Buzina</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="buzina" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Vidros/para-brisa</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="vidros" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Cinto de segurança</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="cinto" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Macaco</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="macaco" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Quebra Sol</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="quebraSol" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Triângulo</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="triangulo" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Retrovisor interno</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="retrovisorInterno" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Retrovisores Laterais</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="retrovisoresLaterais" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Chave De Roda</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="chaveDeRoda" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Extensor/ ret. Estepe</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="extensor" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Indicadores do Painel</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="indicadoresPainel" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Luz da Placa</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="luzPlaca" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Para-brisa diant. / traz.</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="paraBrisas" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Óleo do Motor</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="oleoMotor" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Óleo do Freio</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="oleoFreio" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Luz do Freio</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="luzFreio" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Luz da Ré</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="luzRe" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Nível da Água</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="nivelAgua" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Alarme</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="alarme" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Pneus</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="pneus" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Travas</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="travas" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Faróis</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="farois" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Extintor</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="extintor" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Lanternas diant. (seta)</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="lanternasDianteiras" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Lanternas tras. (seta)</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="lanternasTraseiras" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Bancos / assentos</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="bancos" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Estepe</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="estepe" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Alerta (advertência)</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="alerta" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Documento do veículo</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="documentoVeiculo" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Cartão de Abastecimento Com Condutor</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="cartaoAbastecimentoComCondutor" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Habilitação do condutor</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="habilitacaoCondutor" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Vencimento da carteira de habilitação</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="vencimentoCarteira" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzXs="24" nzSm="12" nzMd="8" nzLg="6" nzXl="4">
+                <nz-form-label [nzLabelWrap]="true" nzSpan="24">Categoria da carteira de habilitação</nz-form-label>
+                <nz-form-control nzSpan="24">
+                    <nz-select [nzOptions]="schedulingValues" formControlName="categoriaCarteira" nzAllowClear></nz-select>  
+                </nz-form-control>
+            </nz-col>
+
+            <nz-col nzSpan="24">
+                <app-signature-pad 
+                    [textoAssinatura]="'Assinatura do Responsável'"
+                    [imageText]="validateImageText(this.assinaturaResponsavel)"
+                    (signatureFilled)="getAssinaturaResponsavel($event)" 
+                >
+                </app-signature-pad>
+            </nz-col>
+            <nz-col nzSpan="24">
+                <app-signature-pad 
+                    [textoAssinatura]="'Assinatura do Motorista'"
+                    [imageText]="validateImageText(this.assinaturaMotorista)"
+                    (signatureFilled)="getAssinaturaMotorista($event)" 
+                >
+                </app-signature-pad>
+            </nz-col>
+        </nz-row>
+    </div>
+
+</app-form-component> 

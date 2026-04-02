@@ -1,0 +1,105 @@
+<app-form-component
+        [formTitle]=" 'GERAR RELATÓRIO'"
+        [validateForm]="validateForm"
+        (validForm)="submit($event)"
+>
+    <div class="forms-data" formData [formGroup]="validateForm">
+        <nz-row [nzGutter]="[24, 12]">
+            <nz-col nzSpan="12">
+                <nz-form-label>Veículo</nz-form-label>
+                <nz-form-control>
+                    <nz-select 
+                    [nzOptions]="vehicleOptions"
+                    [(ngModel)]="selectedVehicle"
+                    [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="onChange(true)"
+                    nzAllowClear
+                    nzPlaceHolder="Veículo">
+                    </nz-select>
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzSpan="12">
+                <nz-form-label>Tipo de Veículo</nz-form-label>
+                <nz-form-control>
+                    <nz-select 
+                    [nzOptions]="vehicleTypeOptions"
+                    [(ngModel)]="selectedVehicleType"
+                    [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="onChange(false)"
+                    nzAllowClear
+                    nzPlaceHolder="Tipo de veículo">
+                    </nz-select>
+                </nz-form-control>
+            </nz-col>
+            <nz-col nzSpan="12">
+                <nz-form-label nz-col>Data de início</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="startDate"></nz-date-picker>
+                    </nz-form-control>
+            </nz-col>
+            <nz-col nzSpan="12">
+                <nz-form-label nz-col>Data final</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="endDate"></nz-date-picker>
+                    </nz-form-control>
+            </nz-col>
+        </nz-row>
+    </div>
+</app-form-component>
+
+<!-- ── Relatórios Governamentais AP04 ─────────────────────────────────── -->
+<nz-card nzTitle="RELATÓRIOS GOVERNAMENTAIS — AUDITORIA AP04" style="margin-top: 24px;">
+    <p style="color: #666; margin-bottom: 16px;">
+        Selecione o mês de referência e gere o relatório desejado.
+    </p>
+
+    <nz-row [nzGutter]="[24, 16]" nzAlign="middle">
+        <nz-col nzSpan="8">
+            <nz-form-label>Mês de Referência</nz-form-label>
+            <nz-date-picker
+                nzMode="month"
+                nzFormat="MM/yyyy"
+                [(ngModel)]="selectedMesGlosa"
+                [ngModelOptions]="{standalone: true}"
+                nzPlaceHolder="Selecione o mês"
+                style="width: 100%">
+            </nz-date-picker>
+        </nz-col>
+    </nz-row>
+
+    <nz-row [nzGutter]="[16, 16]" style="margin-top: 20px;">
+        <nz-col nzSpan="8">
+            <button nz-button nzType="primary" nzSize="large"
+                    [disabled]="!selectedMesGlosa"
+                    (click)="gerarSead()"
+                    style="width: 100%; background-color: #003366;">
+                Relatório SEAD (Liquidação)
+            </button>
+            <p style="font-size: 11px; color: #888; margin-top: 6px; text-align: center;">
+                Valor Bruto / Glosado / Líquido por abastecimento
+            </p>
+        </nz-col>
+        <nz-col nzSpan="8">
+            <button nz-button nzType="primary" nzSize="large"
+                    [disabled]="!selectedMesGlosa"
+                    (click)="gerarCge()"
+                    style="width: 100%; background-color: #6B0000;">
+                Relatório CGE (Compliance)
+            </button>
+            <p style="font-size: 11px; color: #888; margin-top: 6px; text-align: center;">
+                Transações GLOSADAS/ALERTA com evidências e hashes
+            </p>
+        </nz-col>
+        <nz-col nzSpan="8">
+            <button nz-button nzType="primary" nzSize="large"
+                    [disabled]="!selectedMesGlosa"
+                    (click)="gerarTce()"
+                    style="width: 100%; background-color: #004400;">
+                Relatório TCE (ROI)
+            </button>
+            <p style="font-size: 11px; color: #888; margin-top: 6px; text-align: center;">
+                Consolidado mensal + Certificado de Integridade SHA-256
+            </p>
+        </nz-col>
+    </nz-row>
+</nz-card>
