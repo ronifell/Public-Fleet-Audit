@@ -1,237 +1,354 @@
-<div class="m1-wrapper" [class.dark]="darkMode">
-  <header class="m1-hero">
-    <div class="m1-hero-main">
-      <p class="m1-eyebrow">SIG-Frota</p>
-      <h2 class="m1-title">Painel de auditoria</h2>
-      <p class="m1-subtitle">Governança, auditoria geográfica e integridade de dados em uma demonstração unificada.</p>
+<div
+  class="m1-wrapper"
+  [class.dark]="darkMode"
+  [class.m1-assets-theme]="isAssetsModuleView"
+  [class.m1-has-ticker]="!loading && activeView !== 'hub'"
+>
+  <!-- Governance Center: hub -->
+  <ng-container *ngIf="activeView === 'hub' && !loading">
+    <header class="m1-hub-header">
+      <div class="m1-logo-showcase">
+        <div class="m1-logo-showcase__energy" aria-hidden="true"></div>
+        <div class="m1-logo-showcase__mesh" aria-hidden="true"></div>
+        <div class="m1-logo-showcase__panel">
+          <div class="m1-logo-showcase__scan" aria-hidden="true"></div>
+          <img
+            class="m1-inovathec-logo"
+            [src]="logoSrc"
+            width="176"
+            height="50"
+            alt="Inovathec Soluções Ltda"
+            decoding="sync"
+            fetchpriority="high"
+          />
+        </div>
+      </div>
+      <p class="m1-hub-tagline">Centro de governança — identidade visual por módulo (combustível / ativos).</p>
+    </header>
+
+    <nav class="m1-hub-grid" aria-label="Módulos SIG-Frota">
+      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('governance')">
+        <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
+        <span class="m1-hub-tile-title">Painel de governança</span>
+      </button>
+      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-map')">
+        <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
+        <span class="m1-hub-tile-title">Auditoria geográfica</span>
+      </button>
+      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-integrity')">
+        <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
+        <span class="m1-hub-tile-title">Integridade e relatórios</span>
+      </button>
+      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-map')">
+        <span class="m1-hub-tile-kicker">Siga Frota — Ativos</span>
+        <span class="m1-hub-tile-title">Gestão de ativos</span>
+      </button>
+      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
+        <span class="m1-hub-tile-kicker">Siga Frota — Ativos</span>
+        <span class="m1-hub-tile-title">Relatório de ativos</span>
+      </button>
+    </nav>
+
+    <div class="m1-hub-footer-tools">
+      <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
+        {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
+      </button>
     </div>
-    <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
-      {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
-    </button>
-  </header>
+  </ng-container>
+
+  <!-- Module screens -->
+  <ng-container *ngIf="activeView !== 'hub' && !loading">
+    <header class="m1-hero">
+      <div class="m1-hero-main">
+        <div class="m1-brand-strip">
+          <div class="m1-logo-showcase m1-logo-showcase--compact">
+            <div class="m1-logo-showcase__energy" aria-hidden="true"></div>
+            <div class="m1-logo-showcase__mesh" aria-hidden="true"></div>
+            <div class="m1-logo-showcase__panel">
+              <div class="m1-logo-showcase__scan" aria-hidden="true"></div>
+              <img
+                class="m1-inovathec-logo m1-inovathec-logo--compact"
+                [src]="logoSrc"
+                width="124"
+                height="35"
+                alt="Inovathec Soluções Ltda"
+                decoding="sync"
+              />
+            </div>
+          </div>
+        </div>
+        <p class="m1-eyebrow">{{ isFuelModuleView ? 'Siga Frota — Combustível' : 'Siga Frota — Ativos' }}</p>
+        <h2 class="m1-title">{{ moduleTitleLine }}</h2>
+        <p class="m1-subtitle">{{ moduleSubtitle }}</p>
+      </div>
+      <div class="m1-hero-actions">
+        <button nz-button nzType="default" class="milestone-back-btn" (click)="goToHub()">Centro de governança</button>
+        <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
+          {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
+        </button>
+      </div>
+    </header>
+
+    <ng-container *ngIf="demoData">
+      <section *ngIf="activeView === 'governance'" class="grid cards m1-dashboard">
+        <nz-card class="m1-stat-card m1-stat-fleet">
+          <h4 class="m1-stat-label">Frota total</h4>
+          <div class="m1-stat-value">{{ totalFleet | number }}</div>
+        </nz-card>
+        <nz-card class="m1-stat-card m1-stat-liters">
+          <h4 class="m1-stat-label">Total de litros auditados</h4>
+          <div class="m1-stat-value">{{ displayLiters | number: '1.0-2' }} <span class="m1-stat-unit">L</span></div>
+        </nz-card>
+        <nz-card class="m1-stat-card m1-stat-savings">
+          <h4 class="m1-stat-label">Economia total</h4>
+          <div class="m1-stat-value"><span class="m1-currency">R$</span> {{ displaySavings | number: '1.2-2' }}</div>
+        </nz-card>
+
+        <nz-card class="span-2 m1-roi-card">
+          <h4 class="m1-card-title">Gráfico de ROI</h4>
+          <div class="roi-bars">
+            <div class="bar-row">
+              <span>Gasto bruto</span>
+              <div class="bar"><div class="bar-fill bar-fill--blue" [style.width.%]="roiGrossBarPercent"></div></div>
+              <strong>R$ {{ grossSpending | number: '1.2-2' }}</strong>
+            </div>
+            <div class="bar-row">
+              <span>Gasto real</span>
+              <div class="bar"><div class="bar-fill bar-fill--green bar-fill--actual" [style.width.%]="roiActualBarPercent"></div></div>
+              <strong>R$ {{ actualSpending | number: '1.2-2' }}</strong>
+            </div>
+          </div>
+          <p class="highlight m1-roi-highlight">Economia: {{ savingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span></p>
+        </nz-card>
+
+        <nz-card class="m1-irregularities-card">
+          <h4 class="m1-card-title">Principais irregularidades <span class="m1-badge">5 principais</span></h4>
+          <div *ngFor="let item of topIrregularities" class="irregularity-row">
+            <span>{{ item.name }}</span>
+            <div class="irr-bar-wrap" aria-hidden="true">
+              <div class="irr-bar-fill" [style.width.%]="irregularityBarPercent(item)"></div>
+            </div>
+            <strong>{{ item.value }}</strong>
+          </div>
+        </nz-card>
+      </section>
+
+      <section *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'" class="map-layout">
+        <nz-card class="map-card m1-map-card">
+          <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Mapa de ativos e equipamentos' : 'Mapa de detecção de fraudes' }}</h4>
+          <div class="map-wrap">
+            <div
+              class="map-tooltip-corner"
+              *ngIf="selectedMapRecord"
+              role="status"
+              [attr.aria-label]="getMapTooltipText(selectedMapRecord)"
+            >
+              {{ getMapTooltipText(selectedMapRecord) }}
+            </div>
+            <div id="milestone-map"></div>
+          </div>
+          <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
+        </nz-card>
+        <nz-card class="side-card m1-side-panel" *ngIf="selectedMapRecord">
+          <h4 class="m1-card-title">Painel lateral de auditoria</h4>
+          <p><strong>Placa:</strong> {{ selectedMapRecord.placa }}</p>
+          <p><strong>Motorista:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
+          <p><strong>Litros:</strong> {{ selectedMapRecord.volumeLitros }}</p>
+          <p><strong>Distância:</strong> {{ getMapDistanceMeters(selectedMapRecord) | number: '1.0-0' }} m</p>
+          <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
+            {{
+              isAutomaticDeduction(selectedMapRecord)
+                ? 'Dedução automática (>500 m)'
+                : 'Sem dedução automática (≤500 m)'
+            }}
+          </p>
+
+          <div class="record-list">
+            <button nz-button nzBlock nzSize="small" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">
+              {{ r.transacaoId }} - {{ r.placa }}
+            </button>
+          </div>
+        </nz-card>
+      </section>
+
+      <section *ngIf="activeView === 'fuel-integrity'" class="integrity-layout">
+        <nz-card class="m1-integrity-card">
+          <h4 class="m1-card-title m1-integrity-heading">Integridade e relatórios</h4>
+          <div class="filters m1-filters">
+            <div class="filter-field">
+              <span class="filter-label">Data</span>
+              <input
+                nz-input
+                class="filter-control"
+                type="date"
+                [(ngModel)]="dateFilter"
+                (ngModelChange)="onIntegrityFilterInteraction()"
+              />
+            </div>
+            <div class="filter-field">
+              <span class="filter-label">Departamento</span>
+              <select nz-input class="filter-control" [(ngModel)]="departmentFilter" (ngModelChange)="onIntegrityFilterInteraction()">
+                <option value="all">Todos</option>
+                <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button nz-button nzType="primary" (click)="exportMockPdf()">Exportar PDF (simulação)</button>
+            </div>
+          </div>
+
+          <div *ngIf="integrityFilterLoading" class="integrity-skeleton-list" aria-busy="true" aria-label="Consulta de segurança em andamento">
+            <div class="integrity-skeleton-card" *ngFor="let _ of [1, 2, 3]">
+              <div class="sk sk-line sk-line--lg"></div>
+              <div class="sk sk-line"></div>
+              <div class="sk sk-line sk-line--sm"></div>
+            </div>
+          </div>
+
+          <ng-container *ngIf="!integrityFilterLoading">
+            <div
+              *ngIf="integrityMobileLayout"
+              class="integrity-mobile-list integrity-scan-region"
+              [class.m1-scanner-paused]="integrityScannerReset"
+              [attr.data-scan]="integrityScanGeneration"
+              role="list"
+              aria-label="Registros de integridade"
+            >
+              <div *ngFor="let row of filteredIntegrityRows; let i = index" class="integrity-mobile-card integrity-card-scan" role="listitem">
+                <div class="integrity-beam" aria-hidden="true" [style.animation-delay.ms]="i * 100"></div>
+                <div class="integrity-mobile-card-head">
+                  <span class="integrity-mobile-plate">{{ row.plate }}</span>
+                  <span [class.verified]="row.verified" class="integrity-mobile-status">
+                    {{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}
+                  </span>
+                </div>
+                <dl class="integrity-mobile-dl">
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Data</dt>
+                    <dd>{{ row.date }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Departamento</dt>
+                    <dd>{{ row.department }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Litros</dt>
+                    <dd>{{ row.liters }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Valor</dt>
+                    <dd>R$ {{ row.amount | number: '1.2-2' }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row integrity-mobile-dl-hash">
+                    <dt>SHA-256</dt>
+                    <dd>
+                      <code class="integrity-mobile-hash hash-glow">{{ row.calculatedHash }}</code>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+              <p *ngIf="!filteredIntegrityRows.length" class="integrity-mobile-empty">Nenhum registro corresponde aos filtros.</p>
+            </div>
+
+            <div
+              *ngIf="!integrityMobileLayout"
+              class="integrity-table-wrap integrity-scan-region"
+              [class.m1-scanner-paused]="integrityScannerReset"
+              [attr.data-scan]="integrityScanGeneration"
+              role="region"
+              aria-label="Tabela de dados de integridade"
+            >
+              <div class="integrity-table-beam" aria-hidden="true"></div>
+              <nz-table [nzData]="filteredIntegrityRows" [nzPageSize]="5" [nzScroll]="{ x: '960px' }">
+                <thead>
+                  <tr>
+                    <th nzWidth="112px">Data</th>
+                    <th nzWidth="120px">Departamento</th>
+                    <th nzWidth="100px">Placa</th>
+                    <th nzWidth="72px">Litros</th>
+                    <th nzWidth="108px">Valor</th>
+                    <th nzWidth="220px">SHA-256</th>
+                    <th nzWidth="148px">Situação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of filteredIntegrityRows" class="integrity-row-scan">
+                    <td class="cell-nowrap">{{ row.date }}</td>
+                    <td>{{ row.department }}</td>
+                    <td class="cell-nowrap">{{ row.plate }}</td>
+                    <td class="cell-nowrap">{{ row.liters }}</td>
+                    <td class="cell-nowrap">R$ {{ row.amount | number: '1.2-2' }}</td>
+                    <td class="hash hash-cell-glow">{{ row.calculatedHash }}</td>
+                    <td>
+                      <span [class.verified]="row.verified">{{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </nz-table>
+            </div>
+          </ng-container>
+        </nz-card>
+      </section>
+
+      <section *ngIf="activeView === 'assets-report'" class="m1-assets-report">
+        <nz-card class="m1-assets-report-card">
+          <h4 class="m1-card-title">Relatório de inventário físico</h4>
+          <p class="m1-assets-report-lead">
+            Consolidação de equipamentos rastreados por GPS e validação documental (simulação para apresentação SIG-Frota).
+          </p>
+          <div class="m1-assets-kpi">
+            <div class="m1-assets-kpi-item">
+              <span class="m1-assets-kpi-label">Equipamentos monitorados</span>
+              <span class="m1-assets-kpi-val">{{ demoData.resultados_motor_glosa.length }}</span>
+            </div>
+            <div class="m1-assets-kpi-item">
+              <span class="m1-assets-kpi-label">Transações com hash</span>
+              <span class="m1-assets-kpi-val">{{ demoData.abastecimentos.length }}</span>
+            </div>
+          </div>
+        </nz-card>
+      </section>
+    </ng-container>
+  </ng-container>
 
   <div *ngIf="loading" class="loading">
     <app-loader></app-loader>
     <p class="loading-text">Carregando demonstração…</p>
   </div>
 
-  <ng-container *ngIf="!loading && demoData">
-    <nav class="m1-tabs" aria-label="Seções da demonstração">
-      <div class="m1-tabs-track">
-        <button
-          nz-button
-          class="m1-tab-btn"
-          [nzType]="activeTab === 'dashboard' ? 'primary' : 'default'"
-          (click)="setTab('dashboard')"
-        >
-          Painel de governança
-        </button>
-        <button
-          nz-button
-          class="m1-tab-btn"
-          [nzType]="activeTab === 'mapa' ? 'primary' : 'default'"
-          (click)="setTab('mapa')"
-        >
-          Auditoria geográfica
-        </button>
-        <button
-          nz-button
-          class="m1-tab-btn"
-          [nzType]="activeTab === 'integridade' ? 'primary' : 'default'"
-          (click)="setTab('integridade')"
-        >
-          Integridade e relatórios
-        </button>
-      </div>
-    </nav>
+  <footer *ngIf="!loading && activeView !== 'hub'" class="m1-audit-ticker" role="status" aria-live="polite">
+    <div class="m1-audit-ticker-track">
+      <span class="m1-audit-ticker-text">{{ auditTickerText }}</span>
+      <span class="m1-audit-ticker-text" aria-hidden="true">{{ auditTickerText }}</span>
+    </div>
+  </footer>
 
-    <section *ngIf="activeTab === 'dashboard'" class="grid cards m1-dashboard">
-      <nz-card class="m1-stat-card m1-stat-fleet">
-        <h4 class="m1-stat-label">Frota total</h4>
-        <div class="m1-stat-value">{{ totalFleet | number }}</div>
-      </nz-card>
-      <nz-card class="m1-stat-card m1-stat-liters">
-        <h4 class="m1-stat-label">Total de litros auditados</h4>
-        <div class="m1-stat-value">{{ totalLiters | number: '1.0-2' }} <span class="m1-stat-unit">L</span></div>
-      </nz-card>
-      <nz-card class="m1-stat-card m1-stat-savings">
-        <h4 class="m1-stat-label">Economia total</h4>
-        <div class="m1-stat-value"><span class="m1-currency">R$</span> {{ totalSavings | number: '1.2-2' }}</div>
-      </nz-card>
-
-      <nz-card class="span-2 m1-roi-card">
-        <h4 class="m1-card-title">Gráfico de ROI</h4>
-        <div class="roi-bars">
-          <div class="bar-row">
-            <span>Gasto bruto</span>
-            <div class="bar"><div [style.width.%]="100"></div></div>
-            <strong>R$ {{ grossSpending | number: '1.2-2' }}</strong>
-          </div>
-          <div class="bar-row">
-            <span>Gasto real</span>
-            <div class="bar"><div class="actual" [style.width.%]="(actualSpending / grossSpending) * 100"></div></div>
-            <strong>R$ {{ actualSpending | number: '1.2-2' }}</strong>
-          </div>
-        </div>
-        <p class="highlight m1-roi-highlight">Economia: {{ savingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span></p>
-      </nz-card>
-
-      <nz-card class="m1-irregularities-card">
-        <h4 class="m1-card-title">Principais irregularidades <span class="m1-badge">5 principais</span></h4>
-        <div *ngFor="let item of topIrregularities" class="irregularity-row">
-          <span>{{ item.name }}</span>
-          <strong>{{ item.value }}</strong>
-        </div>
-      </nz-card>
-    </section>
-
-    <section *ngIf="activeTab === 'mapa'" class="map-layout">
-      <nz-card class="map-card m1-map-card">
-        <h4 class="m1-card-title">Mapa de detecção de fraudes</h4>
-        <div class="map-wrap">
-          <div
-            class="map-tooltip-corner"
-            *ngIf="selectedMapRecord"
-            role="status"
-            [attr.aria-label]="getMapTooltipText(selectedMapRecord)"
-          >
-            {{ getMapTooltipText(selectedMapRecord) }}
-          </div>
-          <div id="milestone-map"></div>
-        </div>
-        <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
-      </nz-card>
-      <nz-card class="side-card m1-side-panel" *ngIf="selectedMapRecord">
-        <h4 class="m1-card-title">Painel lateral de auditoria</h4>
-        <p><strong>Placa:</strong> {{ selectedMapRecord.placa }}</p>
-        <p><strong>Motorista:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
-        <p><strong>Litros:</strong> {{ selectedMapRecord.volumeLitros }}</p>
-        <p><strong>Distância:</strong> {{ getMapDistanceMeters(selectedMapRecord) | number: '1.0-0' }} m</p>
-        <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
-          {{
-            isAutomaticDeduction(selectedMapRecord)
-              ? 'Dedução automática (>500 m)'
-              : 'Sem dedução automática (≤500 m)'
-          }}
-        </p>
-
-        <div class="record-list">
-          <button nz-button nzBlock nzSize="small" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">
-            {{ r.transacaoId }} - {{ r.placa }}
-          </button>
-        </div>
-      </nz-card>
-    </section>
-
-    <section *ngIf="activeTab === 'integridade'" class="integrity-layout">
-      <nz-card class="m1-integrity-card">
-        <h4 class="m1-card-title m1-integrity-heading">Integridade e relatórios</h4>
-        <div class="filters m1-filters">
-          <div class="filter-field">
-            <span class="filter-label">Data</span>
-            <input nz-input class="filter-control" type="date" [(ngModel)]="dateFilter" />
-          </div>
-          <div class="filter-field">
-            <span class="filter-label">Departamento</span>
-            <select nz-input class="filter-control" [(ngModel)]="departmentFilter">
-              <option value="all">Todos</option>
-              <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
-            </select>
-          </div>
-          <div class="filter-actions">
-            <button nz-button nzType="primary" (click)="exportMockPdf()">Exportar PDF (simulação)</button>
-          </div>
-        </div>
-
-        <div
-          *ngIf="integrityMobileLayout"
-          class="integrity-mobile-list"
-          role="list"
-          aria-label="Registros de integridade"
-        >
-          <div *ngFor="let row of filteredIntegrityRows" class="integrity-mobile-card" role="listitem">
-            <div class="integrity-mobile-card-head">
-              <span class="integrity-mobile-plate">{{ row.plate }}</span>
-              <span [class.verified]="row.verified" class="integrity-mobile-status">
-                {{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}
-              </span>
-            </div>
-            <dl class="integrity-mobile-dl">
-              <div class="integrity-mobile-dl-row">
-                <dt>Data</dt>
-                <dd>{{ row.date }}</dd>
-              </div>
-              <div class="integrity-mobile-dl-row">
-                <dt>Departamento</dt>
-                <dd>{{ row.department }}</dd>
-              </div>
-              <div class="integrity-mobile-dl-row">
-                <dt>Litros</dt>
-                <dd>{{ row.liters }}</dd>
-              </div>
-              <div class="integrity-mobile-dl-row">
-                <dt>Valor</dt>
-                <dd>R$ {{ row.amount | number: '1.2-2' }}</dd>
-              </div>
-              <div class="integrity-mobile-dl-row integrity-mobile-dl-hash">
-                <dt>SHA-256</dt>
-                <dd>
-                  <code class="integrity-mobile-hash">{{ row.calculatedHash }}</code>
-                </dd>
-              </div>
-            </dl>
-          </div>
-          <p *ngIf="!filteredIntegrityRows.length" class="integrity-mobile-empty">Nenhum registro corresponde aos filtros.</p>
-        </div>
-
-        <div *ngIf="!integrityMobileLayout" class="integrity-table-wrap" role="region" aria-label="Tabela de dados de integridade">
-          <nz-table [nzData]="filteredIntegrityRows" [nzPageSize]="5" [nzScroll]="{ x: '960px' }">
-            <thead>
-              <tr>
-                <th nzWidth="112px">Data</th>
-                <th nzWidth="120px">Departamento</th>
-                <th nzWidth="100px">Placa</th>
-                <th nzWidth="72px">Litros</th>
-                <th nzWidth="108px">Valor</th>
-                <th nzWidth="220px">SHA-256</th>
-                <th nzWidth="148px">Situação</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let row of filteredIntegrityRows">
-                <td class="cell-nowrap">{{ row.date }}</td>
-                <td>{{ row.department }}</td>
-                <td class="cell-nowrap">{{ row.plate }}</td>
-                <td class="cell-nowrap">{{ row.liters }}</td>
-                <td class="cell-nowrap">R$ {{ row.amount | number: '1.2-2' }}</td>
-                <td class="hash">{{ row.calculatedHash }}</td>
-                <td>
-                  <span [class.verified]="row.verified">{{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}</span>
-                </td>
-              </tr>
-            </tbody>
-          </nz-table>
-        </div>
-      </nz-card>
-    </section>
-
-    <nz-modal
-      [nzVisible]="pinDetailModalVisible"
-      nzTitle="Ativo / equipamento"
-      [nzFooter]="null"
-      nzCentered
-      (nzOnCancel)="closePinDetailModal()"
-    >
-      <ng-container *nzModalContent>
-        <div class="pin-detail-modal-content" *ngIf="pinDetailRecord">
+  <nz-modal
+    [nzVisible]="pinDetailModalVisible"
+    nzTitle="Ativo / equipamento"
+    [nzFooter]="null"
+    nzCentered
+    (nzOnCancel)="closePinDetailModal()"
+  >
+    <ng-container *nzModalContent>
+      <div class="pin-detail-modal-content" *ngIf="pinDetailRecord">
+        <div class="pin-photo-scan-wrap" [class.m1-scanner-paused]="modalPhotoScanReset" [attr.data-scan]="modalScannerKey">
           <div class="pin-detail-photo-placeholder">Foto do ativo (marcador de posição)</div>
-          <p class="pin-detail-gps">Localização validada por GPS</p>
-          <div class="pin-detail-hash">
-            <strong>SHA-256</strong>
-            <code>{{ pinDetailRecord.integrityHash || '—' }}</code>
-          </div>
+          <div class="pin-photo-scanner" aria-hidden="true"></div>
         </div>
-      </ng-container>
-    </nz-modal>
-  </ng-container>
+        <p class="pin-detail-gps">Localização validada por GPS — verificação de imagem e SHA-256</p>
+        <div class="pin-conservation">
+          <span class="pin-conservation-label">Conservação</span>
+          <div class="pin-conservation-bar">
+            <div class="pin-conservation-fill" [style.width.%]="modalConservationDisplay"></div>
+          </div>
+          <span class="pin-conservation-pct">{{ modalConservationDisplay | number: '1.0-0' }}%</span>
+        </div>
+        <div class="pin-detail-hash">
+          <strong>SHA-256</strong>
+          <code>{{ pinDetailRecord.integrityHash || '—' }}</code>
+        </div>
+      </div>
+    </ng-container>
+  </nz-modal>
 </div>
