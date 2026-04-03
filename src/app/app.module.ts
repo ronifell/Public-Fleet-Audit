@@ -95,6 +95,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzTimePickerModule } from 'ng-zorro-antd/time-picker';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { Milestone1DemoComponent } from './component/milestone1-demo/milestone1-demo.component';
+import { M1OdometerComponent } from './component/milestone1-demo/m1-odometer/m1-odometer.component';
 
 registerLocaleData(pt);
 @NgModule({
@@ -143,7 +144,8 @@ registerLocaleData(pt);
     Schedule2FormComponent,
     ErrorComponent,
     ConsultComponent,
-    Milestone1DemoComponent
+    Milestone1DemoComponent,
+    M1OdometerComponent
   ],
   imports: [
     BrowserModule,

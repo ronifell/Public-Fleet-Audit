@@ -101,9 +101,9 @@
           <h4 class="m1-stat-label">Total de litros auditados</h4>
           <div class="m1-stat-value">{{ displayLiters | number: '1.0-2' }} <span class="m1-stat-unit">L</span></div>
         </nz-card>
-        <nz-card class="m1-stat-card m1-stat-savings">
+        <nz-card class="m1-stat-card m1-stat-savings m1-stat-savings--hero">
           <h4 class="m1-stat-label">Economia total</h4>
-          <div class="m1-stat-value"><span class="m1-currency">R$</span> {{ displaySavings | number: '1.2-2' }}</div>
+          <div class="m1-stat-value m1-stat-value--pulse"><span class="m1-currency">R$</span> {{ displaySavings | number: '1.2-2' }}</div>
         </nz-card>
 
         <nz-card class="span-2 m1-roi-card">
@@ -119,6 +119,16 @@
               <div class="bar"><div class="bar-fill bar-fill--gasto-real" [style.width.%]="roiActualBarPercent"></div></div>
               <strong>R$ {{ actualSpending | number: '1.2-2' }}</strong>
             </div>
+          </div>
+          <div class="m1-sparkline-block" *ngIf="dashboardChartsAnimated" aria-hidden="true">
+            <span class="m1-sparkline-label">Índice de consumo (tendência)</span>
+            <svg class="m1-sparkline" viewBox="0 0 280 48" preserveAspectRatio="none">
+              <path
+                class="m1-sparkline-path"
+                pathLength="100"
+                d="M0,38 C45,36 70,8 112,20 S188,4 280,14"
+              />
+            </svg>
           </div>
           <p class="highlight m1-roi-highlight">Economia: {{ savingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span></p>
         </nz-card>
@@ -152,11 +162,8 @@
           <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
         </nz-card>
         <nz-card class="side-card m1-side-panel" *ngIf="selectedMapRecord">
-          <h4 class="m1-card-title">
-            {{ activeView === 'assets-map' ? 'Painel de registro e conservação' : 'Painel lateral de auditoria' }}
-          </h4>
-
           <ng-container *ngIf="activeView === 'fuel-map'">
+            <h4 class="m1-card-title">Painel lateral de auditoria</h4>
             <p><strong>Placa:</strong> {{ selectedMapRecord.placa }}</p>
             <p><strong>Motorista:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
             <p><strong>Litros:</strong> {{ selectedMapRecord.volumeLitros }}</p>
@@ -170,7 +177,8 @@
             </p>
           </ng-container>
 
-          <ng-container *ngIf="activeView === 'assets-map'">
+          <div *ngIf="activeView === 'assets-map'" class="m1-patrimony-validation-block">
+            <h4 class="m1-card-title">Painel de registro e conservação</h4>
             <p><strong>Nº de registro / tombamento:</strong> {{ selectedMapRecord.placa }}</p>
             <p><strong>Responsável / curador:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
             <p><strong>Estado de conservação:</strong> {{ patrimonyConservationPercent(selectedMapRecord) }}</p>
@@ -181,7 +189,7 @@
             <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
               {{ patrimonyLocationStatusMessage(selectedMapRecord) }}
             </p>
-          </ng-container>
+          </div>
 
           <div class="record-list">
             <button nz-button nzBlock nzSize="small" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">
@@ -194,8 +202,10 @@
 
       <section *ngIf="activeView === 'fuel-integrity'" class="integrity-layout">
         <nz-card class="m1-integrity-card">
-          <h4 class="m1-card-title m1-integrity-heading">Conformidade de Dados e Anti-Fraude</h4>
-          <div class="filters m1-filters">
+          <div class="integrity-process-zone">
+            <div *ngIf="integrityLaserSweep" class="integrity-process-laser" aria-hidden="true"></div>
+            <h4 class="m1-card-title m1-integrity-heading">Conformidade de Dados e Anti-Fraude</h4>
+            <div class="filters m1-filters">
             <div class="filter-field">
               <span class="filter-label">Data</span>
               <input
@@ -216,9 +226,14 @@
             <div class="filter-actions">
               <button nz-button nzType="primary" (click)="exportMockPdf()">Exportar PDF (simulação)</button>
             </div>
-          </div>
+            </div>
 
-          <div *ngIf="integrityFilterLoading" class="integrity-skeleton-list" aria-busy="true" aria-label="Consulta de segurança em andamento">
+          <div
+            *ngIf="integrityFilterLoading"
+            class="integrity-skeleton-list integrity-skeleton-scan"
+            aria-busy="true"
+            aria-label="Consulta de segurança em andamento"
+          >
             <div class="integrity-skeleton-card" *ngFor="let _ of [1, 2, 3]">
               <div class="sk sk-line sk-line--lg"></div>
               <div class="sk sk-line"></div>
@@ -308,6 +323,7 @@
               </nz-table>
             </div>
           </ng-container>
+          </div>
         </nz-card>
       </section>
 
@@ -320,11 +336,28 @@
           <div class="m1-assets-kpi">
             <div class="m1-assets-kpi-item">
               <span class="m1-assets-kpi-label">Bens catalogados</span>
-              <span class="m1-assets-kpi-val">{{ demoData.resultados_motor_glosa.length }}</span>
+              <app-m1-odometer
+                class="m1-assets-kpi-val"
+                [value]="assetsReportCatalogedTotal"
+                [rollKey]="assetsKpiOdometerRollKey"
+                [minDigits]="2"
+                [durationMs]="4000"
+                [staggerMs]="130"
+              ></app-m1-odometer>
             </div>
-            <div class="m1-assets-kpi-item">
-              <span class="m1-assets-kpi-label">Registros auditados (Blockchain)</span>
-              <span class="m1-assets-kpi-val">{{ demoData.abastecimentos.length }}</span>
+            <div class="m1-assets-kpi-item m1-assets-kpi-item--action">
+              <button type="button" class="m1-assets-kpi-scroll-btn" (click)="scrollToSha256Footer()">
+                <span class="m1-assets-kpi-label">Registros auditados (Blockchain)</span>
+                <app-m1-odometer
+                  class="m1-assets-kpi-val"
+                  [value]="assetsReportAuditTotal"
+                  [rollKey]="assetsKpiOdometerRollKey"
+                  [minDigits]="2"
+                  [durationMs]="4000"
+                  [staggerMs]="130"
+                ></app-m1-odometer>
+                <span class="m1-assets-kpi-hint">Ver trilha SHA-256 no rodapé</span>
+              </button>
             </div>
           </div>
         </nz-card>
@@ -332,12 +365,28 @@
     </ng-container>
   </ng-container>
 
-  <div *ngIf="loading" class="loading">
-    <app-loader></app-loader>
+  <div *ngIf="loading" class="loading m1-loading-skeleton-screen" aria-busy="true" aria-label="Carregando demonstração">
+    <div class="m1-load-sk m1-load-sk-logo"></div>
+    <div class="m1-load-sk m1-load-sk-title"></div>
+    <div class="m1-load-sk m1-load-sk-sub"></div>
+    <div class="m1-load-sk-grid">
+      <div class="m1-load-sk-card" *ngFor="let _ of [1, 2, 3, 4, 5, 6]">
+        <div class="m1-load-sk-line m1-load-sk-line--lg"></div>
+        <div class="m1-load-sk-line"></div>
+        <div class="m1-load-sk-line m1-load-sk-line--sm"></div>
+      </div>
+    </div>
     <p class="loading-text">Carregando demonstração…</p>
   </div>
 
-  <footer *ngIf="!loading && activeView !== 'hub'" class="m1-audit-ticker" role="status" aria-live="polite">
+  <footer
+    *ngIf="!loading && activeView !== 'hub'"
+    id="m1-sha256-footer-anchor"
+    class="m1-audit-ticker"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="m1-footer-integrity-strip">SHA-256 · trilha de auditoria e integridade documental</div>
     <div class="m1-audit-ticker-track">
       <span class="m1-audit-ticker-text">{{ auditTickerText }}</span>
       <span class="m1-audit-ticker-text" aria-hidden="true">{{ auditTickerText }}</span>
@@ -352,7 +401,11 @@
     (nzOnCancel)="closePinDetailModal()"
   >
     <ng-container *nzModalContent>
-      <div class="pin-detail-modal-content" *ngIf="pinDetailRecord">
+      <div
+        class="pin-detail-modal-content"
+        *ngIf="pinDetailRecord"
+        [class.pin-detail-modal-content--patrimony-flash]="activeView === 'assets-map' && modalPatrimonyValidationFlash"
+      >
         <div class="pin-photo-scan-wrap" [class.m1-scanner-paused]="modalPhotoScanReset" [attr.data-scan]="modalScannerKey">
           <div class="pin-detail-photo-placeholder">Foto do ativo (marcador de posição)</div>
           <div class="pin-photo-scanner" aria-hidden="true"></div>

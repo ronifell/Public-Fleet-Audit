@@ -121,6 +121,17 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   /** Matches SCSS `@media (max-width: 640px)` — stacked cards instead of the fixed-width table. */
   integrityMobileLayout = false;
 
+  /** Relatório de patrimônio — hodômetro com rolos (app-m1-odometer) */
+  assetsReportCatalogedTotal = 0;
+  assetsReportAuditTotal = 0;
+  assetsKpiOdometerRollKey = 0;
+
+  /** Aura na modal de ficha (patrimônio) ao abrir — ~2s */
+  modalPatrimonyValidationFlash = false;
+
+  /** Cobertura laser sobre filtros + tabela (auditoria em conformidade) */
+  integrityLaserSweep = false;
+
   private integrityFilterDebounce?: ReturnType<typeof setTimeout>;
 
   /** Root-absolute path; file is PNG (ChatGPT export was mislabeled as .svg). */
@@ -143,6 +154,12 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         this.viewportRecords = data.resultados_motor_glosa;
         this.integrityRows = await this.buildIntegrityRows(data);
         this.loading = false;
+        if (this.activeView === 'assets-report') {
+          setTimeout(() => {
+            this.triggerAssetsKpiOdometerRoll();
+            this.cdr.markForCheck();
+          }, 0);
+        }
         setTimeout(() => this.ensureMapInitialized(), 0);
       },
       error: () => {
@@ -275,6 +292,14 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (view === 'fuel-integrity') {
       this.triggerIntegrityScan();
     }
+
+    if (view === 'assets-report' && this.demoData) {
+      setTimeout(() => {
+        this.triggerAssetsKpiOdometerRoll();
+        this.cdr.markForCheck();
+      }, 0);
+    }
+
   }
 
   onIntegrityFilterInteraction(): void {
@@ -292,11 +317,16 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   private triggerIntegrityScan(): void {
     this.integrityScanGeneration++;
     this.integrityScannerReset = true;
+    this.integrityLaserSweep = true;
     this.cdr.markForCheck();
     setTimeout(() => {
       this.integrityScannerReset = false;
       this.cdr.markForCheck();
     }, 40);
+    setTimeout(() => {
+      this.integrityLaserSweep = false;
+      this.cdr.markForCheck();
+    }, 3600);
   }
 
   private queueKpiAnimation(): void {
@@ -324,6 +354,21 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       }
     };
     this.kpiAnimationFrame = requestAnimationFrame(tick);
+  }
+
+  private triggerAssetsKpiOdometerRoll(): void {
+    if (!this.demoData) {
+      return;
+    }
+    this.assetsReportCatalogedTotal = this.demoData.resultados_motor_glosa.length;
+    this.assetsReportAuditTotal = this.demoData.abastecimentos.length;
+    this.assetsKpiOdometerRollKey++;
+    this.cdr.markForCheck();
+  }
+
+  scrollToSha256Footer(): void {
+    const el = this.document.getElementById('m1-sha256-footer-anchor');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }
 
   get totalLiters(): number {
@@ -487,6 +532,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     this.pinDetailRecord = record;
     this.modalConservationTarget = 65 + (record.id * 17) % 35;
     this.modalConservationDisplay = 0;
+    this.modalPatrimonyValidationFlash = false;
     this.modalScannerKey++;
     this.modalPhotoScanReset = true;
     this.pinDetailModalVisible = true;
@@ -498,6 +544,16 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       this.cdr.markForCheck();
     }, 40);
     setTimeout(() => this.animateConservationBar(), 120);
+    if (this.activeView === 'assets-map') {
+      requestAnimationFrame(() => {
+        this.modalPatrimonyValidationFlash = true;
+        this.cdr.markForCheck();
+        setTimeout(() => {
+          this.modalPatrimonyValidationFlash = false;
+          this.cdr.markForCheck();
+        }, 2000);
+      });
+    }
   }
 
   private animateConservationBar(): void {
@@ -521,6 +577,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   closePinDetailModal(): void {
     this.pinDetailModalVisible = false;
+    this.modalPatrimonyValidationFlash = false;
   }
 
   exportMockPdf(): void {

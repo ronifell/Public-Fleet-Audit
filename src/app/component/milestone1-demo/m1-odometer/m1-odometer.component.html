@@ -1,0 +1,13 @@
+<span class="m1-odo" role="img" [attr.aria-label]="ariaLabel">
+  <span *ngFor="let _ of offsets; let i = index" class="m1-odo-col">
+    <span
+      class="m1-odo-reel"
+      [class.m1-odo-reel--instant]="!transitionOn"
+      [style.transform]="transformForCol(i)"
+      [style.transition-duration.ms]="durationMs"
+      [style.transition-delay.ms]="staggerDelay(i)"
+    >
+      <span *ngFor="let d of digits0to9" class="m1-odo-cell">{{ d }}</span>
+    </span>
+  </span>
+</span>

@@ -15,18 +15,52 @@
   --m1-accent-amber: #d97706;
   --m1-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 14px 44px -12px rgba(15, 23, 42, 0.14);
   --m1-shadow-hover: 0 8px 32px -8px rgba(15, 23, 42, 0.18);
+  --m1-page-bg-light: #f1f5f9;
+  --m1-page-bg-dark: #0b1220;
+
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
 
   padding: clamp(1rem, 3vw, 1.75rem);
   max-width: 1400px;
   margin: 0 auto;
-  background: #f1f5f9;
-  background-image:
-    radial-gradient(ellipse 100% 90% at 100% -15%, rgba(15, 118, 110, 0.1) 0%, transparent 52%),
-    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(37, 99, 235, 0.07) 0%, transparent 48%);
+  /* background-color + opacity das camadas interpolam; shorthand background entre gradientes diferentes “salta” no escuro */
+  background-color: var(--m1-page-bg-light);
+  transition:
+    background-color 0.55s ease,
+    color 0.55s ease;
   color: #0f172a;
   min-height: 100vh;
   min-width: 0;
   box-sizing: border-box;
+}
+
+.m1-wrapper::before,
+.m1-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.55s ease;
+}
+
+/* Camada clara (combustível / hub) */
+.m1-wrapper::before {
+  opacity: 1;
+  background-image:
+    radial-gradient(ellipse 100% 90% at 100% -15%, rgba(15, 118, 110, 0.1) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(37, 99, 235, 0.07) 0%, transparent 48%);
+}
+
+/* Camada escura — revelada com fade (transição simétrica claro ↔ escuro) */
+.m1-wrapper::after {
+  opacity: 0;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.22) 0%, transparent 42%),
+    radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.1) 0%, transparent 38%),
+    radial-gradient(circle at 15% 20%, #1f2937 0%, #111827 45%, #0b1220 100%);
 }
 
 .m1-wrapper.m1-has-ticker {
@@ -38,11 +72,16 @@
   --m1-border: rgba(148, 163, 184, 0.18);
   --m1-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
   --m1-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.4);
-  background:
-    radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.22) 0%, transparent 42%),
-    radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.1) 0%, transparent 38%),
-    radial-gradient(circle at 15% 20%, #1f2937 0%, #111827 45%, #0b1220 100%);
+  background-color: var(--m1-page-bg-dark);
   color: #e5e7eb;
+}
+
+.m1-wrapper.dark::before {
+  opacity: 0;
+}
+
+.m1-wrapper.dark::after {
+  opacity: 1;
 }
 
 .m1-wrapper.dark,
@@ -228,41 +267,66 @@
   color: #fff !important;
 }
 
-/* Theme toggle — light */
+/* Theme toggle — mesmo “chrome” moderno que o botão Centro de governança */
 :host ::ng-deep .m1-theme-toggle.ant-btn {
-  border-radius: 999px !important;
-  height: 40px;
-  padding: 0 1.25rem;
-  font-weight: 600;
-  font-size: 0.8125rem;
-  border: 1px solid var(--m1-border) !important;
-  background: rgba(255, 255, 255, 0.92) !important;
-  color: #334155 !important;
-  box-shadow: var(--m1-shadow);
+  height: 40px !important;
+  padding: 0 1.2rem !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  font-size: 0.8125rem !important;
+  letter-spacing: 0.04em !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #0f172a !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 6px 20px -4px rgba(15, 23, 42, 0.08) !important;
   align-self: center;
+  transition:
+    transform 0.2s ease,
+    background 0.45s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease !important;
 }
 
 :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
 :host ::ng-deep .m1-theme-toggle.ant-btn:focus {
-  border-color: rgba(15, 118, 110, 0.35) !important;
-  color: #0f766e !important;
+  border-color: rgba(15, 118, 110, 0.4) !important;
+  color: #0d9488 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 4px 14px -2px rgba(15, 118, 110, 0.18) !important;
+  transform: translateY(-1px);
 }
 
-/* Dark mode: theme toggle */
 .m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn,
 .m1-wrapper.dark ::ng-deep .m1-theme-toggle.ant-btn {
-  background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%) !important;
-  border-color: #334155 !important;
-  color: #e2e8f0 !important;
-  box-shadow: 0 4px 14px rgba(2, 6, 23, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  background: rgba(30, 41, 59, 0.55) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #f1f5f9 !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 4px 24px -6px rgba(0, 0, 0, 0.45) !important;
 }
 
 .m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
-.m1-wrapper.dark ::ng-deep .m1-theme-toggle.ant-btn:focus,
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:focus,
 .m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
 .m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:focus {
-  border-color: #64748b !important;
+  border-color: rgba(94, 234, 212, 0.45) !important;
   color: #f8fafc !important;
+  background: rgba(51, 65, 85, 0.65) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 6px 28px -4px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-1px);
 }
 
 /* Dark mode: TXN list (Geographic Audit side panel) */
@@ -358,6 +422,43 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
 
 .m1-wrapper.dark .m1-stat-value {
   color: #f8fafc;
+}
+
+.m1-stat-value--pulse {
+  display: inline-block;
+  animation: m1-savings-attention 2.75s ease-in-out infinite;
+}
+
+@keyframes m1-savings-attention {
+  0%,
+  100% {
+    text-shadow: none;
+    filter: brightness(1);
+  }
+  45% {
+    text-shadow:
+      0 0 12px rgba(16, 185, 129, 0.55),
+      0 0 26px rgba(45, 212, 191, 0.3);
+    filter: brightness(1.07);
+  }
+}
+
+.m1-wrapper.dark .m1-stat-value--pulse {
+  animation-name: m1-savings-attention-dark;
+}
+
+@keyframes m1-savings-attention-dark {
+  0%,
+  100% {
+    text-shadow: none;
+    filter: brightness(1);
+  }
+  48% {
+    text-shadow:
+      0 0 14px rgba(250, 204, 21, 0.5),
+      0 0 28px rgba(45, 212, 191, 0.28);
+    filter: brightness(1.09);
+  }
 }
 
 .m1-stat-unit,
@@ -480,6 +581,57 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   color: #5eead4;
 }
 
+.m1-sparkline-block {
+  margin: 0.85rem 0 0.25rem;
+}
+
+.m1-sparkline-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--m1-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.m1-sparkline {
+  display: block;
+  width: 100%;
+  height: 44px;
+}
+
+.m1-sparkline-path {
+  fill: none;
+  stroke: #0ea5e9;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  /* ~1,55s de desenho + pausa; ciclo repete (salto 100%→0% reinicia o traço) */
+  animation: m1-sparkline-draw 6s infinite;
+  animation-delay: 0.2s;
+}
+
+.m1-wrapper.dark .m1-sparkline-path {
+  stroke: #38bdf8;
+}
+
+@keyframes m1-sparkline-draw {
+  0% {
+    stroke-dashoffset: 100;
+    animation-timing-function: cubic-bezier(0.22, 1.15, 0.36, 1);
+  }
+  26% {
+    stroke-dashoffset: 0;
+    animation-timing-function: linear;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
 .irregularity-row {
   display: flex;
   justify-content: space-between;
@@ -574,6 +726,78 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   color: #94a3b8;
 }
 
+.m1-patrimony-validation-block {
+  margin: -0.35rem -0.25rem 0.75rem;
+  padding: 0.5rem 0.65rem 0.35rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  /* ~2s de pulso + ~6s de pausa, em ciclo contínuo */
+  animation: m1-patrimony-validation-aura 8s ease-in-out infinite;
+}
+
+.m1-wrapper.dark .m1-patrimony-validation-block {
+  animation-name: m1-patrimony-validation-aura-dark;
+}
+
+@keyframes m1-patrimony-validation-aura {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border-color: transparent;
+    background-color: transparent;
+  }
+  /* Primeiros 25% do ciclo = antigo 0–100% (2s num ciclo de 8s) */
+  4.5% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.65),
+      0 0 28px rgba(34, 211, 238, 0.45),
+      inset 0 0 20px rgba(56, 189, 248, 0.08);
+    border-color: rgba(45, 212, 191, 0.5);
+    background-color: rgba(240, 253, 250, 0.35);
+  }
+  13.75% {
+    box-shadow:
+      0 0 0 1px rgba(59, 130, 246, 0.35),
+      0 0 18px rgba(34, 211, 238, 0.25);
+    border-color: rgba(59, 130, 246, 0.25);
+    background-color: rgba(239, 246, 255, 0.2);
+  }
+  25%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
+@keyframes m1-patrimony-validation-aura-dark {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border-color: transparent;
+    background-color: transparent;
+  }
+  4.5% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.55),
+      0 0 32px rgba(34, 211, 238, 0.35),
+      inset 0 0 24px rgba(15, 118, 110, 0.15);
+    border-color: rgba(94, 234, 212, 0.45);
+    background-color: rgba(15, 23, 42, 0.55);
+  }
+  13.75% {
+    box-shadow:
+      0 0 0 1px rgba(96, 165, 250, 0.4),
+      0 0 20px rgba(56, 189, 248, 0.2);
+    border-color: rgba(96, 165, 250, 0.3);
+    background-color: rgba(30, 41, 59, 0.4);
+  }
+  25%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
 .m1-integrity-card ::ng-deep .ant-card-body {
   padding: 1.35rem 1.5rem;
 }
@@ -638,6 +862,71 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.pin-detail-modal-content--patrimony-flash {
+  margin: -0.35rem;
+  padding: 0.35rem;
+  border-radius: 12px;
+  animation: m1-modal-patrimony-aura 2s ease-out forwards;
+}
+
+@keyframes m1-modal-patrimony-aura {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border: 1px solid transparent;
+    background-color: transparent;
+  }
+  20% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.55),
+      0 0 26px rgba(34, 211, 238, 0.4);
+    border-color: rgba(45, 212, 191, 0.45);
+    background-color: rgba(240, 253, 250, 0.25);
+  }
+  55% {
+    box-shadow:
+      0 0 0 1px rgba(59, 130, 246, 0.35),
+      0 0 16px rgba(34, 211, 238, 0.22);
+    border-color: rgba(59, 130, 246, 0.22);
+    background-color: rgba(239, 246, 255, 0.12);
+  }
+  100% {
+    box-shadow: none;
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
+.m1-wrapper.dark .pin-detail-modal-content--patrimony-flash {
+  animation-name: m1-modal-patrimony-aura-dark;
+}
+
+@keyframes m1-modal-patrimony-aura-dark {
+  0% {
+    box-shadow: none;
+    border-color: transparent;
+    background-color: transparent;
+  }
+  20% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.45),
+      0 0 28px rgba(34, 211, 238, 0.3);
+    border-color: rgba(94, 234, 212, 0.4);
+    background-color: rgba(15, 23, 42, 0.45);
+  }
+  55% {
+    box-shadow:
+      0 0 0 1px rgba(96, 165, 250, 0.35),
+      0 0 18px rgba(56, 189, 248, 0.18);
+    border-color: rgba(96, 165, 250, 0.25);
+    background-color: rgba(30, 41, 59, 0.35);
+  }
+  100% {
+    box-shadow: none;
+    border-color: transparent;
+    background-color: transparent;
+  }
 }
 
 .pin-detail-photo-placeholder {
@@ -774,6 +1063,42 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.integrity-process-zone {
+  position: relative;
+}
+
+.integrity-process-laser {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0) 40%,
+    rgba(56, 189, 248, 0.72) 50%,
+    rgba(34, 211, 238, 0) 60%,
+    transparent 100%
+  );
+  background-size: 100% 260%;
+  animation: m1-process-laser-sweep 3.35s cubic-bezier(0.3, 0.55, 0.2, 1) forwards;
+}
+
+@keyframes m1-process-laser-sweep {
+  0% {
+    background-position: 0 -130%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 230%;
+    opacity: 0;
+  }
 }
 
 .integrity-table-wrap {
@@ -1090,6 +1415,45 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
 
   .m1-subtitle {
     font-size: 0.875rem;
+  }
+
+  /* Hero: em coluna; botões ocupam toda a largura (evita bloco à esquerda com vazio à direita) */
+  .m1-hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .m1-hero-main {
+    flex: none;
+    width: 100%;
+  }
+
+  .m1-hero-actions {
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+    align-self: stretch;
+  }
+
+  .m1-hero-actions :host ::ng-deep .ant-btn,
+  .m1-hero-actions ::ng-deep .ant-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+    height: auto !important;
+    min-height: 40px;
+  }
+
+  .m1-hero-actions :host ::ng-deep .m1-theme-toggle.ant-btn {
+    height: auto !important;
+    min-height: 40px;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
   }
 
   .m1-tabs-track {
@@ -1471,7 +1835,7 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
 .m1-hero-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.65rem;
   align-items: center;
 }
 
@@ -1486,10 +1850,15 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   .m1-logo-showcase__energy {
     transform: none;
   }
+
+  :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+  :host ::ng-deep .m1-theme-toggle.ant-btn:focus {
+    transform: none;
+  }
 }
 
-/* Assets module subtle theme hook */
-.m1-wrapper.m1-assets-theme:not(.dark) {
+/* Assets module subtle theme hook — só camada clara */
+.m1-wrapper.m1-assets-theme:not(.dark)::before {
   background-image:
     radial-gradient(ellipse 100% 90% at 100% -15%, rgba(14, 165, 233, 0.12) 0%, transparent 52%),
     radial-gradient(ellipse 70% 50% at 0% 100%, rgba(12, 74, 110, 0.06) 0%, transparent 48%);
@@ -1502,17 +1871,38 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   left: 0;
   right: 0;
   margin: 1.25rem -1rem -1rem;
-  padding: 0.45rem 0;
+  padding: 0;
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, #0f172a 100%);
   border-top: 1px solid rgba(56, 189, 248, 0.25);
   overflow: hidden;
   z-index: 5;
+  display: flex;
+  flex-direction: column;
+}
+
+.m1-footer-integrity-strip {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5eead4;
+  padding: 0.35rem 0.75rem;
+  background: rgba(56, 189, 248, 0.12);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.m1-wrapper.dark .m1-footer-integrity-strip {
+  color: #a5f3fc;
+  background: rgba(6, 182, 212, 0.15);
 }
 
 .m1-audit-ticker-track {
   display: flex;
   width: max-content;
   animation: m1-ticker-marquee 42s linear infinite;
+  padding: 0.45rem 0;
 }
 
 .m1-audit-ticker-text {
@@ -1542,7 +1932,7 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   overflow: hidden;
   height: 100%;
   border-radius: 999px;
-  transition: width 2.75s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: width 2.45s cubic-bezier(0.34, 1.35, 0.55, 1.02);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
@@ -1675,6 +2065,51 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
     animation: none !important;
     display: none;
   }
+
+  .m1-wrapper {
+    transition: none !important;
+  }
+
+  .m1-wrapper::before,
+  .m1-wrapper::after {
+    transition: none !important;
+  }
+
+  .m1-stat-value--pulse {
+    animation: none !important;
+  }
+
+  .m1-patrimony-validation-block {
+    animation: none !important;
+  }
+
+  .m1-sparkline-path {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .integrity-process-laser {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .m1-load-sk,
+  .m1-load-sk-line {
+    animation: none !important;
+  }
+
+  .integrity-skeleton-card::after {
+    animation: none !important;
+  }
+
+  .pin-detail-modal-content--patrimony-flash {
+    animation: none !important;
+  }
+
+  .integrity-skeleton-scan::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
 }
 
 .irregularity-row {
@@ -1700,7 +2135,7 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   height: 100%;
   border-radius: 999px;
   background: linear-gradient(90deg, #ea580c 0%, #fb923c 100%);
-  transition: width 0.95s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 1.2s cubic-bezier(0.34, 1.35, 0.55, 1.02);
 }
 
 @media (max-width: 640px) {
@@ -1746,20 +2181,20 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
 }
 
 .integrity-scan-region:not(.m1-scanner-paused) .integrity-table-beam {
-  animation: m1-integrity-table-scan 1.25s ease-out forwards;
+  animation: m1-integrity-table-scan 3.1s cubic-bezier(0.25, 0.5, 0.35, 1) forwards;
 }
 
 @keyframes m1-integrity-table-scan {
   0% {
     background-position: 0 -80%;
-    opacity: 0.3;
+    opacity: 0.35;
   }
-  25% {
+  20% {
     opacity: 1;
   }
   100% {
-    background-position: 0 180%;
-    opacity: 0.15;
+    background-position: 0 200%;
+    opacity: 0.08;
   }
 }
 
@@ -1785,7 +2220,7 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
 }
 
 .integrity-scan-region:not(.m1-scanner-paused) .integrity-beam {
-  animation: m1-integrity-card-scan 0.95s ease-out forwards;
+  animation: m1-integrity-card-scan 2.6s cubic-bezier(0.25, 0.5, 0.35, 1) forwards;
 }
 
 @keyframes m1-integrity-card-scan {
@@ -1793,11 +2228,11 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
     background-position: 0 -100%;
     opacity: 0;
   }
-  15% {
+  12% {
     opacity: 1;
   }
   100% {
-    background-position: 0 120%;
+    background-position: 0 160%;
     opacity: 0;
   }
 }
@@ -1812,6 +2247,48 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.integrity-skeleton-scan {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  padding: 0.25rem 0;
+}
+
+.integrity-skeleton-scan::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0) 42%,
+    rgba(56, 189, 248, 0.55) 50%,
+    rgba(34, 211, 238, 0) 58%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  animation: m1-skeleton-laser-sweep 1.85s ease-in-out infinite;
+}
+
+@keyframes m1-skeleton-laser-sweep {
+  0% {
+    background-position: 0 -90%;
+    opacity: 0.4;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 190%;
+    opacity: 0.25;
+  }
 }
 
 .integrity-skeleton-card {
@@ -2042,4 +2519,193 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
 
 .m1-wrapper.dark .m1-assets-kpi-val {
   color: #7dd3fc;
+}
+
+app-m1-odometer.m1-assets-kpi-val {
+  margin-top: 0.15rem;
+}
+
+.m1-assets-kpi-item--action {
+  padding: 0;
+  overflow: hidden;
+}
+
+.m1-assets-kpi-scroll-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  width: 100%;
+  margin: 0;
+  padding: 1rem 1.15rem;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.m1-assets-kpi-scroll-btn:hover,
+.m1-assets-kpi-scroll-btn:focus-visible {
+  background: rgba(14, 165, 233, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.35);
+  outline: none;
+}
+
+.m1-wrapper.dark .m1-assets-kpi-scroll-btn:hover,
+.m1-wrapper.dark .m1-assets-kpi-scroll-btn:focus-visible {
+  background: rgba(14, 165, 233, 0.18);
+}
+
+.m1-assets-kpi-hint {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--m1-accent-blue);
+  text-transform: none;
+}
+
+.m1-wrapper.dark .m1-assets-kpi-hint {
+  color: #7dd3fc;
+}
+
+/* ——— Initial load: skeleton + shimmer ——— */
+.m1-loading-skeleton-screen {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.m1-load-sk {
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 42%, #e2e8f0 100%);
+  background-size: 220% 100%;
+  animation: m1-load-shimmer 1.35s ease-in-out infinite;
+}
+
+.m1-wrapper.dark .m1-load-sk {
+  background: linear-gradient(90deg, #1e293b 0%, #334155 45%, #1e293b 100%);
+  background-size: 220% 100%;
+}
+
+@keyframes m1-load-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+.m1-load-sk-logo {
+  width: 176px;
+  height: 50px;
+  margin: 0 auto 1.25rem;
+}
+
+.m1-load-sk-title {
+  height: 28px;
+  width: 70%;
+  margin: 0 auto 0.65rem;
+}
+
+.m1-load-sk-sub {
+  height: 16px;
+  width: 50%;
+  margin: 0 auto 1.75rem;
+}
+
+.m1-load-sk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.85rem;
+}
+
+.m1-load-sk-card {
+  border-radius: var(--m1-radius);
+  border: 1px solid var(--m1-border);
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.m1-wrapper.dark .m1-load-sk-card {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: #334155;
+}
+
+.m1-load-sk-line {
+  height: 11px;
+  border-radius: 6px;
+  margin-bottom: 0.45rem;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background-size: 200% 100%;
+  animation: m1-load-shimmer 1.2s ease-in-out infinite;
+}
+
+.m1-wrapper.dark .m1-load-sk-line {
+  background: linear-gradient(90deg, #334155 0%, #475569 50%, #334155 100%);
+  background-size: 200% 100%;
+}
+
+.m1-load-sk-line--lg {
+  width: 100%;
+}
+
+.m1-load-sk-line--sm {
+  width: 40%;
+  margin-bottom: 0;
+}
+
+.integrity-skeleton-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.integrity-skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: m1-skeleton-shimmer-sweep 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.m1-wrapper.dark .integrity-skeleton-card::after {
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(148, 163, 184, 0.12) 50%,
+    rgba(255, 255, 255, 0) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes m1-skeleton-shimmer-sweep {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.m1-wrapper ::ng-deep .ant-card {
+  transition:
+    background 0.55s ease,
+    border-color 0.55s ease,
+    box-shadow 0.55s ease,
+    color 0.55s ease;
 }

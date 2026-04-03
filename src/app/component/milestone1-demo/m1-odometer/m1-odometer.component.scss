@@ -1,0 +1,57 @@
+:host {
+  display: inline-block;
+  vertical-align: baseline;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.m1-odo {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.04em;
+}
+
+.m1-odo-col {
+  display: inline-block;
+  height: 1em;
+  width: 0.62em;
+  overflow: hidden;
+  vertical-align: bottom;
+  text-align: center;
+  border-radius: 2px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+:host-context(.m1-wrapper.dark) .m1-odo-col {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.m1-odo-reel {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  transition-property: transform;
+  /* Subida lenta e uniforme (menos “snap” no fim). */
+  transition-timing-function: cubic-bezier(0.35, 0.02, 0.22, 1);
+}
+
+.m1-odo-reel--instant {
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+}
+
+.m1-odo-cell {
+  flex-shrink: 0;
+  height: 1em;
+  line-height: 1em;
+  font-size: 1em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m1-odo-reel {
+    transition: none !important;
+  }
+}
