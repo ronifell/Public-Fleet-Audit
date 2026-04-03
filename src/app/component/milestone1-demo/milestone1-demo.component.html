@@ -2,7 +2,7 @@
   class="m1-wrapper"
   [class.dark]="darkMode"
   [class.m1-assets-theme]="isAssetsModuleView"
-  [class.m1-has-ticker]="!loading && activeView !== 'hub'"
+  [class.m1-has-ticker]="!loading"
 >
   <!-- Governance Center: hub -->
   <ng-container *ngIf="activeView === 'hub' && !loading">
@@ -112,12 +112,12 @@
             <div class="bar-row">
               <span>Gasto bruto</span>
               <div class="bar"><div class="bar-fill bar-fill--gasto-bruto" [style.width.%]="roiGrossBarPercent"></div></div>
-              <strong>R$ {{ grossSpending | number: '1.2-2' }}</strong>
+              <strong>R$ {{ displayGrossSpending | number: '1.2-2' }}</strong>
             </div>
             <div class="bar-row">
               <span>Gasto real</span>
               <div class="bar"><div class="bar-fill bar-fill--gasto-real" [style.width.%]="roiActualBarPercent"></div></div>
-              <strong>R$ {{ actualSpending | number: '1.2-2' }}</strong>
+              <strong>R$ {{ displayActualSpending | number: '1.2-2' }}</strong>
             </div>
           </div>
           <div class="m1-sparkline-block" *ngIf="dashboardChartsAnimated" aria-hidden="true">
@@ -130,7 +130,7 @@
               />
             </svg>
           </div>
-          <p class="highlight m1-roi-highlight">Economia: {{ savingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span></p>
+          <p class="highlight m1-roi-highlight">Economia: {{ displaySavingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span></p>
         </nz-card>
 
         <nz-card class="m1-irregularities-card">
@@ -379,8 +379,26 @@
     <p class="loading-text">Carregando demonstração…</p>
   </div>
 
-  <footer
+  <aside
+    class="m1-control-tower-toasts"
     *ngIf="!loading && activeView !== 'hub'"
+    aria-live="polite"
+    aria-label="Alertas operacionais"
+  >
+    <div
+      *ngFor="let t of controlTowerToasts; trackBy: trackToastById"
+      class="m1-toast"
+      [class.m1-toast--ok]="t.kind === 'ok'"
+      [class.m1-toast--info]="t.kind === 'info'"
+      [class.m1-toast--warn]="t.kind === 'warn'"
+    >
+      <span class="m1-toast-dot" aria-hidden="true"></span>
+      <span class="m1-toast-msg">{{ t.message }}</span>
+    </div>
+  </aside>
+
+  <footer
+    *ngIf="!loading"
     id="m1-sha256-footer-anchor"
     class="m1-audit-ticker"
     role="status"

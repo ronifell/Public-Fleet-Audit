@@ -36,6 +36,8 @@ interface Supply {
   liters: number;
   emission_value: number;
   cidade: string;
+  UF?: string;
+  nome_estabelecimento?: string;
   integrityHash: string;
 }
 
@@ -60,6 +62,12 @@ interface IntegrityRow {
   providedHash: string;
   calculatedHash: string;
   verified: boolean;
+}
+
+interface ControlTowerToast {
+  id: number;
+  message: string;
+  kind: 'ok' | 'info' | 'warn';
 }
 
 export type MilestoneHubView =
@@ -104,7 +112,16 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   /** Animated KPI values on governance */
   displaySavings = 0;
   displayLiters = 0;
+  displayGrossSpending = 0;
+  displayActualSpending = 0;
+  displaySavingsPercent = 0;
   private kpiAnimationFrame = 0;
+
+  /** Torre de controle — toasts automáticos (canto superior direito) */
+  controlTowerToasts: ControlTowerToast[] = [];
+  private toastSeq = 0;
+  private toastIntervalId?: ReturnType<typeof setInterval>;
+  private toastTimeouts: ReturnType<typeof setTimeout>[] = [];
 
   /** Bar / irregularity chart entrance */
   dashboardChartsAnimated = false;
@@ -160,6 +177,14 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
             this.cdr.markForCheck();
           }, 0);
         }
+        if (this.activeView === 'governance') {
+          this.queueKpiAnimation();
+          setTimeout(() => {
+            this.dashboardChartsAnimated = true;
+            this.cdr.markForCheck();
+          }, 80);
+        }
+        this.syncControlTowerToasts();
         setTimeout(() => this.ensureMapInitialized(), 0);
       },
       error: () => {
@@ -175,6 +200,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   ngOnDestroy(): void {
     this.destroyMap();
+    this.clearControlTowerToasts();
     if (this.integrityFilterDebounce) {
       clearTimeout(this.integrityFilterDebounce);
     }
@@ -258,6 +284,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     }
     this.activeView = 'hub';
     this.dashboardChartsAnimated = false;
+    this.syncControlTowerToasts();
   }
 
   setView(view: MilestoneHubView): void {
@@ -300,6 +327,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       }, 0);
     }
 
+    this.syncControlTowerToasts();
   }
 
   onIntegrityFilterInteraction(): void {
@@ -332,24 +360,47 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   private queueKpiAnimation(): void {
     const targetS = this.totalSavings;
     const targetL = this.totalLiters;
+    const targetG = this.grossSpending;
+    const targetA = this.actualSpending;
+    const targetP = this.savingsPercent;
     this.displaySavings = 0;
     this.displayLiters = 0;
+    this.displayGrossSpending = 0;
+    this.displayActualSpending = 0;
+    this.displaySavingsPercent = 0;
     if (this.kpiAnimationFrame) {
       cancelAnimationFrame(this.kpiAnimationFrame);
     }
-    const duration = 1200;
+    const reduceMotion =
+      typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      this.displaySavings = targetS;
+      this.displayLiters = targetL;
+      this.displayGrossSpending = targetG;
+      this.displayActualSpending = targetA;
+      this.displaySavingsPercent = targetP;
+      this.cdr.markForCheck();
+      return;
+    }
+    const duration = 2400;
     const t0 = performance.now();
     const tick = (now: number) => {
       const t = Math.min(1, (now - t0) / duration);
       const ease = 1 - Math.pow(1 - t, 3);
       this.displaySavings = targetS * ease;
       this.displayLiters = targetL * ease;
+      this.displayGrossSpending = targetG * ease;
+      this.displayActualSpending = targetA * ease;
+      this.displaySavingsPercent = targetP * ease;
       this.cdr.markForCheck();
       if (t < 1) {
         this.kpiAnimationFrame = requestAnimationFrame(tick);
       } else {
         this.displaySavings = targetS;
         this.displayLiters = targetL;
+        this.displayGrossSpending = targetG;
+        this.displayActualSpending = targetA;
+        this.displaySavingsPercent = targetP;
         this.cdr.markForCheck();
       }
     };
@@ -446,35 +497,130 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   get auditTickerFuel(): string {
     const parts: string[] = [];
-    this.filteredIntegrityRows.slice(0, 6).forEach((row) => {
+    const supplies = this.demoData?.abastecimentos || [];
+    supplies.forEach((s) => {
+      parts.push(
+        `[${s.license_plate}] R$ ${s.emission_value.toFixed(2)} · ${s.liters} L · ${s.cidade}/${s.UF ?? '—'}`
+      );
+      parts.push(`[${s.license_plate}] ${(s.nome_estabelecimento || 'Posto').slice(0, 22)}… confirmado`);
+    });
+    (this.demoData?.resultados_motor_glosa || []).forEach((r) => {
+      parts.push(`[${r.placa}] Motor glosa: ${r.glosaStatus} · R$ ${r.valorTotal.toFixed(2)} · ${r.volumeLitros} L`);
+    });
+    this.filteredIntegrityRows.slice(0, 4).forEach((row) => {
       const shortHash = row.calculatedHash.slice(0, 8).toUpperCase();
-      parts.push(`[${row.plate}] SHA-256 verificado (${shortHash})…`);
-      const m = 200 + (row.id * 37) % 400;
-      parts.push(`[${row.plate}] Local validado (${m}m)…`);
+      parts.push(`[${row.plate}] SHA-256 ${shortHash}… trilha ativa`);
     });
     if (!parts.length) {
       return '[SISTEMA] Aguardando registros de auditoria…';
     }
-    return parts.join('   •   ');
+    return parts.join('      ◆      ');
   }
 
   get auditTickerAssets(): string {
     const labels = ['PREDIO-01', 'MONUMENTO-05', 'SITIO-03', 'MUSEU-07', 'CENTRO-12'];
-    const items = (this.demoData?.resultados_motor_glosa || []).slice(0, 4);
+    const items = (this.demoData?.resultados_motor_glosa || []).slice(0, 6);
     const parts: string[] = [];
     items.forEach((r, i) => {
       const tag = labels[i % labels.length];
-      parts.push(`[${tag}] Localização confirmada — tombo ${r.placa}…`);
-      parts.push(`[${tag}] Registro auditado — SHA-256 (cadeia de integridade)…`);
+      parts.push(`[${tag}] Tombo ${r.placa} · R$ ${r.valorTotal.toFixed(2)} (referência patrimonial)`);
+      parts.push(`[${tag}] Vistoria AO VIVO · conservação sincronizada · Acre`);
     });
-    return parts.join('   •   ') || '[PATRIMÔNIO] Monitoramento em tempo real…';
+    return parts.join('      ◆      ') || '[PATRIMÔNIO] Monitoramento em tempo real…';
+  }
+
+  /** Ticker no hub — fluxo contínuo para não “congelar” a apresentação */
+  get auditTickerHub(): string {
+    const parts: string[] = [
+      'TORRE DE CONTROLE · Inovathec · Governança SEAGRI',
+      'Siga Frota — combustível · Patrimônio histórico · SHA-256 · tempo real',
+    ];
+    const supplies = this.demoData?.abastecimentos || [];
+    supplies.forEach((s) => {
+      parts.push(`[${s.license_plate}] R$ ${s.emission_value.toFixed(2)} · auditoria em curso`);
+    });
+    (this.demoData?.resultados_motor_glosa || []).slice(0, 5).forEach((r) => {
+      parts.push(`[${r.placa}] Georef. validado · R$ ${r.valorTotal.toFixed(2)}`);
+    });
+    return parts.join('      ◆      ');
   }
 
   get auditTickerText(): string {
+    if (this.activeView === 'hub') {
+      return this.auditTickerHub;
+    }
     if (this.activeView === 'assets-map' || this.activeView === 'assets-report') {
       return this.auditTickerAssets;
     }
     return this.auditTickerFuel;
+  }
+
+  trackToastById(_index: number, t: ControlTowerToast): number {
+    return t.id;
+  }
+
+  private syncControlTowerToasts(): void {
+    this.clearControlTowerTimers();
+    this.controlTowerToasts = [];
+    if (this.loading || this.activeView === 'hub') {
+      this.cdr.markForCheck();
+      return;
+    }
+    const kick = window.setTimeout(() => {
+      this.pushControlTowerToast();
+      this.cdr.markForCheck();
+    }, 900);
+    this.toastTimeouts.push(kick);
+    this.toastIntervalId = window.setInterval(() => {
+      this.pushControlTowerToast();
+      this.cdr.markForCheck();
+    }, 6800);
+  }
+
+  private clearControlTowerTimers(): void {
+    if (this.toastIntervalId !== undefined) {
+      clearInterval(this.toastIntervalId);
+      this.toastIntervalId = undefined;
+    }
+    this.toastTimeouts.forEach((id) => clearTimeout(id));
+    this.toastTimeouts = [];
+  }
+
+  private clearControlTowerToasts(): void {
+    this.clearControlTowerTimers();
+    this.controlTowerToasts = [];
+  }
+
+  private pushControlTowerToast(): void {
+    const id = ++this.toastSeq;
+    const next = this.nextToastPayload();
+    this.controlTowerToasts = [...this.controlTowerToasts.slice(-2), { id, ...next }];
+    const removeAfter = window.setTimeout(() => {
+      this.controlTowerToasts = this.controlTowerToasts.filter((t) => t.id !== id);
+      this.cdr.markForCheck();
+    }, 5200);
+    this.toastTimeouts.push(removeAfter);
+  }
+
+  private nextToastPayload(): Pick<ControlTowerToast, 'message' | 'kind'> {
+    const fuel: Pick<ControlTowerToast, 'message' | 'kind'>[] = [
+      { message: 'Abastecimento confirmado — cartão e volume validados', kind: 'ok' },
+      { message: 'Georreferenciamento sincronizado com o motor de glosa', kind: 'info' },
+      { message: 'Novo fechamento de perímetro — Acre (área ativa)', kind: 'info' },
+      { message: 'Alerta: transação fora do raio — dedução automática acionada', kind: 'warn' },
+      { message: 'SHA-256 gravado — trilha de imutabilidade atualizada', kind: 'ok' },
+      { message: 'Painel fiscal: ROI dentro da meta operacional', kind: 'info' },
+    ];
+    const assets: Pick<ControlTowerToast, 'message' | 'kind'>[] = [
+      { message: 'Vistoria de patrimônio registrada — fé pública AP 04', kind: 'ok' },
+      { message: 'Tombo sincronizado — inventário em tempo real', kind: 'info' },
+      { message: 'Conservação do bem atualizada no painel pericial', kind: 'info' },
+      { message: 'Geolocalização confirmada — dentro do perímetro delimitado', kind: 'ok' },
+      { message: 'Cadeia de integridade: hash verificado no bloco', kind: 'info' },
+    ];
+    const pool =
+      this.activeView === 'assets-map' || this.activeView === 'assets-report' ? assets : fuel;
+    return pool[(this.toastSeq + this.activeView.length) % pool.length];
   }
 
   getMapDistanceMeters(record: MotorResult): number {
@@ -485,11 +631,6 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   isAutomaticDeduction(record: MotorResult): boolean {
     return this.getMapDistanceMeters(record) > 500;
-  }
-
-  /** Operational / “validated” → green sonar pulse on asset map */
-  isAssetOperational(record: MotorResult): boolean {
-    return record.glosaStatus === 'APROVADO' && !this.isAutomaticDeduction(record);
   }
 
   getMapTooltipText(record: MotorResult): string {
@@ -665,17 +806,16 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       const postoGlyph = assetMode ? this.patrimonyReferenceIcon(idx) : '⛽';
       const postoIcon = L.divIcon({
         className: 'marker marker-posto',
-        html: `<span>${postoGlyph}</span>`,
+        html: `<span class="map-live-pulse map-live-pulse--posto" style="animation-delay:${(idx * 0.11).toFixed(2)}s" aria-hidden="true">${postoGlyph}</span>`,
         iconSize: [26, 26],
       });
-      const op = this.isAssetOperational(record);
-      const pulseClass = assetMode && op ? ' asset-pulse' : '';
+      const pulseWarn = automaticDeduction ? ' map-live-pulse--warn' : '';
       const dropClass = assetMode ? ' asset-drop' : '';
       const assetLabel = assetMode ? this.assetIconLabel(idx) : 'A/E';
       const pinTitle = assetMode ? 'Bem patrimonial' : 'Ativo / equipamento';
       const assetHtml = isSelected
-        ? `<span class="asset-pin asset-pin-selected${pulseClass}${dropClass}" style="animation-delay:${idx * 0.07}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`
-        : `<span class="asset-pin${pulseClass}${dropClass}" style="animation-delay:${idx * 0.07}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`;
+        ? `<span class="asset-pin asset-pin-selected map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`
+        : `<span class="asset-pin map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`;
       const assetIcon = L.divIcon({
         className: 'marker marker-asset',
         html: assetHtml,
