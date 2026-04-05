@@ -270,10 +270,10 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
     }
     if (this.activeView === 'assets-report') {
-      return 'SIG Patrimônio — inventário, tombamento e trilha de integridade documental.';
+      return 'SIG-PATRIMÔNIO — inventário, tombamento e trilha de integridade documental.';
     }
     if (this.isAssetsModuleView) {
-      return 'SIG Patrimônio — vistoria, censo e georreferenciamento para prova técnica.';
+      return 'SIG-PATRIMÔNIO — vistoria, censo e georreferenciamento para prova técnica.';
     }
     return 'Centro de governança — Inovathec Soluções Ltda.';
   }
@@ -526,14 +526,14 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       parts.push(`[${tag}] Tombo ${r.placa} · R$ ${r.valorTotal.toFixed(2)} (referência patrimonial)`);
       parts.push(`[${tag}] Vistoria AO VIVO · conservação sincronizada · Acre`);
     });
-    return parts.join('      ◆      ') || '[PATRIMÔNIO] Monitoramento em tempo real…';
+    return parts.join('      ◆      ') || '[SIG-PATRIMÔNIO] Monitoramento em tempo real…';
   }
 
   /** Ticker no hub — fluxo contínuo para não “congelar” a apresentação */
   get auditTickerHub(): string {
     const parts: string[] = [
       'TORRE DE CONTROLE · Inovathec · Governança SEAGRI',
-      'SIG-FROTA — combustível · Patrimônio histórico · SHA-256 · tempo real',
+      'SIG-FROTA — combustível · SIG-PATRIMÔNIO · SHA-256 · tempo real',
     ];
     const supplies = this.demoData?.abastecimentos || [];
     supplies.forEach((s) => {
