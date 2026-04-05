@@ -88,7 +88,7 @@ body.milestone1-demo-dark .milestone-back-btn.ant-btn .anticon {
 
 /* Mobile: barra de ações do hero em largura total (emparelha com .m1-hero-actions no componente) */
 @media (max-width: 640px) {
-  body app-milestone1-demo .m1-hero-actions .milestone-back-btn.ant-btn {
+  body app-milestone1-demo .m1-module-topbar .milestone-back-btn.ant-btn {
     height: auto !important;
     min-height: 40px;
     white-space: normal;

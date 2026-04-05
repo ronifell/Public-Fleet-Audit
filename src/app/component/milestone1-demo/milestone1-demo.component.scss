@@ -101,6 +101,16 @@
   color: #e5e7eb;
 }
 
+.m1-module-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0 0 0.35rem;
+}
+
 .m1-hero {
   display: flex;
   justify-content: space-between;
@@ -110,6 +120,10 @@
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--m1-border);
+}
+
+.m1-hero--module {
+  padding-top: 0.15rem;
 }
 
 .m1-hero-main {
@@ -128,6 +142,14 @@
 
 .m1-wrapper.dark .m1-eyebrow {
   color: #5eead4;
+}
+
+.m1-wrapper.m1-assets-theme .m1-eyebrow {
+  color: #1e3a8a;
+}
+
+.m1-wrapper.m1-assets-theme.dark .m1-eyebrow {
+  color: #93c5fd;
 }
 
 .m1-title {
@@ -1428,17 +1450,17 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
     width: 100%;
   }
 
-  .m1-hero-actions {
-    width: 100%;
-    flex-wrap: nowrap;
-    justify-content: stretch;
-    align-self: stretch;
+  .m1-module-topbar {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .m1-hero-actions :host ::ng-deep .ant-btn,
-  .m1-hero-actions ::ng-deep .ant-btn {
-    flex: 1 1 0;
-    min-width: 0;
+  .m1-module-topbar .m1-theme-toggle {
+    width: 100%;
+  }
+
+  .m1-module-topbar :host ::ng-deep .ant-btn,
+  .m1-module-topbar ::ng-deep .ant-btn {
     width: 100%;
     max-width: 100%;
     white-space: normal;
@@ -1449,7 +1471,8 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
     min-height: 40px;
   }
 
-  .m1-hero-actions :host ::ng-deep .m1-theme-toggle.ant-btn {
+  .m1-module-topbar :host ::ng-deep .m1-theme-toggle.ant-btn,
+  .m1-module-topbar ::ng-deep .m1-theme-toggle.ant-btn {
     height: auto !important;
     min-height: 40px;
     padding-top: 0.5rem !important;
@@ -1744,11 +1767,52 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   line-height: 1.5;
 }
 
+.m1-hub-sections {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 4vw, 2.25rem);
+  margin-bottom: 2rem;
+}
+
+.m1-hub-section {
+  min-width: 0;
+}
+
+.m1-hub-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--m1-border);
+}
+
+.m1-hub-section-title--fuel {
+  color: #14532d;
+  border-bottom-color: rgba(15, 118, 110, 0.22);
+}
+
+.m1-wrapper.dark .m1-hub-section-title--fuel {
+  color: #6ee7b7;
+  border-bottom-color: rgba(52, 211, 153, 0.35);
+}
+
+.m1-hub-section-title--asset {
+  color: #0c4a6e;
+  border-bottom-color: rgba(37, 99, 235, 0.2);
+}
+
+.m1-wrapper.dark .m1-hub-section-title--asset {
+  color: #7dd3fc;
+  border-bottom-color: rgba(56, 189, 248, 0.35);
+}
+
 .m1-hub-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 0.85rem;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
 .m1-hub-tile {
@@ -1756,7 +1820,7 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   flex-direction: column;
   align-items: flex-start !important;
   justify-content: center !important;
-  min-height: 88px !important;
+  min-height: 76px !important;
   height: auto !important;
   padding: 1rem 1.15rem !important;
   border-radius: var(--m1-radius-lg) !important;
@@ -1934,6 +1998,32 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
   color: #a5f3fc;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+}
+
+/* Selo institucional — discreto, rodapé da demonstração */
+.m1-tce-seal {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.35rem 0.75rem 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.m1-tce-seal__text {
+  display: inline-block;
+  max-width: 100%;
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+  color: rgba(226, 232, 240, 0.5);
+  padding: 0.2rem 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 @keyframes m1-ticker-marquee {

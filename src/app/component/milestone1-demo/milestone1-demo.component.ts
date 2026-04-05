@@ -251,15 +251,15 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   get moduleTitleLine(): string {
     switch (this.activeView) {
       case 'governance':
-        return 'Siga Frota | Combustível — Monitoramento e Inteligência Fiscal';
+        return 'Monitoramento e Inteligência Fiscal';
       case 'fuel-map':
-        return 'Siga Frota | Combustível — Georreferenciamento de Prova';
+        return 'Georreferenciamento de Prova';
       case 'fuel-integrity':
-        return 'Siga Frota | Combustível — Conformidade de Dados e Anti-Fraude';
+        return 'Conformidade e Anti-Fraude';
       case 'assets-map':
-        return 'Patrimônio Histórico | Inventário e Monitoramento';
+        return 'Vistoria e Censo (Fé Pública)';
       case 'assets-report':
-        return 'Relatório de Patrimônio Histórico';
+        return 'Inventário e Tombamento';
       default:
         return '';
     }
@@ -270,10 +270,10 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
     }
     if (this.activeView === 'assets-report') {
-      return 'Módulo de Integridade de Patrimônio — consolidação de bens tombados e validação documental.';
+      return 'Siga Patrimônio — inventário, tombamento e trilha de integridade documental.';
     }
     if (this.isAssetsModuleView) {
-      return 'Patrimônio histórico — inventário, vistoria e monitoramento por georreferenciamento.';
+      return 'Siga Patrimônio — vistoria, censo e georreferenciamento para prova técnica.';
     }
     return 'Centro de governança — Inovathec Soluções Ltda.';
   }

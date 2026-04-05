@@ -26,28 +26,38 @@
       <p class="m1-hub-tagline">Centro de governança — identidade visual por módulo (combustível / ativos).</p>
     </header>
 
-    <nav class="m1-hub-grid" aria-label="Módulos — combustível e patrimônio">
-      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('governance')">
-        <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
-        <span class="m1-hub-tile-title">Monitoramento e Inteligência Fiscal</span>
-      </button>
-      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-map')">
-        <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
-        <span class="m1-hub-tile-title">Georreferenciamento de Prova</span>
-      </button>
-      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-integrity')">
-        <span class="m1-hub-tile-kicker">Siga Frota — Combustível</span>
-        <span class="m1-hub-tile-title">Conformidade de Dados e Anti-Fraude</span>
-      </button>
-      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-map')">
-        <span class="m1-hub-tile-kicker">GESTÃO DE PATRIMÔNIO</span>
-        <span class="m1-hub-tile-title">Vistoria e Censo (Fé Pública AP 04)</span>
-      </button>
-      <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
-        <span class="m1-hub-tile-kicker">GESTÃO DE PATRIMÔNIO</span>
-        <span class="m1-hub-tile-title">Relatório Pericial e Saneamento</span>
-      </button>
-    </nav>
+    <div class="m1-hub-sections">
+      <section class="m1-hub-section" aria-labelledby="m1-hub-fuel-heading">
+        <h2 id="m1-hub-fuel-heading" class="m1-hub-section-title m1-hub-section-title--fuel">
+          SIGA FROTA — GESTÃO DE COMBUSTÍVEL
+        </h2>
+        <nav class="m1-hub-grid m1-hub-grid--fuel" aria-label="Siga Frota — gestão de combustível">
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('governance')">
+            <span class="m1-hub-tile-title">Monitoramento e Inteligência Fiscal</span>
+          </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-map')">
+            <span class="m1-hub-tile-title">Georreferenciamento de Prova</span>
+          </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-integrity')">
+            <span class="m1-hub-tile-title">Conformidade e Anti-Fraude</span>
+          </button>
+        </nav>
+      </section>
+
+      <section class="m1-hub-section" aria-labelledby="m1-hub-asset-heading">
+        <h2 id="m1-hub-asset-heading" class="m1-hub-section-title m1-hub-section-title--asset">
+          SIGA PATRIMÔNIO — GESTÃO DE ATIVOS
+        </h2>
+        <nav class="m1-hub-grid m1-hub-grid--asset" aria-label="Siga Patrimônio — gestão de ativos">
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-map')">
+            <span class="m1-hub-tile-title">Vistoria e Censo (Fé Pública)</span>
+          </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
+            <span class="m1-hub-tile-title">Inventário e Tombamento</span>
+          </button>
+        </nav>
+      </section>
+    </div>
 
     <div class="m1-hub-footer-tools">
       <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
@@ -58,7 +68,15 @@
 
   <!-- Module screens -->
   <ng-container *ngIf="activeView !== 'hub' && !loading">
-    <header class="m1-hero">
+    <div class="m1-module-topbar">
+      <button nz-button nzType="default" class="milestone-back-btn" type="button" (click)="goToHub()">
+        Menu principal
+      </button>
+      <button nz-button nzType="default" class="m1-theme-toggle" type="button" (click)="toggleDarkMode()">
+        {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
+      </button>
+    </div>
+    <header class="m1-hero m1-hero--module">
       <div class="m1-hero-main">
         <div class="m1-brand-strip">
           <div class="m1-logo-showcase m1-logo-showcase--compact">
@@ -77,17 +95,9 @@
             </div>
           </div>
         </div>
-        <p class="m1-eyebrow">{{ isFuelModuleView ? 'Siga Frota — Combustível' : 'GESTÃO DE PATRIMÔNIO' }}</p>
+        <p class="m1-eyebrow">{{ isFuelModuleView ? 'SIGA FROTA — GESTÃO DE COMBUSTÍVEL' : 'SIGA PATRIMÔNIO — GESTÃO DE ATIVOS' }}</p>
         <h2 class="m1-title">{{ moduleTitleLine }}</h2>
         <p class="m1-subtitle">{{ moduleSubtitle }}</p>
-      </div>
-      <div class="m1-hero-actions">
-        <button nz-button nzType="default" class="milestone-back-btn" (click)="goToHub()">
-          {{ isAssetsModuleView ? 'Painel do Patrimônio' : 'Centro de governança' }}
-        </button>
-        <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
-          {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
-        </button>
       </div>
     </header>
 
@@ -147,7 +157,7 @@
 
       <section *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'" class="map-layout">
         <nz-card class="map-card m1-map-card">
-          <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Vistoria e Censo (Fé Pública AP 04)' : 'Georreferenciamento de Prova' }}</h4>
+          <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Vistoria e Censo (Fé Pública)' : 'Georreferenciamento de Prova' }}</h4>
           <div class="map-wrap">
             <div
               class="map-tooltip-corner"
@@ -204,7 +214,7 @@
         <nz-card class="m1-integrity-card">
           <div class="integrity-process-zone">
             <div *ngIf="integrityLaserSweep" class="integrity-process-laser" aria-hidden="true"></div>
-            <h4 class="m1-card-title m1-integrity-heading">Conformidade de Dados e Anti-Fraude</h4>
+            <h4 class="m1-card-title m1-integrity-heading">Conformidade e Anti-Fraude</h4>
             <div class="filters m1-filters">
             <div class="filter-field">
               <span class="filter-label">Data</span>
@@ -329,7 +339,7 @@
 
       <section *ngIf="activeView === 'assets-report'" class="m1-assets-report">
         <nz-card class="m1-assets-report-card">
-          <h4 class="m1-card-title">Relatório Pericial e Saneamento</h4>
+          <h4 class="m1-card-title">Inventário e Tombamento</h4>
           <p class="m1-assets-report-lead">
             Consolidação de bens tombados e validação de integridade documental.
           </p>
@@ -408,6 +418,9 @@
     <div class="m1-audit-ticker-track">
       <span class="m1-audit-ticker-text">{{ auditTickerText }}</span>
       <span class="m1-audit-ticker-text" aria-hidden="true">{{ auditTickerText }}</span>
+    </div>
+    <div class="m1-tce-seal" role="note">
+      <span class="m1-tce-seal__text">Metodologia apresentada ao TCE-AC</span>
     </div>
   </footer>
 
