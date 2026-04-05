@@ -270,10 +270,10 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
     }
     if (this.activeView === 'assets-report') {
-      return 'Siga Patrimônio — inventário, tombamento e trilha de integridade documental.';
+      return 'SIG Patrimônio — inventário, tombamento e trilha de integridade documental.';
     }
     if (this.isAssetsModuleView) {
-      return 'Siga Patrimônio — vistoria, censo e georreferenciamento para prova técnica.';
+      return 'SIG Patrimônio — vistoria, censo e georreferenciamento para prova técnica.';
     }
     return 'Centro de governança — Inovathec Soluções Ltda.';
   }
@@ -533,7 +533,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   get auditTickerHub(): string {
     const parts: string[] = [
       'TORRE DE CONTROLE · Inovathec · Governança SEAGRI',
-      'Siga Frota — combustível · Patrimônio histórico · SHA-256 · tempo real',
+      'SIG-FROTA — combustível · Patrimônio histórico · SHA-256 · tempo real',
     ];
     const supplies = this.demoData?.abastecimentos || [];
     supplies.forEach((s) => {
@@ -731,7 +731,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       )
       .join('');
     const html = `
-      <html><head><title>Relatório de integridade SIG-Frota</title></head><body>
+      <html><head><title>Relatório de integridade SIG-FROTA</title></head><body>
       <h2>Relatório de integridade – Painel de auditoria (PDF simulado)</h2>
       <table border="1" cellpadding="6" cellspacing="0">
       <tr><th>Data</th><th>Departamento</th><th>Placa</th><th>Litros</th><th>Valor</th><th>SHA-256</th><th>Situação</th></tr>
