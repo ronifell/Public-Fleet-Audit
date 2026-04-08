@@ -55,12 +55,22 @@
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
             <span class="m1-hub-tile-title">Inventário e Tombamento</span>
           </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-timeline')">
+            <span class="m1-hub-tile-title">Timeline de Auditoria (perícia digital)</span>
+          </button>
         </nav>
       </section>
     </div>
 
     <div class="m1-hub-footer-tools">
-      <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
+      <button
+        nz-button
+        nzType="default"
+        class="m1-theme-toggle m1-ripple-target"
+        type="button"
+        (mousedown)="playRipple($event)"
+        (click)="toggleDarkMode()"
+      >
         {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
       </button>
     </div>
@@ -69,10 +79,24 @@
   <!-- Module screens -->
   <ng-container *ngIf="activeView !== 'hub' && !loading">
     <div class="m1-module-topbar">
-      <button nz-button nzType="default" class="milestone-back-btn" type="button" (click)="goToHub()">
+      <button
+        nz-button
+        nzType="default"
+        class="milestone-back-btn m1-ripple-target"
+        type="button"
+        (mousedown)="playRipple($event)"
+        (click)="goToHub()"
+      >
         Menu principal
       </button>
-      <button nz-button nzType="default" class="m1-theme-toggle" type="button" (click)="toggleDarkMode()">
+      <button
+        nz-button
+        nzType="default"
+        class="m1-theme-toggle m1-ripple-target"
+        type="button"
+        (mousedown)="playRipple($event)"
+        (click)="toggleDarkMode()"
+      >
         {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
       </button>
     </div>
@@ -155,10 +179,24 @@
         </nz-card>
       </section>
 
-      <section *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'" class="map-layout">
+      <section
+        *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'"
+        class="map-layout"
+        [class.map-layout--patrimony]="activeView === 'assets-map'"
+      >
         <nz-card class="map-card m1-map-card">
           <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Vistoria e Censo (Fé Pública)' : 'Georreferenciamento de Prova' }}</h4>
           <div class="map-wrap">
+            <div
+              *ngIf="activeView === 'assets-map' && assetsMapDataSkeleton"
+              class="m1-float-skeleton m1-map-skeleton-overlay"
+              aria-busy="true"
+              aria-label="Sincronizando mapa e registros"
+            >
+              <div class="m1-float-skeleton__blob m1-float-skeleton__blob--1"></div>
+              <div class="m1-float-skeleton__blob m1-float-skeleton__blob--2"></div>
+              <div class="m1-float-skeleton__blob m1-float-skeleton__blob--3"></div>
+            </div>
             <div
               class="map-tooltip-corner"
               *ngIf="selectedMapRecord"
@@ -171,6 +209,18 @@
           </div>
           <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
         </nz-card>
+        <button
+          *ngIf="activeView === 'assets-map'"
+          type="button"
+          class="m1-ap04-fab m1-ripple-target"
+          (mousedown)="playRipple($event)"
+          (click)="openAp04Scanner(true)"
+          [class.m1-ap04-fab--pulse]="ap04ShutterPulse"
+          aria-label="Capturar bem — câmera AP04 (sem galeria)"
+        >
+          <span class="m1-ap04-fab__ring" aria-hidden="true"></span>
+          <span nz-icon nzType="camera" nzTheme="outline" class="m1-ap04-fab__icon"></span>
+        </button>
         <nz-card class="side-card m1-side-panel" *ngIf="selectedMapRecord">
           <ng-container *ngIf="activeView === 'fuel-map'">
             <h4 class="m1-card-title">Painel lateral de auditoria</h4>
@@ -199,6 +249,43 @@
             <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
               {{ patrimonyLocationStatusMessage(selectedMapRecord) }}
             </p>
+          </div>
+
+          <div class="m1-ap04-field-card">
+            <h4 class="m1-card-title m1-ap04-field-title">Gestão AP04 — leitor de tombamento</h4>
+            <p class="m1-ap04-field-lead">
+              Sistema distinto do cadastro genérico: captura exclusiva por câmera segura (sem galeria) e trilha INPI.
+            </p>
+            <button
+              nz-button
+              nzType="primary"
+              class="m1-ap04-scan-btn m1-ripple-target"
+              type="button"
+              (mousedown)="playRipple($event)"
+              (click)="openAp04Scanner(false)"
+            >
+              Escanear código de tombamento
+            </button>
+            <div *ngIf="ap04PhotoCaptured" class="m1-ap04-preview" [class.m1-ap04-preview--flash]="ap04PhotoFlash">
+              <div class="m1-ap04-preview__thumb" aria-hidden="true">
+                <span class="m1-ap04-preview__glyph">🏛</span>
+              </div>
+              <div class="m1-ap04-live-stamp">
+                <span class="m1-ap04-live-stamp__label">Fé pública — metadados ao vivo</span>
+                <span class="m1-ap04-live-stamp__row"><strong>GPS</strong> {{ ap04LiveGps }}</span>
+                <span class="m1-ap04-live-stamp__row"><strong>Timestamp ISO</strong> {{ ap04LiveTime }}</span>
+              </div>
+              <button
+                nz-button
+                nzType="default"
+                class="m1-ap04-save-btn"
+                type="button"
+                [nzLoading]="ap04Saving"
+                (click)="confirmAp04PublicFaith()"
+              >
+                Confirmar e gravar fé pública
+              </button>
+            </div>
           </div>
 
           <div class="record-list">
@@ -341,9 +428,18 @@
         <nz-card class="m1-assets-report-card">
           <h4 class="m1-card-title">Inventário e Tombamento</h4>
           <p class="m1-assets-report-lead">
-            Consolidação de bens tombados e validação de integridade documental.
+            Consolidação de bens tombados, registro INPI (texto-fonte) e validação de integridade documental.
           </p>
-          <div class="m1-assets-kpi">
+          <div
+            *ngIf="assetsReportChainLoading"
+            class="m1-float-skeleton m1-assets-kpi-skeleton"
+            aria-busy="true"
+            aria-label="Carregando indicadores"
+          >
+            <div class="m1-float-skeleton__blob m1-float-skeleton__blob--1"></div>
+            <div class="m1-float-skeleton__blob m1-float-skeleton__blob--2"></div>
+          </div>
+          <div class="m1-assets-kpi" *ngIf="!assetsReportChainLoading">
             <div class="m1-assets-kpi-item">
               <span class="m1-assets-kpi-label">Bens catalogados</span>
               <app-m1-odometer
@@ -369,6 +465,97 @@
                 <span class="m1-assets-kpi-hint">Ver trilha SHA-256 no rodapé</span>
               </button>
             </div>
+          </div>
+
+          <div class="m1-integrity-chain" *ngIf="!assetsReportChainLoading">
+            <div class="m1-integrity-chain__head">
+              <h4 class="m1-card-title m1-integrity-chain__title">Cadeia de integridade</h4>
+              <button nz-button nzType="primary" type="button" class="m1-ripple-target" (mousedown)="playRipple($event)" (click)="exportPatrimonyOfficialPdf()">
+                Exportar PDF oficial
+              </button>
+            </div>
+            <p class="m1-integrity-chain__hint">
+              Selos SHA-256 em <span class="m1-trust-blue">#11CDEF</span> — mesma legibilidade na impressão (botão acima).
+            </p>
+            <div class="m1-integrity-chain-table-wrap">
+              <table class="m1-integrity-chain-table">
+                <thead>
+                  <tr>
+                    <th>Tombamento</th>
+                    <th>Descrição</th>
+                    <th>INPI</th>
+                    <th>SHA-256</th>
+                    <th>Situação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of patrimonyChainRows">
+                    <td class="cell-nowrap">{{ row.tombo }}</td>
+                    <td>{{ row.descricao }}</td>
+                    <td><code class="m1-inpi-code">{{ row.inpiRegistro }}</code></td>
+                    <td><code class="m1-sha256-official">{{ row.integrityHash }}</code></td>
+                    <td>
+                      <span
+                        class="m1-chain-status"
+                        [class.m1-chain-status--ok]="row.situacao.indexOf('válido') >= 0"
+                        [class.m1-chain-status--warn]="row.situacao.indexOf('revisão') >= 0"
+                        >{{ row.situacao }}</span
+                      >
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </nz-card>
+      </section>
+
+      <section *ngIf="activeView === 'assets-timeline'" class="m1-timeline-layout">
+        <nz-card class="m1-timeline-card">
+          <h4 class="m1-card-title">Timeline de auditoria</h4>
+          <p class="m1-timeline-lead">
+            Evolução imutável do bem no SIG-PATRIMÔNIO — padrão pericial distinto do cadastro tradicional no Brasil.
+          </p>
+          <div class="m1-timeline-actions">
+            <button
+              nz-button
+              nzType="primary"
+              type="button"
+              class="m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="compareTimelineHashes()"
+            >
+              Comparar Hashes
+            </button>
+            <span class="m1-timeline-actions__hint" *ngIf="timelineCompareState === 'idle'"
+              >Alterna demonstração: rodada autêntica (verde) / divergência simulada (vermelho no termo de cautela).</span
+            >
+          </div>
+          <div class="m1-timeline-track" [class.m1-timeline-track--active]="timelineRevealActive">
+            <ng-container *ngFor="let ev of timelineEvents; let i = index; let last = last">
+              <div
+                class="m1-timeline-node"
+                [class.m1-timeline-node--latest]="last"
+                [style.animation-delay.ms]="timelineRevealActive ? i * 130 : 0"
+              >
+                <div class="m1-timeline-node__rail" aria-hidden="true"></div>
+                <div
+                  class="m1-timeline-node__dot-wrap"
+                  [class.m1-timeline-node__dot-wrap--radar]="last"
+                >
+                  <span class="m1-timeline-node__dot" [attr.data-kind]="ev.kind"></span>
+                </div>
+                <div class="m1-timeline-node__card m1-trust-card" [ngClass]="timelineItemCompareClass(ev)">
+                  <span class="m1-timeline-node__kicker">{{ ev.title }}</span>
+                  <time class="m1-timeline-node__time" [attr.datetime]="ev.at">{{ ev.at | slice:0:19 }}</time>
+                  <p class="m1-timeline-node__detail">{{ ev.detail }}</p>
+                  <div class="m1-timeline-hash">
+                    <span class="m1-timeline-hash__label">SHA-256</span>
+                    <code class="m1-sha256-official m1-sha256-official--compact">{{ ev.integrityHash }}</code>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
           </div>
         </nz-card>
       </section>
@@ -425,6 +612,27 @@
   </footer>
 
   <nz-modal
+    [(nzVisible)]="ap04ScannerOpen"
+    nzTitle="Leitor AP04 — câmera exclusiva (sem galeria)"
+    [nzFooter]="null"
+    nzCentered
+    [nzWidth]="440"
+    (nzOnCancel)="closeAp04Scanner()"
+  >
+    <ng-container *nzModalContent>
+      <div class="m1-ap04-scanner">
+        <div class="m1-ap04-scanner__viewport">
+          <div class="m1-ap04-scanner__laser" *ngIf="ap04Scanning" aria-hidden="true"></div>
+          <p class="m1-ap04-scanner__hint">Posicione o código de tombamento — linha laser em leitura</p>
+        </div>
+        <p class="m1-ap04-scanner__legal">
+          Protocolo distinto: somente captura por câmera ao vivo; acesso à galeria permanece bloqueado no app.
+        </p>
+      </div>
+    </ng-container>
+  </nz-modal>
+
+  <nz-modal
     [nzVisible]="pinDetailModalVisible"
     [nzTitle]="activeView === 'assets-map' ? 'Bem patrimonial' : 'Ativo / equipamento'"
     [nzFooter]="null"
@@ -438,6 +646,7 @@
         [class.pin-detail-modal-content--patrimony-flash]="activeView === 'assets-map' && modalPatrimonyValidationFlash"
       >
         <div class="pin-photo-scan-wrap" [class.m1-scanner-paused]="modalPhotoScanReset" [attr.data-scan]="modalScannerKey">
+          <div *ngIf="activeView === 'assets-map'" class="m1-pin-ap04-laser" aria-hidden="true"></div>
           <div class="pin-detail-photo-placeholder">Foto do ativo (marcador de posição)</div>
           <div class="pin-photo-scanner" aria-hidden="true"></div>
         </div>
@@ -451,7 +660,7 @@
         </div>
         <div class="pin-detail-hash">
           <strong>SHA-256</strong>
-          <code>{{ pinDetailRecord.integrityHash || '—' }}</code>
+          <code class="m1-sha256-official">{{ pinDetailRecord.integrityHash || '—' }}</code>
         </div>
       </div>
     </ng-container>

@@ -76,7 +76,31 @@ export type MilestoneHubView =
   | 'fuel-map'
   | 'fuel-integrity'
   | 'assets-map'
-  | 'assets-report';
+  | 'assets-report'
+  | 'assets-timeline';
+
+export type PatrimonyTimelineKind = 'tombamento' | 'cautela' | 'vistoria';
+
+export interface PatrimonyTimelineEvent {
+  id: string;
+  kind: PatrimonyTimelineKind;
+  title: string;
+  detail: string;
+  at: string;
+  integrityHash: string;
+  /** Quando true, “Comparar Hashes” acusa divergência neste evento */
+  tampered?: boolean;
+}
+
+export interface PatrimonyChainRow {
+  tombo: string;
+  descricao: string;
+  inpiRegistro: string;
+  integrityHash: string;
+  situacao: string;
+}
+
+export type TimelineCompareState = 'idle' | 'ok' | 'fail';
 
 @Component({
   selector: 'app-milestone1-demo',
@@ -149,7 +173,32 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   /** Cobertura laser sobre filtros + tabela (auditoria em conformidade) */
   integrityLaserSweep = false;
 
+  /** Mapa patrimônio — skeleton até primeiro paint dos dados */
+  assetsMapDataSkeleton = true;
+
+  /** Inventário — skeleton da cadeia SHA + INPI */
+  assetsReportChainLoading = true;
+
+  /** AP04 / INPI — leitor simulado (protótipo) */
+  ap04ScannerOpen = false;
+  ap04Scanning = false;
+  ap04ShutterPulse = false;
+  ap04PhotoCaptured = false;
+  ap04PhotoFlash = false;
+  ap04Saving = false;
+  ap04LiveGps = '';
+  ap04LiveTime = '';
+  private ap04StampInterval?: ReturnType<typeof setInterval>;
+  private ap04ScanDoneTimer?: ReturnType<typeof setTimeout>;
+
+  /** Timeline — entrada escalonada e comparação de hashes */
+  timelineRevealActive = false;
+  timelineCompareState: TimelineCompareState = 'idle';
+  private timelineCompareFailRound = false;
+
   private integrityFilterDebounce?: ReturnType<typeof setTimeout>;
+  private assetsMapSkeletonTimer?: ReturnType<typeof setTimeout>;
+  private assetsReportSkeletonTimer?: ReturnType<typeof setTimeout>;
 
   /** Root-absolute path; file is PNG (ChatGPT export was mislabeled as .svg). */
   readonly logoSrc = '/assets/imagens/inovathec-logo.png';
@@ -201,8 +250,18 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   ngOnDestroy(): void {
     this.destroyMap();
     this.clearControlTowerToasts();
+    this.stopAp04LiveStamp();
+    if (this.ap04ScanDoneTimer) {
+      clearTimeout(this.ap04ScanDoneTimer);
+    }
     if (this.integrityFilterDebounce) {
       clearTimeout(this.integrityFilterDebounce);
+    }
+    if (this.assetsMapSkeletonTimer) {
+      clearTimeout(this.assetsMapSkeletonTimer);
+    }
+    if (this.assetsReportSkeletonTimer) {
+      clearTimeout(this.assetsReportSkeletonTimer);
     }
     if (this.kpiAnimationFrame) {
       cancelAnimationFrame(this.kpiAnimationFrame);
@@ -243,9 +302,13 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     );
   }
 
-  /** Assets module: map + report */
+  /** Assets module: map, inventário e timeline */
   get isAssetsModuleView(): boolean {
-    return this.activeView === 'assets-map' || this.activeView === 'assets-report';
+    return (
+      this.activeView === 'assets-map' ||
+      this.activeView === 'assets-report' ||
+      this.activeView === 'assets-timeline'
+    );
   }
 
   get moduleTitleLine(): string {
@@ -260,6 +323,8 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         return 'Vistoria e Censo (Fé Pública)';
       case 'assets-report':
         return 'Inventário e Tombamento';
+      case 'assets-timeline':
+        return 'Timeline de Auditoria (perícia digital)';
       default:
         return '';
     }
@@ -272,6 +337,9 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.activeView === 'assets-report') {
       return 'SIG-PATRIMÔNIO — inventário, tombamento e trilha de integridade documental.';
     }
+    if (this.activeView === 'assets-timeline') {
+      return 'Histórico imutável do bem — INPI, AP04 distinto e cadeia SHA-256 auditável.';
+    }
     if (this.isAssetsModuleView) {
       return 'SIG-PATRIMÔNIO — vistoria, censo e georreferenciamento para prova técnica.';
     }
@@ -282,9 +350,24 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.activeView === 'fuel-map' || this.activeView === 'assets-map') {
       this.destroyMap();
     }
+    this.stopAp04LiveStamp();
+    this.ap04ScannerOpen = false;
+    this.ap04Scanning = false;
     this.activeView = 'hub';
     this.dashboardChartsAnimated = false;
+    this.timelineRevealActive = false;
     this.syncControlTowerToasts();
+  }
+
+  playRipple(ev: MouseEvent): void {
+    const el = ev.currentTarget as HTMLElement | null;
+    if (!el) {
+      return;
+    }
+    el.classList.remove('m1-ripple-active');
+    void el.offsetWidth;
+    el.classList.add('m1-ripple-active');
+    window.setTimeout(() => el.classList.remove('m1-ripple-active'), 650);
   }
 
   setView(view: MilestoneHubView): void {
@@ -294,6 +377,15 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       view !== 'assets-map'
     ) {
       this.destroyMap();
+    }
+
+    if (this.assetsMapSkeletonTimer) {
+      clearTimeout(this.assetsMapSkeletonTimer);
+      this.assetsMapSkeletonTimer = undefined;
+    }
+    if (this.assetsReportSkeletonTimer) {
+      clearTimeout(this.assetsReportSkeletonTimer);
+      this.assetsReportSkeletonTimer = undefined;
     }
 
     this.activeView = view;
@@ -309,11 +401,19 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     if (view === 'fuel-map' || view === 'assets-map') {
+      this.assetsMapDataSkeleton = true;
       setTimeout(() => {
         this.ensureMapInitialized();
         this.map?.invalidateSize();
         this.renderViewportMarkers(view === 'assets-map');
       }, 150);
+      this.assetsMapSkeletonTimer = window.setTimeout(() => {
+        this.assetsMapDataSkeleton = false;
+        this.assetsMapSkeletonTimer = undefined;
+        this.cdr.markForCheck();
+      }, 700);
+    } else {
+      this.assetsMapDataSkeleton = false;
     }
 
     if (view === 'fuel-integrity') {
@@ -321,10 +421,29 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     if (view === 'assets-report' && this.demoData) {
+      this.assetsReportChainLoading = true;
       setTimeout(() => {
         this.triggerAssetsKpiOdometerRoll();
         this.cdr.markForCheck();
       }, 0);
+      this.assetsReportSkeletonTimer = window.setTimeout(() => {
+        this.assetsReportChainLoading = false;
+        this.assetsReportSkeletonTimer = undefined;
+        this.cdr.markForCheck();
+      }, 650);
+    } else if (view !== 'assets-report') {
+      this.assetsReportChainLoading = false;
+    }
+
+    if (view === 'assets-timeline') {
+      this.timelineRevealActive = false;
+      this.timelineCompareState = 'idle';
+      window.setTimeout(() => {
+        this.timelineRevealActive = true;
+        this.cdr.markForCheck();
+      }, 80);
+    } else {
+      this.timelineRevealActive = false;
     }
 
     this.syncControlTowerToasts();
@@ -549,7 +668,11 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.activeView === 'hub') {
       return this.auditTickerHub;
     }
-    if (this.activeView === 'assets-map' || this.activeView === 'assets-report') {
+    if (
+      this.activeView === 'assets-map' ||
+      this.activeView === 'assets-report' ||
+      this.activeView === 'assets-timeline'
+    ) {
       return this.auditTickerAssets;
     }
     return this.auditTickerFuel;
@@ -619,8 +742,213 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       { message: 'Cadeia de integridade: hash verificado no bloco', kind: 'info' },
     ];
     const pool =
-      this.activeView === 'assets-map' || this.activeView === 'assets-report' ? assets : fuel;
+      this.activeView === 'assets-map' ||
+      this.activeView === 'assets-report' ||
+      this.activeView === 'assets-timeline'
+        ? assets
+        : fuel;
     return pool[(this.toastSeq + this.activeView.length) % pool.length];
+  }
+
+  get patrimonyChainRows(): PatrimonyChainRow[] {
+    const rows = this.demoData?.resultados_motor_glosa || [];
+    const labels = ['Imóvel histórico', 'Monumento tombado', 'Bem móvel catalogado', 'Acervo museológico', 'Patrimônio público'];
+    return rows.slice(0, 8).map((r, i) => ({
+      tombo: r.placa,
+      descricao: `${labels[i % labels.length]} · ${r.transacaoId}`,
+      inpiRegistro: `INPI-BR-2024-PAT-${(827400 + r.id).toString(36).toUpperCase()}`,
+      integrityHash: r.integrityHash || `sim-${r.id}-${r.placa}`,
+      situacao: r.glosaStatus === 'APROVADO' ? 'Sincronizado / válido' : 'Em revisão pericial',
+    }));
+  }
+
+  get timelineEvents(): PatrimonyTimelineEvent[] {
+    const base = this.selectedMapRecord || this.demoData?.resultados_motor_glosa?.[0];
+    const tombo = base?.placa ?? 'TOMBO-DEMO';
+    const h = (suffix: string) =>
+      base?.integrityHash
+        ? `${base.integrityHash.slice(0, 24)}${suffix}`
+        : `a1f2c9${tombo}${suffix}`.padEnd(64, '0').slice(0, 64);
+    return [
+      {
+        id: 'ev-1',
+        kind: 'tombamento',
+        title: 'Tombamento inicial',
+        detail: `Registro definitivo do bem ${tombo} — livro tombo digital AP04.`,
+        at: '2023-08-14T09:22:00-05:00',
+        integrityHash: h('01'),
+      },
+      {
+        id: 'ev-2',
+        kind: 'cautela',
+        title: 'Termo de cautela',
+        detail: 'Responsabilidade formal do gestor e vinculação ao inventário SIG-PATRIMÔNIO.',
+        at: '2024-01-20T14:05:00-05:00',
+        integrityHash: h('02'),
+        tampered: true,
+      },
+      {
+        id: 'ev-3',
+        kind: 'vistoria',
+        title: 'Vistoria 1 — censo',
+        detail: 'Georreferenciamento e índice de conservação homologados.',
+        at: '2024-06-02T11:40:00-05:00',
+        integrityHash: h('03'),
+      },
+      {
+        id: 'ev-4',
+        kind: 'vistoria',
+        title: 'Vistoria 2 — fé pública (hoje)',
+        detail: 'Captura AP04 com carimbo dinâmico GPS + timestamp — trilha ativa.',
+        at: new Date().toISOString(),
+        integrityHash: h('04'),
+      },
+    ];
+  }
+
+  openAp04Scanner(fromFab = false): void {
+    if (this.ap04ScanDoneTimer) {
+      clearTimeout(this.ap04ScanDoneTimer);
+      this.ap04ScanDoneTimer = undefined;
+    }
+    this.ap04ScannerOpen = true;
+    this.ap04Scanning = true;
+    if (fromFab) {
+      this.ap04ShutterPulse = true;
+      window.setTimeout(() => {
+        this.ap04ShutterPulse = false;
+        this.cdr.markForCheck();
+      }, 450);
+    }
+    this.ap04ScanDoneTimer = window.setTimeout(() => {
+      this.ap04ScanDoneTimer = undefined;
+      if (!this.ap04ScannerOpen) {
+        return;
+      }
+      this.ap04Scanning = false;
+      this.ap04ScannerOpen = false;
+      this.ap04PhotoCaptured = true;
+      this.ap04PhotoFlash = true;
+      window.setTimeout(() => {
+        this.ap04PhotoFlash = false;
+        this.cdr.markForCheck();
+      }, 280);
+      this.startAp04LiveStamp();
+      this.cdr.markForCheck();
+    }, 2800);
+    this.cdr.markForCheck();
+  }
+
+  closeAp04Scanner(): void {
+    if (this.ap04ScanDoneTimer) {
+      clearTimeout(this.ap04ScanDoneTimer);
+      this.ap04ScanDoneTimer = undefined;
+    }
+    this.ap04ScannerOpen = false;
+    this.ap04Scanning = false;
+    this.cdr.markForCheck();
+  }
+
+  startAp04LiveStamp(): void {
+    this.stopAp04LiveStamp();
+    const lat = this.selectedMapRecord?.postoLat ?? -9.974;
+    const lng = this.selectedMapRecord?.postoLng ?? -67.81;
+    const tick = () => {
+      const jitter = (Math.random() - 0.5) * 0.00002;
+      this.ap04LiveGps = `${(lat + jitter).toFixed(6)}, ${(lng + jitter).toFixed(6)} (WGS-84)`;
+      this.ap04LiveTime = new Date().toISOString();
+      this.cdr.markForCheck();
+    };
+    tick();
+    this.ap04StampInterval = window.setInterval(tick, 400);
+  }
+
+  stopAp04LiveStamp(): void {
+    if (this.ap04StampInterval) {
+      clearInterval(this.ap04StampInterval);
+      this.ap04StampInterval = undefined;
+    }
+  }
+
+  confirmAp04PublicFaith(): void {
+    this.ap04Saving = true;
+    this.stopAp04LiveStamp();
+    window.setTimeout(() => {
+      this.ap04Saving = false;
+      this.ap04PhotoCaptured = false;
+      this.cdr.markForCheck();
+    }, 900);
+    this.cdr.markForCheck();
+  }
+
+  compareTimelineHashes(): void {
+    this.timelineCompareFailRound = !this.timelineCompareFailRound;
+    this.timelineCompareState = this.timelineCompareFailRound ? 'fail' : 'ok';
+    window.setTimeout(() => {
+      this.timelineCompareState = 'idle';
+      this.cdr.markForCheck();
+    }, 1900);
+    this.cdr.markForCheck();
+  }
+
+  timelineItemCompareClass(ev: PatrimonyTimelineEvent): string {
+    if (this.timelineCompareState === 'idle') {
+      return '';
+    }
+    if (this.timelineCompareState === 'ok') {
+      return 'm1-timeline-card--flash-ok';
+    }
+    return ev.tampered ? 'm1-timeline-card--flash-bad' : 'm1-timeline-card--flash-ok';
+  }
+
+  exportPatrimonyOfficialPdf(): void {
+    const rows = this.patrimonyChainRows
+      .map(
+        (row) =>
+          `<tr>
+            <td>${row.tombo}</td>
+            <td>${row.descricao}</td>
+            <td style="font-weight:700;color:#11CDEF;">${row.inpiRegistro}</td>
+            <td style="font-family:monospace;font-size:9px;color:#11CDEF;word-break:break-all;">${row.integrityHash}</td>
+            <td>${row.situacao}</td>
+          </tr>`
+      )
+      .join('');
+    const html = `
+      <!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório oficial — SIG-PATRIMÔNIO · Cadeia de integridade</title>
+      <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; color: #0f172a; padding: 24px; }
+        h1 { font-size: 18px; margin: 0 0 8px; }
+        h2 { font-size: 14px; color: #334155; margin: 0 0 20px; font-weight: 600; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th, td { border: 1px solid #cbd5e1; padding: 8px; vertical-align: top; }
+        th { background: #f1f5f9; text-align: left; }
+        .foot { margin-top: 20px; font-size: 10px; color: #64748b; }
+        .seal { color: #11CDEF; font-weight: 700; letter-spacing: 0.04em; }
+      </style></head><body>
+      <h1>SIG-PATRIMÔNIO — Inventário e tombamento (impressão oficial)</h1>
+      <h2>Cadeia de integridade SHA-256 · registro INPI exclusivo · gestão AP04 distinta</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Tombamento</th>
+            <th>Descrição</th>
+            <th>Registro INPI (texto-fonte)</th>
+            <th>SHA-256 (integridade)</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <p class="foot"><span class="seal">SHA-256</span> — cada linha reproduz o selo exibido no painel “Cadeia de integridade”. Documento gerado para auditoria (simulação).</p>
+      </body></html>
+    `;
+    const popup = window.open('', '_blank');
+    if (popup) {
+      popup.document.write(html);
+      popup.document.close();
+      popup.print();
+    }
   }
 
   getMapDistanceMeters(record: MotorResult): number {
