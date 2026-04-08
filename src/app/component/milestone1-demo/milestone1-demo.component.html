@@ -8,23 +8,13 @@
   <!-- Governance Center: hub -->
   <ng-container *ngIf="activeView === 'hub' && !loading">
     <header class="m1-hub-header">
-      <div class="m1-logo-showcase m1-hub-logo-reveal">
-        <div class="m1-logo-showcase__energy" aria-hidden="true"></div>
-        <div class="m1-logo-showcase__mesh" aria-hidden="true"></div>
-        <div class="m1-logo-showcase__panel">
-          <div class="m1-logo-showcase__scan" aria-hidden="true"></div>
-          <img
-            class="m1-inovathec-logo m1-inovathec-logo--hub-enter"
-            [src]="logoSrc"
-            width="176"
-            height="50"
-            alt="Inovathec Soluções Ltda"
-            decoding="sync"
-            fetchpriority="high"
-          />
+      <div class="m1-logo-plain m1-logo-fx">
+        <div class="m1-brand-wordmark" role="img" aria-label="Inovathec Soluções Ltda">
+          <span class="m1-brand-wordmark__name">INOVATEC</span>
+          <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
         </div>
       </div>
-      <p class="m1-hub-tagline m1-hub-tagline--enter">
+      <p class="m1-hub-tagline">
         Centro de Governança — identidade visual por módulo
       </p>
     </header>
@@ -157,19 +147,10 @@
     <header class="m1-hero m1-hero--module">
       <div class="m1-hero-main">
         <div class="m1-brand-strip">
-          <div class="m1-logo-showcase m1-logo-showcase--compact">
-            <div class="m1-logo-showcase__energy" aria-hidden="true"></div>
-            <div class="m1-logo-showcase__mesh" aria-hidden="true"></div>
-            <div class="m1-logo-showcase__panel">
-              <div class="m1-logo-showcase__scan" aria-hidden="true"></div>
-              <img
-                class="m1-inovathec-logo m1-inovathec-logo--compact"
-                [src]="logoSrc"
-                width="124"
-                height="35"
-                alt="Inovathec Soluções Ltda"
-                decoding="sync"
-              />
+          <div class="m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
+            <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inovathec Soluções Ltda">
+              <span class="m1-brand-wordmark__name">INOVATEC</span>
+              <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
             </div>
           </div>
         </div>

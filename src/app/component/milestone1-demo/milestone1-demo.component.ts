@@ -224,9 +224,6 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   private assetsMapSkeletonTimer?: ReturnType<typeof setTimeout>;
   private assetsReportSkeletonTimer?: ReturnType<typeof setTimeout>;
 
-  /** Root-absolute path; file is PNG (ChatGPT export was mislabeled as .svg). */
-  readonly logoSrc = '/assets/imagens/inovathec-logo.png';
-
   /** Home — “resto” SHA até primeira interação */
   hubFooterHashLocked = false;
   hubLiveFooterHash = '';
