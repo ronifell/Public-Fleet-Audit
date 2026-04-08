@@ -3,17 +3,18 @@
   [class.dark]="darkMode"
   [class.m1-assets-theme]="isAssetsModuleView"
   [class.m1-has-ticker]="!loading"
+  [class.m1-wrapper--hub-home]="activeView === 'hub' && !loading"
 >
   <!-- Governance Center: hub -->
   <ng-container *ngIf="activeView === 'hub' && !loading">
     <header class="m1-hub-header">
-      <div class="m1-logo-showcase">
+      <div class="m1-logo-showcase m1-hub-logo-reveal">
         <div class="m1-logo-showcase__energy" aria-hidden="true"></div>
         <div class="m1-logo-showcase__mesh" aria-hidden="true"></div>
         <div class="m1-logo-showcase__panel">
           <div class="m1-logo-showcase__scan" aria-hidden="true"></div>
           <img
-            class="m1-inovathec-logo"
+            class="m1-inovathec-logo m1-inovathec-logo--hub-enter"
             [src]="logoSrc"
             width="176"
             height="50"
@@ -23,40 +24,84 @@
           />
         </div>
       </div>
-      <p class="m1-hub-tagline">Centro de governança — identidade visual por módulo (combustível / ativos).</p>
+      <p class="m1-hub-tagline m1-hub-tagline--enter">
+        Centro de Governança — identidade visual por módulo
+      </p>
     </header>
 
     <div class="m1-hub-sections">
-      <section class="m1-hub-section" aria-labelledby="m1-hub-fuel-heading">
+      <section
+        class="m1-hub-section m1-hub-section--fuel m1-hub-section--from-left"
+        aria-labelledby="m1-hub-fuel-heading"
+      >
         <h2 id="m1-hub-fuel-heading" class="m1-hub-section-title m1-hub-section-title--fuel">
           SIG-FROTA — GESTÃO DE COMBUSTÍVEL
         </h2>
         <nav class="m1-hub-grid m1-hub-grid--fuel" aria-label="SIG-FROTA — gestão de combustível">
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('governance')">
-            <span class="m1-hub-tile-title">Monitoramento e Inteligência Fiscal</span>
+            <span class="m1-hub-tile__row">
+              <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                <span nz-icon nzType="dashboard" nzTheme="outline"></span>
+              </span>
+              <span class="m1-hub-tile-title">Monitoramento e Inteligência Fiscal</span>
+              <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+            </span>
           </button>
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-map')">
-            <span class="m1-hub-tile-title">Georreferenciamento de Prova</span>
+            <span class="m1-hub-tile__row">
+              <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                <span nz-icon nzType="global" nzTheme="outline"></span>
+              </span>
+              <span class="m1-hub-tile-title">Georreferenciamento de Prova</span>
+              <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+            </span>
           </button>
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-integrity')">
-            <span class="m1-hub-tile-title">Conformidade e Anti-Fraude</span>
+            <span class="m1-hub-tile__row">
+              <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                <span nz-icon nzType="file-text" nzTheme="outline"></span>
+              </span>
+              <span class="m1-hub-tile-title">Relatórios e Trilha de Auditoria</span>
+              <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+            </span>
           </button>
         </nav>
       </section>
 
-      <section class="m1-hub-section" aria-labelledby="m1-hub-asset-heading">
+      <section
+        class="m1-hub-section m1-hub-section--patrimony m1-hub-section--from-right"
+        aria-labelledby="m1-hub-asset-heading"
+      >
         <h2 id="m1-hub-asset-heading" class="m1-hub-section-title m1-hub-section-title--asset">
           SIG-PATRIMÔNIO — GESTÃO DE ATIVOS
         </h2>
         <nav class="m1-hub-grid m1-hub-grid--asset" aria-label="SIG-PATRIMÔNIO — gestão de ativos">
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-map')">
-            <span class="m1-hub-tile-title">Vistoria e Censo (Fé Pública)</span>
+            <span class="m1-hub-tile__row">
+              <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+              </span>
+              <span class="m1-hub-tile-title">Vistoria e Censo (Fé Pública)</span>
+              <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+            </span>
           </button>
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
-            <span class="m1-hub-tile-title">Inventário e Tombamento</span>
+            <span class="m1-hub-tile__row">
+              <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                <span nz-icon nzType="gold" nzTheme="outline"></span>
+              </span>
+              <span class="m1-hub-tile-title">Inventário e Tombamento</span>
+              <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+            </span>
           </button>
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-timeline')">
-            <span class="m1-hub-tile-title">Timeline de Auditoria (perícia digital)</span>
+            <span class="m1-hub-tile__row">
+              <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                <span nz-icon nzType="history" nzTheme="outline"></span>
+              </span>
+              <span class="m1-hub-tile-title">Timeline de Auditoria (perícia digital)</span>
+              <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+            </span>
           </button>
         </nav>
       </section>
@@ -66,12 +111,15 @@
       <button
         nz-button
         nzType="default"
-        class="m1-theme-toggle m1-ripple-target"
+        class="m1-theme-toggle m1-theme-toggle--modern m1-ripple-target"
         type="button"
         (mousedown)="playRipple($event)"
         (click)="toggleDarkMode()"
       >
-        {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
+        <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+          <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+        </span>
+        <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
       </button>
     </div>
   </ng-container>
@@ -82,22 +130,28 @@
       <button
         nz-button
         nzType="default"
-        class="milestone-back-btn m1-ripple-target"
+        class="milestone-back-btn m1-back-hub-btn m1-ripple-target"
         type="button"
         (mousedown)="playRipple($event)"
         (click)="goToHub()"
       >
-        Menu principal
+        <span class="m1-back-hub-btn__inner">
+          <span nz-icon nzType="arrow-left" nzTheme="outline" class="m1-back-hub-btn__ico" aria-hidden="true"></span>
+          <span class="m1-back-hub-btn__label">Menu principal</span>
+        </span>
       </button>
       <button
         nz-button
         nzType="default"
-        class="m1-theme-toggle m1-ripple-target"
+        class="m1-theme-toggle m1-theme-toggle--modern m1-ripple-target"
         type="button"
         (mousedown)="playRipple($event)"
         (click)="toggleDarkMode()"
       >
-        {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
+        <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+          <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+        </span>
+        <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
       </button>
     </div>
     <header class="m1-hero m1-hero--module">
@@ -126,21 +180,21 @@
     </header>
 
     <ng-container *ngIf="demoData">
-      <section *ngIf="activeView === 'governance'" class="grid cards m1-dashboard">
-        <nz-card class="m1-stat-card m1-stat-fleet">
+      <section *ngIf="activeView === 'governance'" class="grid cards m1-dashboard m1-fuel-pane-enter">
+        <nz-card class="m1-stat-card m1-stat-fleet m1-stat-fuel-success">
           <h4 class="m1-stat-label">Frota total</h4>
-          <div class="m1-stat-value">{{ totalFleet | number }}</div>
+          <div class="m1-stat-value">{{ displayFleet | number }}</div>
         </nz-card>
-        <nz-card class="m1-stat-card m1-stat-liters">
+        <nz-card class="m1-stat-card m1-stat-liters m1-stat-fuel-tech">
           <h4 class="m1-stat-label">Total de litros auditados</h4>
           <div class="m1-stat-value">{{ displayLiters | number: '1.0-2' }} <span class="m1-stat-unit">L</span></div>
         </nz-card>
-        <nz-card class="m1-stat-card m1-stat-savings m1-stat-savings--hero">
+        <nz-card class="m1-stat-card m1-stat-savings m1-stat-savings--hero m1-stat-fuel-success">
           <h4 class="m1-stat-label">Economia total</h4>
           <div class="m1-stat-value m1-stat-value--pulse"><span class="m1-currency">R$</span> {{ displaySavings | number: '1.2-2' }}</div>
         </nz-card>
 
-        <nz-card class="span-2 m1-roi-card">
+        <nz-card class="span-2 m1-roi-card m1-roi-card--fuel">
           <h4 class="m1-card-title">Gráfico de ROI</h4>
           <div class="roi-bars">
             <div class="bar-row">
@@ -164,7 +218,9 @@
               />
             </svg>
           </div>
-          <p class="highlight m1-roi-highlight">Economia: {{ displaySavingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span></p>
+          <p class="highlight m1-roi-highlight m1-roi-highlight--efficiency">
+            Economia: {{ displaySavingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span>
+          </p>
         </nz-card>
 
         <nz-card class="m1-irregularities-card">
@@ -183,9 +239,19 @@
         *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'"
         class="map-layout"
         [class.map-layout--patrimony]="activeView === 'assets-map'"
+        [class.map-layout--fuel]="activeView === 'fuel-map'"
+        [class.m1-fuel-pane-enter]="activeView === 'fuel-map'"
       >
         <nz-card class="map-card m1-map-card">
           <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Vistoria e Censo (Fé Pública)' : 'Georreferenciamento de Prova' }}</h4>
+          <div
+            *ngIf="activeView === 'fuel-map' && selectedMapRecord && isAutomaticDeduction(selectedMapRecord)"
+            class="m1-fuel-glosa-alert"
+            role="alert"
+          >
+            <span nz-icon nzType="warning" nzTheme="outline" class="m1-fuel-glosa-alert__ico"></span>
+            Alerta: transação fora do raio — glosa / dedução automática acionada
+          </div>
           <div class="map-wrap">
             <div
               *ngIf="activeView === 'assets-map' && assetsMapDataSkeleton"
@@ -209,6 +275,18 @@
           </div>
           <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
         </nz-card>
+        <button
+          *ngIf="activeView === 'fuel-map'"
+          type="button"
+          class="m1-fuel-proof-fab m1-ripple-target"
+          (mousedown)="playRipple($event)"
+          (click)="triggerFuelCamera($event)"
+          [class.m1-fuel-proof-fab--pulse]="fuelShutterPulse"
+          aria-label="Capturar prova — câmera nativa com marca d'água"
+        >
+          <span class="m1-fuel-proof-fab__ring" aria-hidden="true"></span>
+          <span nz-icon nzType="camera" nzTheme="outline"></span>
+        </button>
         <button
           *ngIf="activeView === 'assets-map'"
           type="button"
@@ -235,6 +313,32 @@
                   : 'Sem dedução automática (≤500 m)'
               }}
             </p>
+            <input
+              id="m1-fuel-camera-input"
+              type="file"
+              class="m1-sr-only"
+              accept="image/*"
+              capture="environment"
+              (change)="onFuelCameraInputChange($event)"
+              tabindex="-1"
+              aria-hidden="true"
+            />
+            <div class="m1-fuel-proof-block">
+              <p class="m1-fuel-proof-lead">Prova pericial — câmera nativa (galeria bloqueada no protocolo).</p>
+              <button
+                nz-button
+                nzType="primary"
+                type="button"
+                class="m1-fuel-proof-btn m1-ripple-target"
+                (mousedown)="playRipple($event)"
+                (click)="triggerFuelCamera($event)"
+              >
+                Capturar imagem com marca d'água
+              </button>
+              <div *ngIf="fuelProofPreviewUrl" class="m1-fuel-proof-preview">
+                <img [src]="fuelProofPreviewUrl" alt="Pré-visualização da prova com data, hora e GPS" />
+              </div>
+            </div>
           </ng-container>
 
           <div *ngIf="activeView === 'assets-map'" class="m1-patrimony-validation-block">
@@ -251,7 +355,7 @@
             </p>
           </div>
 
-          <div class="m1-ap04-field-card">
+          <div class="m1-ap04-field-card" *ngIf="activeView === 'assets-map'">
             <h4 class="m1-card-title m1-ap04-field-title">Gestão AP04 — leitor de tombamento</h4>
             <p class="m1-ap04-field-lead">
               Sistema distinto do cadastro genérico: captura exclusiva por câmera segura (sem galeria) e trilha INPI.
@@ -297,11 +401,11 @@
         </nz-card>
       </section>
 
-      <section *ngIf="activeView === 'fuel-integrity'" class="integrity-layout">
+      <section *ngIf="activeView === 'fuel-integrity'" class="integrity-layout m1-fuel-pane-enter">
         <nz-card class="m1-integrity-card">
           <div class="integrity-process-zone">
             <div *ngIf="integrityLaserSweep" class="integrity-process-laser" aria-hidden="true"></div>
-            <h4 class="m1-card-title m1-integrity-heading">Conformidade e Anti-Fraude</h4>
+            <h4 class="m1-card-title m1-integrity-heading">Relatórios e Trilha de Auditoria</h4>
             <div class="filters m1-filters">
             <div class="filter-field">
               <span class="filter-label">Data</span>
@@ -321,7 +425,7 @@
               </select>
             </div>
             <div class="filter-actions">
-              <button nz-button nzType="primary" (click)="exportMockPdf()">Exportar PDF (simulação)</button>
+              <button nz-button nzType="primary" type="button" (click)="exportFuelAuditPdf()">Exportar PDF oficial</button>
             </div>
             </div>
 
@@ -347,9 +451,22 @@
               role="list"
               aria-label="Registros de integridade"
             >
-              <div *ngFor="let row of filteredIntegrityRows; let i = index" class="integrity-mobile-card integrity-card-scan" role="listitem">
+              <div
+                *ngFor="let row of filteredIntegrityRows; let i = index"
+                class="integrity-mobile-card integrity-card-scan m1-integrity-cascade"
+                role="listitem"
+                [style.animation-delay.ms]="i * 85"
+              >
                 <div class="integrity-beam" aria-hidden="true" [style.animation-delay.ms]="i * 100"></div>
                 <div class="integrity-mobile-card-head">
+                  <span
+                    class="m1-integrity-shield"
+                    [class.m1-integrity-shield--ok]="integrityShieldOk[row.id]"
+                    aria-hidden="true"
+                  >
+                    <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+                    <span *ngIf="integrityShieldOk[row.id]" class="m1-integrity-shield__check" nz-icon nzType="check" nzTheme="outline"></span>
+                  </span>
                   <span class="integrity-mobile-plate">{{ row.plate }}</span>
                   <span [class.verified]="row.verified" class="integrity-mobile-status">
                     {{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}
@@ -375,7 +492,7 @@
                   <div class="integrity-mobile-dl-row integrity-mobile-dl-hash">
                     <dt>SHA-256</dt>
                     <dd>
-                      <code class="integrity-mobile-hash hash-glow">{{ row.calculatedHash }}</code>
+                      <code class="integrity-mobile-hash hash-glow m1-fuel-hash-line">{{ getIntegrityHashDisplay(row, i) }}</code>
                     </dd>
                   </div>
                 </dl>
@@ -392,9 +509,10 @@
               aria-label="Tabela de dados de integridade"
             >
               <div class="integrity-table-beam" aria-hidden="true"></div>
-              <nz-table [nzData]="filteredIntegrityRows" [nzPageSize]="5" [nzScroll]="{ x: '960px' }">
+              <nz-table [nzData]="filteredIntegrityRows" [nzPageSize]="5" [nzScroll]="{ x: '1020px' }">
                 <thead>
                   <tr>
+                    <th nzWidth="56px">Integr.</th>
                     <th nzWidth="112px">Data</th>
                     <th nzWidth="120px">Departamento</th>
                     <th nzWidth="100px">Placa</th>
@@ -405,13 +523,27 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let row of filteredIntegrityRows" class="integrity-row-scan">
+                  <tr
+                    *ngFor="let row of filteredIntegrityRows; let ri = index"
+                    class="integrity-row-scan m1-integrity-cascade"
+                    [style.animation-delay.ms]="ri * 70"
+                  >
+                    <td class="m1-integrity-shield-cell">
+                      <span
+                        class="m1-integrity-shield m1-integrity-shield--table"
+                        [class.m1-integrity-shield--ok]="integrityShieldOk[row.id]"
+                        aria-hidden="true"
+                      >
+                        <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+                        <span *ngIf="integrityShieldOk[row.id]" class="m1-integrity-shield__check" nz-icon nzType="check" nzTheme="outline"></span>
+                      </span>
+                    </td>
                     <td class="cell-nowrap">{{ row.date }}</td>
                     <td>{{ row.department }}</td>
                     <td class="cell-nowrap">{{ row.plate }}</td>
                     <td class="cell-nowrap">{{ row.liters }}</td>
                     <td class="cell-nowrap">R$ {{ row.amount | number: '1.2-2' }}</td>
-                    <td class="hash hash-cell-glow">{{ row.calculatedHash }}</td>
+                    <td class="hash hash-cell-glow m1-fuel-hash-line">{{ getIntegrityHashDisplay(row, ri) }}</td>
                     <td>
                       <span [class.verified]="row.verified">{{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}</span>
                     </td>
@@ -489,12 +621,12 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let row of patrimonyChainRows">
-                    <td class="cell-nowrap">{{ row.tombo }}</td>
-                    <td>{{ row.descricao }}</td>
-                    <td><code class="m1-inpi-code">{{ row.inpiRegistro }}</code></td>
-                    <td><code class="m1-sha256-official">{{ row.integrityHash }}</code></td>
-                    <td>
+                  <tr *ngFor="let row of patrimonyChainRows" class="m1-integrity-chain-row">
+                    <td class="cell-nowrap" data-label="Tombamento">{{ row.tombo }}</td>
+                    <td data-label="Descrição">{{ row.descricao }}</td>
+                    <td data-label="INPI"><code class="m1-inpi-code">{{ row.inpiRegistro }}</code></td>
+                    <td data-label="SHA-256"><code class="m1-sha256-official">{{ row.integrityHash }}</code></td>
+                    <td data-label="Situação">
                       <span
                         class="m1-chain-status"
                         [class.m1-chain-status--ok]="row.situacao.indexOf('válido') >= 0"
@@ -521,18 +653,29 @@
               nz-button
               nzType="primary"
               type="button"
-              class="m1-ripple-target"
+              class="m1-ripple-target m1-compare-hashes-btn"
+              [disabled]="timelineCompareState !== 'idle'"
               (mousedown)="playRipple($event)"
               (click)="compareTimelineHashes()"
             >
-              Comparar Hashes
+              <span class="m1-compare-hashes-btn__inner">
+                <span nz-icon nzType="swap" nzTheme="outline" class="m1-compare-hashes-btn__ico" aria-hidden="true"></span>
+                <span class="m1-compare-hashes-btn__label">Comparar Hashes</span>
+              </span>
             </button>
-            <span class="m1-timeline-actions__hint" *ngIf="timelineCompareState === 'idle'"
+            <span
+              class="m1-timeline-actions__hint"
+              [class.m1-timeline-actions__hint--during-compare]="timelineCompareState !== 'idle'"
+              [attr.aria-hidden]="timelineCompareState !== 'idle'"
               >Alterna demonstração: rodada autêntica (verde) / divergência simulada (vermelho no termo de cautela).</span
             >
           </div>
-          <div class="m1-timeline-track" [class.m1-timeline-track--active]="timelineRevealActive">
-            <ng-container *ngFor="let ev of timelineEvents; let i = index; let last = last">
+          <div
+            class="m1-timeline-track"
+            [class.m1-timeline-track--active]="timelineRevealActive"
+            [class.m1-timeline-track--hash-compare]="timelineCompareState !== 'idle'"
+          >
+            <ng-container *ngFor="let ev of timelineEvents; trackBy: trackByTimelineId; let i = index; let last = last">
               <div
                 class="m1-timeline-node"
                 [class.m1-timeline-node--latest]="last"
@@ -601,7 +744,16 @@
     role="status"
     aria-live="polite"
   >
-    <div class="m1-footer-integrity-strip">SHA-256 · trilha de auditoria e integridade documental</div>
+    <div class="m1-footer-integrity-strip">
+      <div class="m1-footer-integrity-marquee">
+        <span class="m1-footer-integrity-marquee__text">SHA-256 · TRILHA DE AUDITORIA E INTEGRIDADE DOCUMENTAL · FÉ PÚBLICA</span>
+        <span class="m1-footer-integrity-marquee__text" aria-hidden="true">SHA-256 · TRILHA DE AUDITORIA E INTEGRIDADE DOCUMENTAL · FÉ PÚBLICA</span>
+      </div>
+    </div>
+    <div class="m1-hub-footer-scratch" *ngIf="activeView === 'hub'">
+      <span class="m1-hub-footer-scratch__label">Resto (SHA-256)</span>
+      <code class="m1-hub-footer-scratch__hash">{{ hubFooterHashLocked ? hubFixedFooterHash : hubLiveFooterHash }}</code>
+    </div>
     <div class="m1-audit-ticker-track">
       <span class="m1-audit-ticker-text">{{ auditTickerText }}</span>
       <span class="m1-audit-ticker-text" aria-hidden="true">{{ auditTickerText }}</span>

@@ -110,6 +110,14 @@ export type TimelineCompareState = 'idle' | 'ok' | 'fail';
 export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly bodyDarkClass = 'milestone1-demo-dark';
 
+  /**
+   * Timeline — um único ciclo de ênfase nos quatro cartões ao “Comparar Hashes”.
+   * Igual a --m1-timeline-flash-total no SCSS + folga p/ paint.
+   */
+  private static readonly timelineFlashTotalMs = 3000;
+  private static readonly timelineCompareResetMs =
+    Milestone1DemoComponent.timelineFlashTotalMs + 220;
+
   loading = true;
   /** Governance Center hub or a module screen */
   activeView: MilestoneHubView = 'hub';
@@ -133,13 +141,24 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   /** Toggles to force CSS animation restart on the integrity scanner overlay */
   integrityScannerReset = false;
 
-  /** Animated KPI values on governance */
+  /** Animated KPI values on governance (count-up 1,5s) */
+  displayFleet = 0;
   displaySavings = 0;
   displayLiters = 0;
   displayGrossSpending = 0;
   displayActualSpending = 0;
   displaySavingsPercent = 0;
   private kpiAnimationFrame = 0;
+
+  /** Tela 3 — escudo por linha + “embaralhamento” SHA antes de fixar */
+  integrityShieldOk: Record<number, boolean> = {};
+  integrityScrambleTick = 0;
+  private integrityScrambleTimer?: ReturnType<typeof setInterval>;
+  private integrityShieldTimers: ReturnType<typeof setTimeout>[] = [];
+
+  /** Tela 2 combustível — prova com câmera (marca d'água) */
+  fuelProofPreviewUrl: string | null = null;
+  fuelShutterPulse = false;
 
   /** Torre de controle — toasts automáticos (canto superior direito) */
   controlTowerToasts: ControlTowerToast[] = [];
@@ -195,6 +214,11 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   timelineRevealActive = false;
   timelineCompareState: TimelineCompareState = 'idle';
   private timelineCompareFailRound = false;
+  private timelineCompareEndTimer?: ReturnType<typeof setTimeout>;
+  /** ISO do último evento da timeline — só atualiza ao entrar na tela (evita *ngFor a invalidar a cada CD) */
+  private timelineLatestIso = '';
+  /** Lista estável; não usar getter que devolve [] novo a cada ciclo (reiniciava animação CSS). */
+  timelineEvents: PatrimonyTimelineEvent[] = [];
 
   private integrityFilterDebounce?: ReturnType<typeof setTimeout>;
   private assetsMapSkeletonTimer?: ReturnType<typeof setTimeout>;
@@ -202,6 +226,14 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   /** Root-absolute path; file is PNG (ChatGPT export was mislabeled as .svg). */
   readonly logoSrc = '/assets/imagens/inovathec-logo.png';
+
+  /** Home — “resto” SHA até primeira interação */
+  hubFooterHashLocked = false;
+  hubLiveFooterHash = '';
+  hubFixedFooterHash = '';
+  private hubFooterHashTimer?: ReturnType<typeof setInterval>;
+  /** Ícone lua/sol — rotação ao alternar tema */
+  themeIconSpinning = false;
 
   constructor(
     private readonly http: HttpClient,
@@ -220,6 +252,10 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         this.viewportRecords = data.resultados_motor_glosa;
         this.integrityRows = await this.buildIntegrityRows(data);
         this.loading = false;
+        if (this.activeView === 'hub') {
+          this.hubFooterHashLocked = false;
+          this.startHubFooterHashScratch();
+        }
         if (this.activeView === 'assets-report') {
           setTimeout(() => {
             this.triggerAssetsKpiOdometerRoll();
@@ -234,6 +270,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
           }, 80);
         }
         this.syncControlTowerToasts();
+        this.rebuildPatrimonyTimelineEvents();
         setTimeout(() => this.ensureMapInitialized(), 0);
       },
       error: () => {
@@ -269,6 +306,12 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.conservationRaf) {
       cancelAnimationFrame(this.conservationRaf);
     }
+    this.clearIntegrityScramble();
+    this.clearIntegrityShieldTimers();
+    this.clearHubFooterHashScratch();
+    if (this.timelineCompareEndTimer) {
+      clearTimeout(this.timelineCompareEndTimer);
+    }
     this.renderer.removeClass(this.document.body, Milestone1DemoComponent.bodyDarkClass);
   }
 
@@ -285,12 +328,59 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   toggleDarkMode(): void {
+    this.themeIconSpinning = true;
+    window.setTimeout(() => {
+      this.themeIconSpinning = false;
+      this.cdr.markForCheck();
+    }, 700);
+    if (this.activeView === 'hub') {
+      this.lockHubFooterScratch();
+    }
     this.darkMode = !this.darkMode;
     if (this.darkMode) {
       this.renderer.addClass(this.document.body, Milestone1DemoComponent.bodyDarkClass);
     } else {
       this.renderer.removeClass(this.document.body, Milestone1DemoComponent.bodyDarkClass);
     }
+    this.cdr.markForCheck();
+  }
+
+  private tickHubFooterHash(): void {
+    const hex = '0123456789abcdef';
+    let s = '';
+    for (let i = 0; i < 64; i++) {
+      s += hex[Math.floor(Math.random() * 16)];
+    }
+    this.hubLiveFooterHash = s;
+    this.cdr.markForCheck();
+  }
+
+  private clearHubFooterHashScratch(): void {
+    if (this.hubFooterHashTimer != null) {
+      clearInterval(this.hubFooterHashTimer);
+      this.hubFooterHashTimer = undefined;
+    }
+  }
+
+  private startHubFooterHashScratch(): void {
+    this.clearHubFooterHashScratch();
+    if (this.activeView !== 'hub' || this.hubFooterHashLocked || this.loading) {
+      return;
+    }
+    this.tickHubFooterHash();
+    this.hubFooterHashTimer = setInterval(() => this.tickHubFooterHash(), 100);
+  }
+
+  private lockHubFooterScratch(): void {
+    this.clearHubFooterHashScratch();
+    this.hubFooterHashLocked = true;
+    const fromData =
+      this.demoData?.abastecimentos?.[0]?.integrityHash ??
+      this.integrityRows?.[0]?.calculatedHash;
+    this.hubFixedFooterHash =
+      (fromData && String(fromData).replace(/\s/g, '')) ||
+      this.hubLiveFooterHash ||
+      '0'.repeat(64);
   }
 
   /** Fuel module: governance, geo audit, integrity */
@@ -318,7 +408,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       case 'fuel-map':
         return 'Georreferenciamento de Prova';
       case 'fuel-integrity':
-        return 'Conformidade e Anti-Fraude';
+        return 'Relatórios e Trilha de Auditoria';
       case 'assets-map':
         return 'Vistoria e Censo (Fé Pública)';
       case 'assets-report':
@@ -331,6 +421,9 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   get moduleSubtitle(): string {
+    if (this.activeView === 'fuel-integrity') {
+      return 'Fecho jurídico para o auditor — relatório, QR de validação e SHA-256 com fé pública.';
+    }
     if (this.isFuelModuleView) {
       return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
     }
@@ -356,6 +449,14 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     this.activeView = 'hub';
     this.dashboardChartsAnimated = false;
     this.timelineRevealActive = false;
+    this.timelineCompareState = 'idle';
+    if (this.timelineCompareEndTimer) {
+      clearTimeout(this.timelineCompareEndTimer);
+      this.timelineCompareEndTimer = undefined;
+    }
+    this.fuelProofPreviewUrl = null;
+    this.hubFooterHashLocked = false;
+    this.startHubFooterHashScratch();
     this.syncControlTowerToasts();
   }
 
@@ -371,6 +472,11 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   setView(view: MilestoneHubView): void {
+    if (view !== 'fuel-integrity') {
+      this.clearIntegrityScramble();
+      this.clearIntegrityShieldTimers();
+    }
+
     if (
       (this.activeView === 'fuel-map' || this.activeView === 'assets-map') &&
       view !== 'fuel-map' &&
@@ -388,7 +494,17 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       this.assetsReportSkeletonTimer = undefined;
     }
 
+    const wasHub = this.activeView === 'hub';
+
     this.activeView = view;
+
+    if (wasHub && view !== 'hub') {
+      this.lockHubFooterScratch();
+    }
+
+    if (view !== 'fuel-map') {
+      this.fuelProofPreviewUrl = null;
+    }
 
     if (view === 'governance') {
       this.queueKpiAnimation();
@@ -418,6 +534,11 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
     if (view === 'fuel-integrity') {
       this.triggerIntegrityScan();
+      this.startIntegrityVisualEffects();
+    }
+
+    if (view === 'governance' || view === 'fuel-map' || view === 'fuel-integrity') {
+      this.pushScreenAuditContext(view);
     }
 
     if (view === 'assets-report' && this.demoData) {
@@ -438,12 +559,19 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (view === 'assets-timeline') {
       this.timelineRevealActive = false;
       this.timelineCompareState = 'idle';
+      this.timelineLatestIso = new Date().toISOString();
+      this.rebuildPatrimonyTimelineEvents();
       window.setTimeout(() => {
         this.timelineRevealActive = true;
         this.cdr.markForCheck();
       }, 80);
     } else {
       this.timelineRevealActive = false;
+      if (this.timelineCompareEndTimer) {
+        clearTimeout(this.timelineCompareEndTimer);
+        this.timelineCompareEndTimer = undefined;
+      }
+      this.timelineCompareState = 'idle';
     }
 
     this.syncControlTowerToasts();
@@ -457,6 +585,9 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     this.integrityFilterDebounce = setTimeout(() => {
       this.integrityFilterLoading = false;
       this.triggerIntegrityScan();
+      if (this.activeView === 'fuel-integrity') {
+        this.startIntegrityVisualEffects();
+      }
       this.cdr.markForCheck();
     }, 550);
   }
@@ -477,11 +608,13 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private queueKpiAnimation(): void {
+    const targetFleet = this.totalFleet;
     const targetS = this.totalSavings;
     const targetL = this.totalLiters;
     const targetG = this.grossSpending;
     const targetA = this.actualSpending;
     const targetP = this.savingsPercent;
+    this.displayFleet = 0;
     this.displaySavings = 0;
     this.displayLiters = 0;
     this.displayGrossSpending = 0;
@@ -493,6 +626,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     const reduceMotion =
       typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
+      this.displayFleet = targetFleet;
       this.displaySavings = targetS;
       this.displayLiters = targetL;
       this.displayGrossSpending = targetG;
@@ -501,11 +635,12 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       this.cdr.markForCheck();
       return;
     }
-    const duration = 2400;
+    const duration = 1500;
     const t0 = performance.now();
     const tick = (now: number) => {
       const t = Math.min(1, (now - t0) / duration);
       const ease = 1 - Math.pow(1 - t, 3);
+      this.displayFleet = Math.round(targetFleet * ease);
       this.displaySavings = targetS * ease;
       this.displayLiters = targetL * ease;
       this.displayGrossSpending = targetG * ease;
@@ -515,6 +650,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       if (t < 1) {
         this.kpiAnimationFrame = requestAnimationFrame(tick);
       } else {
+        this.displayFleet = targetFleet;
         this.displaySavings = targetS;
         this.displayLiters = targetL;
         this.displayGrossSpending = targetG;
@@ -524,6 +660,125 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       }
     };
     this.kpiAnimationFrame = requestAnimationFrame(tick);
+  }
+
+  private pushScreenAuditContext(screenId: string): void {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.dispatchEvent(
+      new CustomEvent('sig-frota:screen', {
+        detail: { screenId, ts: Date.now() },
+      })
+    );
+  }
+
+  private clearIntegrityScramble(): void {
+    if (this.integrityScrambleTimer !== undefined) {
+      clearInterval(this.integrityScrambleTimer);
+      this.integrityScrambleTimer = undefined;
+    }
+    this.integrityScrambleTick = 0;
+  }
+
+  private clearIntegrityShieldTimers(): void {
+    this.integrityShieldTimers.forEach((id) => clearTimeout(id));
+    this.integrityShieldTimers = [];
+    this.integrityShieldOk = {};
+  }
+
+  /** Escudo + embaralhamento SHA na lista / tabela (Tela 3 combustível) */
+  startIntegrityVisualEffects(): void {
+    if (this.activeView !== 'fuel-integrity') {
+      return;
+    }
+    this.clearIntegrityScramble();
+    this.clearIntegrityShieldTimers();
+    this.integrityShieldOk = {};
+    this.integrityScrambleTick = 0;
+    this.integrityScrambleTimer = window.setInterval(() => {
+      this.integrityScrambleTick++;
+      if (this.integrityScrambleTick > 48) {
+        this.clearIntegrityScramble();
+      }
+      this.cdr.markForCheck();
+    }, 90);
+    this.filteredIntegrityRows.forEach((row, i) => {
+      const id = window.setTimeout(() => {
+        this.integrityShieldOk[row.id] = true;
+        this.cdr.markForCheck();
+      }, 480 + i * 100);
+      this.integrityShieldTimers.push(id);
+    });
+    this.cdr.markForCheck();
+  }
+
+  getIntegrityHashDisplay(row: IntegrityRow, index: number): string {
+    const settleAt = 6 + index * 3;
+    if (!this.integrityScrambleTimer || this.integrityScrambleTick >= settleAt) {
+      return row.calculatedHash;
+    }
+    return this.scrambleHexPlaceholder(row.calculatedHash.length, row.id + index + this.integrityScrambleTick);
+  }
+
+  private scrambleHexPlaceholder(len: number, seed: number): string {
+    const chars = '0123456789abcdef';
+    let out = '';
+    for (let i = 0; i < len; i++) {
+      out += chars[(seed * (i + 13) + this.integrityScrambleTick * 7 + i) % 16];
+    }
+    return out;
+  }
+
+  triggerFuelCamera(ev: MouseEvent): void {
+    this.playRipple(ev);
+    this.fuelShutterPulse = true;
+    window.setTimeout(() => {
+      this.fuelShutterPulse = false;
+      this.cdr.markForCheck();
+    }, 400);
+    const input = this.document.getElementById('m1-fuel-camera-input') as HTMLInputElement | null;
+    input?.click();
+    this.cdr.markForCheck();
+  }
+
+  onFuelCameraInputChange(ev: Event): void {
+    const input = ev.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file || !file.type.startsWith('image/')) {
+      input.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      const img = new Image();
+      img.onload = () => {
+        const canvas = this.document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          input.value = '';
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+        const lat = this.selectedMapRecord?.postoLat ?? -15.601;
+        const lng = this.selectedMapRecord?.postoLng ?? -56.097;
+        const stamp = `${new Date().toISOString()} · GPS ${lat.toFixed(5)}, ${lng.toFixed(5)} (WGS-84)`;
+        const barH = Math.max(40, Math.round(canvas.height * 0.08));
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+        ctx.fillRect(0, canvas.height - barH, canvas.width, barH);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `${Math.max(11, Math.round(canvas.width * 0.018))}px system-ui, sans-serif`;
+        ctx.fillText(stamp, 10, canvas.height - Math.round(barH / 3));
+        this.fuelProofPreviewUrl = canvas.toDataURL('image/jpeg', 0.85);
+        this.ngZone.run(() => this.cdr.markForCheck());
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
   }
 
   private triggerAssetsKpiOdometerRoll(): void {
@@ -762,14 +1017,23 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     }));
   }
 
-  get timelineEvents(): PatrimonyTimelineEvent[] {
-    const base = this.selectedMapRecord || this.demoData?.resultados_motor_glosa?.[0];
+  trackByTimelineId(_index: number, ev: PatrimonyTimelineEvent): string {
+    return ev.id;
+  }
+
+  private rebuildPatrimonyTimelineEvents(): void {
+    if (!this.demoData?.resultados_motor_glosa?.length) {
+      this.timelineEvents = [];
+      return;
+    }
+    const base = this.selectedMapRecord || this.demoData.resultados_motor_glosa[0];
     const tombo = base?.placa ?? 'TOMBO-DEMO';
     const h = (suffix: string) =>
       base?.integrityHash
         ? `${base.integrityHash.slice(0, 24)}${suffix}`
         : `a1f2c9${tombo}${suffix}`.padEnd(64, '0').slice(0, 64);
-    return [
+    const latestAt = this.timelineLatestIso || new Date().toISOString();
+    this.timelineEvents = [
       {
         id: 'ev-1',
         kind: 'tombamento',
@@ -800,7 +1064,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         kind: 'vistoria',
         title: 'Vistoria 2 — fé pública (hoje)',
         detail: 'Captura AP04 com carimbo dinâmico GPS + timestamp — trilha ativa.',
-        at: new Date().toISOString(),
+        at: latestAt,
         integrityHash: h('04'),
       },
     ];
@@ -882,12 +1146,19 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   compareTimelineHashes(): void {
+    if (this.timelineCompareState !== 'idle') {
+      return;
+    }
     this.timelineCompareFailRound = !this.timelineCompareFailRound;
     this.timelineCompareState = this.timelineCompareFailRound ? 'fail' : 'ok';
-    window.setTimeout(() => {
+    if (this.timelineCompareEndTimer) {
+      clearTimeout(this.timelineCompareEndTimer);
+    }
+    this.timelineCompareEndTimer = window.setTimeout(() => {
+      this.timelineCompareEndTimer = undefined;
       this.timelineCompareState = 'idle';
       this.cdr.markForCheck();
-    }, 1900);
+    }, Milestone1DemoComponent.timelineCompareResetMs);
     this.cdr.markForCheck();
   }
 
@@ -1050,22 +1321,63 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   exportMockPdf(): void {
+    this.exportFuelAuditPdf();
+  }
+
+  exportFuelAuditPdf(): void {
+    const gross = this.grossSpending;
+    const actual = this.actualSpending;
+    const pctGross = 100;
+    const pctActual = gross ? (actual / gross) * 100 : 0;
     const rows = this.filteredIntegrityRows
       .map(
         (row) =>
           `<tr><td>${row.date}</td><td>${row.department}</td><td>${row.plate}</td><td>${row.liters}</td><td>R$ ${row.amount.toFixed(
             2
-          )}</td><td>${row.calculatedHash}</td><td>${row.verified ? 'Verificado / imutável' : 'Em revisão'}</td></tr>`
+          )}</td><td style="font-family:monospace;font-size:8px;color:#11CDEF;">${row.calculatedHash}</td><td>${row.verified ? 'Verificado / imutável' : 'Em revisão'}</td></tr>`
       )
       .join('');
+    const validationUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/milestone1-demo?auditoria=SIG-FROTA&relatorio=1`;
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(validationUrl)}`;
+    const footerHash =
+      this.filteredIntegrityRows[0]?.calculatedHash ||
+      '0000000000000000000000000000000000000000000000000000000000000000';
     const html = `
-      <html><head><title>Relatório de integridade SIG-FROTA</title></head><body>
-      <h2>Relatório de integridade – Painel de auditoria (PDF simulado)</h2>
-      <table border="1" cellpadding="6" cellspacing="0">
-      <tr><th>Data</th><th>Departamento</th><th>Placa</th><th>Litros</th><th>Valor</th><th>SHA-256</th><th>Situação</th></tr>
-      ${rows}
+      <!DOCTYPE html><html><head><meta charset="utf-8"><title>SIG-FROTA — Relatório e trilha de auditoria</title>
+      <style>
+        body { font-family: 'Segoe UI', system-ui, sans-serif; color: #0f172a; padding: 22px; }
+        h1 { font-size: 17px; margin: 0 0 6px; }
+        h2 { font-size: 13px; color: #475569; margin: 0 0 16px; font-weight: 600; }
+        .roi-wrap { margin: 16px 0 20px; padding: 14px; border: 1px solid #cbd5e1; border-radius: 10px; background: #f8fafc; }
+        .roi-title { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #64748b; margin-bottom: 10px; }
+        .roi-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 11px; }
+        .roi-bar { flex: 1; height: 16px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+        .roi-fill-gross { height: 100%; width: ${pctGross}%; background: linear-gradient(90deg, #312e81 0%, #2563eb 40%, #11CDEF 100%); border-radius: 999px; }
+        .roi-fill-real { height: 100%; width: ${pctActual}%; background: linear-gradient(90deg, #134e4a 0%, #2DCE89 55%, #86efac 100%); border-radius: 999px; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 8px; }
+        th, td { border: 1px solid #cbd5e1; padding: 6px; text-align: left; vertical-align: top; }
+        th { background: #f1f5f9; }
+        .foot { margin-top: 22px; padding-top: 14px; border-top: 2px solid #11CDEF; display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+        .sha { font-family: monospace; font-size: 9px; color: #11CDEF; word-break: break-all; max-width: 420px; line-height: 1.35; }
+        .tce { font-size: 10px; font-weight: 700; color: #0f172a; width: 100%; margin-top: 8px; }
+      </style></head><body>
+      <h1>SIG-FROTA — Relatórios e trilha de auditoria</h1>
+      <h2>Inteligência fiscal · georreferenciamento · integridade SHA-256</h2>
+      <div class="roi-wrap">
+        <div class="roi-title">Gráfico de ROI (mesma leitura da Tela 1)</div>
+        <div class="roi-row"><span style="width:88px;">Gasto bruto</span><div class="roi-bar"><div class="roi-fill-gross"></div></div><strong>R$ ${gross.toFixed(2)}</strong></div>
+        <div class="roi-row"><span style="width:88px;">Gasto real</span><div class="roi-bar"><div class="roi-fill-real"></div></div><strong>R$ ${actual.toFixed(2)}</strong></div>
+        <div class="roi-row" style="margin-top:10px;color:#2DCE89;font-weight:700;">Economia: ${this.savingsPercent.toFixed(1)}% (meta operacional)</div>
+      </div>
+      <table>
+        <thead><tr><th>Data</th><th>Departamento</th><th>Placa</th><th>Litros</th><th>Valor</th><th>SHA-256</th><th>Situação</th></tr></thead>
+        <tbody>${rows}</tbody>
       </table>
-      <p><strong>Declaração de integridade:</strong> todas as linhas incluem simulação de hash SHA-256 para auditoria de imutabilidade.</p>
+      <div class="foot">
+        <div><strong style="color:#11CDEF;">QR — validação</strong><br/><img src="${qrSrc}" width="120" height="120" alt="QR auditoria" /></div>
+        <div><strong style="color:#11CDEF;">SHA-256 (resto / trilha)</strong><br/><span class="sha">${footerHash}</span></div>
+      </div>
+      <p class="tce">Metodologia apresentada ao TCE-AC</p>
       </body></html>
     `;
     const popup = window.open('', '_blank');
@@ -1112,7 +1424,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     this.map.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+      if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
         this.map?.removeLayer(layer);
       }
     });
@@ -1141,9 +1453,14 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       const dropClass = assetMode ? ' asset-drop' : '';
       const assetLabel = assetMode ? this.assetIconLabel(idx) : 'A/E';
       const pinTitle = assetMode ? 'Bem patrimonial' : 'Ativo / equipamento';
+      const fuelGps =
+        !assetMode
+          ? `<span class="m1-fuel-veh ${isSelected ? 'm1-fuel-veh--selected' : ''} map-fuel-gps-radar${pulseWarn}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="Posição GPS monitorada" aria-label="Posição GPS monitorada"></span>`
+          : '';
+      const assetInner = !assetMode ? fuelGps : assetLabel;
       const assetHtml = isSelected
-        ? `<span class="asset-pin asset-pin-selected map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`
-        : `<span class="asset-pin map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`;
+        ? `<span class="asset-pin asset-pin-selected map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetInner}</span>`
+        : `<span class="asset-pin map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetInner}</span>`;
       const assetIcon = L.divIcon({
         className: 'marker marker-asset',
         html: assetHtml,
@@ -1168,6 +1485,18 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         { color, weight: 3, dashArray: automaticDeduction ? '8 6' : undefined }
       ).addTo(this.map!);
     });
+
+    if (!assetMode && this.selectedMapRecord) {
+      const sel = this.selectedMapRecord;
+      L.circle([sel.postoLat, sel.postoLng], {
+        radius: 350,
+        color: '#11CDEF',
+        weight: 2,
+        dashArray: '10 14',
+        fill: false,
+        className: 'm1-fuel-geofence-path',
+      }).addTo(this.map!);
+    }
   }
 
   private assetIconLabel(index: number): string {

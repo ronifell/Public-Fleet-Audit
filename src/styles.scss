@@ -14,67 +14,89 @@ nz-layout.layout-content {
   height: 100%;
 }
 
-/* Milestone 1 — Centro de governança / Painel: controlo moderno (vidro + borda suave) */
+/* Milestone 1 — Menu principal: pílula vidro + acento SIG-FROTA (teal) */
 body app-milestone1-demo .milestone-back-btn.ant-btn {
-  height: 40px !important;
-  padding: 0 1.2rem !important;
-  border-radius: 12px !important;
-  font-weight: 500 !important;
-  font-size: 0.8125rem !important;
-  letter-spacing: 0.04em !important;
-  text-transform: none !important;
-  border: 1px solid rgba(15, 23, 42, 0.1) !important;
-  background: rgba(255, 255, 255, 0.72) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  height: auto !important;
+  min-height: 44px;
+  padding: 0.5rem 1.35rem 0.5rem 1rem !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  font-size: 0.6875rem !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  background: linear-gradient(168deg, rgba(255, 255, 255, 0.98) 0%, rgba(236, 253, 245, 0.55) 48%, rgba(241, 245, 249, 0.92) 100%) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: #0f172a !important;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.85) inset,
-    0 1px 2px rgba(15, 23, 42, 0.06),
-    0 6px 20px -4px rgba(15, 23, 42, 0.08) !important;
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 2px 8px rgba(15, 23, 42, 0.05),
+    0 10px 32px -12px rgba(13, 148, 136, 0.22) !important;
   transition:
-    transform 0.2s ease,
-    background 0.45s ease,
+    transform 0.22s cubic-bezier(0.33, 1, 0.68, 1),
+    box-shadow 0.28s ease,
     border-color 0.25s ease,
-    color 0.25s ease,
-    box-shadow 0.25s ease !important;
+    background 0.28s ease,
+    color 0.2s ease !important;
+}
+
+body app-milestone1-demo .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+body app-milestone1-demo .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__ico {
+  font-size: 1.05rem;
+  line-height: 0;
+  opacity: 0.92;
 }
 
 body app-milestone1-demo .milestone-back-btn.ant-btn:hover,
 body app-milestone1-demo .milestone-back-btn.ant-btn:focus {
-  border-color: rgba(15, 118, 110, 0.4) !important;
-  color: #0d9488 !important;
-  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(13, 148, 136, 0.42) !important;
+  color: #047857 !important;
+  background: linear-gradient(168deg, #fff 0%, #ecfdf5 55%, #d1fae5 100%) !important;
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 1) inset,
-    0 4px 14px -2px rgba(15, 118, 110, 0.18) !important;
-  transform: translateY(-1px);
+    0 8px 28px -10px rgba(13, 148, 136, 0.35) !important;
+  transform: translateY(-2px);
+}
+
+body app-milestone1-demo .milestone-back-btn.ant-btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+body app-milestone1-demo .milestone-back-btn.ant-btn:focus-visible {
+  outline: 2px solid rgba(13, 148, 136, 0.55);
+  outline-offset: 3px;
 }
 
 body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn {
-  border: 1px solid rgba(148, 163, 184, 0.22) !important;
-  background: rgba(30, 41, 59, 0.55) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: #f1f5f9 !important;
+  border: 1px solid rgba(45, 212, 191, 0.22) !important;
+  background: linear-gradient(168deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+  color: #ecfdf5 !important;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.06) inset,
-    0 4px 24px -6px rgba(0, 0, 0, 0.45) !important;
+    0 1px 0 rgba(255, 255, 255, 0.07) inset,
+    0 4px 24px -10px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(45, 212, 191, 0.1) inset !important;
 }
 
 body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:hover,
 body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:focus {
-  border-color: rgba(94, 234, 212, 0.45) !important;
+  border-color: rgba(52, 211, 153, 0.45) !important;
   color: #f8fafc !important;
-  background: rgba(51, 65, 85, 0.65) !important;
+  background: linear-gradient(168deg, rgba(51, 65, 85, 0.98) 0%, rgba(30, 41, 59, 0.99) 100%) !important;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.08) inset,
-    0 6px 28px -4px rgba(0, 0, 0, 0.5) !important;
-  transform: translateY(-1px);
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 10px 36px -12px rgba(0, 0, 0, 0.55) !important;
+  transform: translateY(-2px);
 }
 
 body.milestone1-demo-dark .milestone-back-btn.ant-btn .anticon {
-  color: #e2e8f0;
+  color: #5eead4;
 }
 
 @media (prefers-reduced-motion: reduce) {
