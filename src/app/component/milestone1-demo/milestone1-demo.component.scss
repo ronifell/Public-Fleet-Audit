@@ -1714,46 +1714,46 @@ section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
     transparent 100%
   );
   mix-blend-mode: soft-light;
-  opacity: 0.65;
+  opacity: 0.52;
 }
 
 .m1-wrapper.dark .m1-brand-wordmark__name {
   background-image:
     linear-gradient(
       162deg,
-      rgba(255, 255, 255, 0.32) 0%,
-      rgba(255, 255, 255, 0.08) 18%,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.14) 18%,
       transparent 38%,
       transparent 58%,
-      rgba(2, 6, 23, 0.45) 76%,
-      rgba(148, 163, 184, 0.2) 92%,
-      rgba(255, 255, 255, 0.12) 100%
+      rgba(15, 23, 42, 0.18) 76%,
+      rgba(203, 213, 225, 0.22) 92%,
+      rgba(255, 255, 255, 0.2) 100%
     ),
     linear-gradient(
       118deg,
-      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.16) 0%,
       transparent 40%,
       transparent 60%,
-      rgba(51, 65, 85, 0.25) 100%
+      rgba(148, 163, 184, 0.12) 100%
     ),
     linear-gradient(
       122deg,
-      #a78bfa 0%,
-      #60a5fa 16%,
-      #38bdf8 32%,
-      #22d3ee 48%,
-      #2dd4bf 64%,
-      #4ade80 80%,
-      #a3e635 100%
+      #c4b5fd 0%,
+      #93c5fd 16%,
+      #7dd3fc 32%,
+      #67e8f9 48%,
+      #5eead4 64%,
+      #86efac 80%,
+      #d9f99d 100%
     );
   background-size: 360% 140%;
   background-repeat: no-repeat;
   -webkit-background-clip: text;
   background-clip: text;
   text-shadow:
-    0 0.04em 0 rgba(255, 255, 255, 0.22),
-    0 0.12em 0.2em rgba(0, 0, 0, 0.45),
-    0 -0.02em 0.1em rgba(255, 255, 255, 0.08);
+    0 0.04em 0 rgba(255, 255, 255, 0.34),
+    0 0.1em 0.18em rgba(0, 0, 0, 0.22),
+    0 -0.02em 0.1em rgba(255, 255, 255, 0.14);
   animation:
     m1-brand-gradient-shift 5.5s ease-in-out infinite,
     m1-brand-name-phosphor-glow-dark 6.8s cubic-bezier(0.45, 0.02, 0.25, 1) infinite;
