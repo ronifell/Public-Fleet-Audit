@@ -210,16 +210,14 @@ export class FuelFormComponent implements OnInit{
 
 ========================================================================
 
---- FILE: src/app/service/getters.service.ts (métodos de API incl. fuel) ---
+--- FILE: src/app/service/getters.service.ts (trecho: métodos fuel/) ---
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { Fuel } from '../model/fuel';
-import { CarModel } from '../model/car-model';
-import { Brand } from '../model/brand';
-import { VehicleType } from '../model/vehicle-type';
 
+// Trecho SIG-FROTA: início da classe + apenas métodos fuel/
 @Injectable({
   providedIn: 'root'
 })
@@ -228,7 +226,7 @@ export class GettersService {
   constructor(private http: HttpClient) { }
 
   apiUrl: string = environment.API_URL + '/';
-  
+
   getFuels(id?:number): Observable<Fuel[]> {
     let url = this.apiUrl + 'fuel/';
     if (id) {
@@ -236,37 +234,6 @@ export class GettersService {
     }
     return this.http.get<Fuel[]>(url);
   }
-
-  getCarModels(id?:number): Observable<CarModel[]> {
-    let url = this.apiUrl + 'carModel/';
-    if (id) {
-      url += id
-    }
-    return this.http.get<CarModel[]>(url);
-  }
-
-  getCarModelsByBrand(id:number): Observable<CarModel[]> {
-    let url = this.apiUrl + 'carModel/brand/' + id;
-    return this.http.get<CarModel[]>(url);
-  }
-
-  getBrands(id?:number): Observable<Brand[]> {
-    let url = this.apiUrl + 'brand/';
-    if (id) {
-      url += id
-    }
-    return this.http.get<Brand[]>(url);
-  }
-
-  getVehicleType(id?:number): Observable<VehicleType[]> {
-    let url = this.apiUrl + 'vehicleType/';
-    if (id) {
-      url += id
-    }
-    return this.http.get<VehicleType[]>(url);
-  }
-
-  // Searching
 
   getFuelSearch(searchTerm?: string | undefined): Observable<Fuel[]> {
     // console.log('Termo de busca: ' + searchTerm);
@@ -277,85 +244,19 @@ export class GettersService {
     return this.http.get<Fuel[]>(url);
   }
 
-  getVehicleTypeSearch(searchTerm?: string | undefined): Observable<VehicleType[]> {
-    // console.log('Termo de busca: ' + searchTerm);
-    let url = this.apiUrl;
-    if (searchTerm) {
-      url += "vehicleType/search/" + searchTerm;
-    }
-    return this.http.get<VehicleType[]>(url);
-  }
-
-  getVehicleModelSearch(searchTerm?: string | undefined): Observable<CarModel[]> {
-    // console.log('Termo de busca: ' + searchTerm);
-    let url = this.apiUrl;
-    if (searchTerm) {
-      url += "carModel/search/" + searchTerm;
-    }
-    return this.http.get<CarModel[]>(url);
-  }
-
-  getBrandSearch(searchTerm?: string | undefined): Observable<Brand[]> {
-    // console.log('Termo de busca: ' + searchTerm);
-    let url = this.apiUrl;
-    if (searchTerm) {
-      url += "brand/search/" + searchTerm;
-    }
-    return this.http.get<Brand[]>(url);
-  }
-  
-}
-
-
+// ... restantes métodos em src/app/service/getters.service.ts (fora deste PDF).
 
 ========================================================================
 
---- FILE: src/app/app-routing.module.ts (trecho rotas admin/fuel) ---
+--- FILE: src/app/app-routing.module.ts (trechos: imports Fuel + rota admin/fuel) ---
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { DriverListComponent } from './component/driver-list/driver-list.component';
-import { DriverFormComponent } from './component/forms/driver-form/driver-form.component';
-import { SchedulingComponent } from './component/scheduling/scheduling.component';
-import { VehListComponent } from './component/veh-list/veh-list.component';
 import { FuelFormComponent } from './component/forms/fuel-form/fuel-form.component';
-import { BrandFormComponent } from './component/forms/brand-form/brand-form.component';
-import { CarModelFormComponent } from './component/forms/car-model-form/car-model-form.component';
-import { VehicleTypeFormComponent } from './component/forms/vehicle-type-form/vehicle-type-form.component';
-import { UserComponent } from './component/user/user.component';
-import { GeneralRegistersComponent } from './component/general-registers/general-registers.component';
-import { DriverEditComponent } from './component/driver-edit/driver-edit.component';
-import { VehicleTypeListComponent } from './component/vehicle-type-list/vehicle-type-list.component';
-import { ChecklistFormComponent } from './component/forms/checklist-form/checklist-form.component';
-import { SettingsComponent } from './component/settings/settings.component';
-import { VehicleModelListComponent } from './component/vehicle-model-list/vehicle-model-list.component';
-import { VehicleFormComponent } from './component/forms/vehicle-form/vehicle-form.component';
 import { FuelListComponent } from './component/fuel-list/fuel-list.component';
-import { SchedulingFormComponent } from './component/forms/scheduling-form/scheduling-form.component';
-import { LoginComponent } from './component/login/login.component';
 import { authGuard } from './service/auth.guard';
-import { UserEditComponent } from './component/user-edit/user-edit.component';
-import { UserFormComponent } from './component/forms/user-form/user-form.component';
-import { ReportsComponent } from './component/reports/reports.component';
-import { BrandsListComponent } from './component/brands-list/brands-list.component';
-import { VehicleInfoComponent } from './component/vehicle-info/vehicle-info.component';
-import { DiscontinuedVehicleFormComponent } from './component/forms/discontinued-vehicle-form/discontinued-vehicle-form.component';
-import { SupplyFormComponent } from './component/forms/supply-form/supply-form.component';
-import { MaintenanceFormComponent } from './component/forms/maintenance-form/maintenance-form.component';
-import { SchedulesListComponent } from './component/schedules-list/schedules-list.component';
-import { ScheduleEditComponent } from './component/schedule-edit/schedule-edit.component';
-import { PermissionsComponent } from './component/permissions/permissions.component';
-import { GroupsFormComponent } from './component/forms/groups-form/groups-form.component';
-import { Schedule2Component } from './component/schedule2/schedule2.component';
-import { Schedule2FormComponent } from './component/schedule2-form/schedule2-form.component';
-import { ErrorComponent } from './component/error/error.component';
-import { ConsultComponent } from './component/consult/consult.component';
-import { Milestone1DemoComponent } from './component/milestone1-demo/milestone1-demo.component';
 
 // ...
-          { path: 'form', component: ChecklistFormComponent, canActivate: [authGuard], data: { permissions: ['CHECKLIST_WRITE'] } },
-        ]
-      },
-      {
+
         path: 'admin', canActivate: [authGuard], data: { permissions: ['ADMIN' , 'GROUP_READ']}, children: [
           {
             path: 'fuel', canActivate: [authGuard], data: { permissions: ['FUEL_READ'] }, children: [
@@ -363,44 +264,15 @@ import { Milestone1DemoComponent } from './component/milestone1-demo/milestone1-
               { path: 'form', component: FuelFormComponent, canActivate: [authGuard], data: { permissions: ['FUEL_WRITE'] } },
             ]
           },
-          {
-            path: 'permissions', canActivate: [authGuard], data: { permissions: ['GROUP_READ'] }, children: [
-              { path: '', component: PermissionsComponent },
-              { path: 'form', component: GroupsFormComponent, canActivate: [authGuard], data: { permissions: ['GROUP_WRITE'] } },
-            ]
-          },
-
-        ]
-      }
-    ]
-  },
-  { path: '**', redirectTo: 'erro/404' }
-];
 
 ========================================================================
 
---- FILE: src/app/app.module.ts (imports e declarations Fuel) ---
+--- FILE: src/app/app.module.ts (imports e declarations apenas Fuel) ---
 import { FuelFormComponent } from './component/forms/fuel-form/fuel-form.component';
-import { BrandFormComponent } from './component/forms/brand-form/brand-form.component';
 import { FuelListComponent } from './component/fuel-list/fuel-list.component';
-import { SchedulingFormComponent } from './component/forms/scheduling-form/scheduling-form.component';
-import { Milestone1DemoComponent } from './component/milestone1-demo/milestone1-demo.component';
-import { M1OdometerComponent } from './component/milestone1-demo/m1-odometer/m1-odometer.component';
-    CarModelFormComponent,
+
     FuelFormComponent,
-    BrandFormComponent,
-    VehicleTypeFormComponent,
-    FormComponentComponent,
-    FiltersAndSearchComponent,
-    DriverEditComponent,
-    ChecklistFormComponent,
-    VehicleTypeListComponent,
-    VehicleFormComponent,
-    ReportsComponent,
-    SettingsComponent,
-    VehicleModelListComponent,
     FuelListComponent,
-    SchedulingFormComponent,
 
 ========================================================================
 

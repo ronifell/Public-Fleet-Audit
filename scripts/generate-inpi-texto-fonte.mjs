@@ -47,20 +47,12 @@ const pdf1Parts = [
     read('src/app/component/forms/fuel-form/fuel-form.component.ts'),
   '--- FILE: src/app/component/forms/fuel-form/fuel-form.component.html ---\n' +
     read('src/app/component/forms/fuel-form/fuel-form.component.html'),
-  '--- FILE: src/app/service/getters.service.ts (métodos de API incl. fuel) ---\n' +
-    read('src/app/service/getters.service.ts'),
-  '--- FILE: src/app/app-routing.module.ts (trecho rotas admin/fuel) ---\n' +
-    extractLines(read('src/app/app-routing.module.ts'), 1, 40) +
-    '\n// ...\n' +
-    extractLines(read('src/app/app-routing.module.ts'), 115, 138),
-  '--- FILE: src/app/app.module.ts (imports e declarations Fuel) ---\n' +
-    extractLines(read('src/app/app.module.ts'), 44, 45) +
-    '\n' +
-    extractLines(read('src/app/app.module.ts'), 66, 67) +
-    '\n' +
-    extractLines(read('src/app/app.module.ts'), 97, 98) +
-    '\n' +
-    extractLines(read('src/app/app.module.ts'), 114, 128),
+  '--- FILE: src/app/service/getters.service.ts (trecho: métodos fuel/) ---\n' +
+    extractGettersFuelOnly(read('src/app/service/getters.service.ts')),
+  '--- FILE: src/app/app-routing.module.ts (trechos: imports Fuel + rota admin/fuel) ---\n' +
+    extractAppRoutingFuelOnly(read('src/app/app-routing.module.ts')),
+  '--- FILE: src/app/app.module.ts (imports e declarations apenas Fuel) ---\n' +
+    extractAppModuleFuelOnly(read('src/app/app.module.ts')),
   '--- FILE: src/app/app.component.ts (permissão e menu Combustível) ---\n' +
     extractLines(read('src/app/app.component.ts'), 47, 50) +
     '\n' +
@@ -74,6 +66,65 @@ const pdf1Parts = [
 function extractLines(text, start, end) {
   const lines = text.split(/\r?\n/);
   return lines.slice(start - 1, end).join('\n');
+}
+
+/** Trechos de app.module.ts usados só pelo SIG-FROTA (imports + declarations Fuel). */
+function extractAppModuleFuelOnly(text) {
+  const lines = text.split(/\r?\n/);
+  const imports = lines.filter(
+    (l) =>
+      l.includes("from './component/forms/fuel-form/fuel-form.component'") ||
+      l.includes("from './component/fuel-list/fuel-list.component'")
+  );
+  const decl = lines.filter((l) => /^\s*Fuel(Form|List)Component,\s*$/.test(l));
+  return imports.join('\n') + '\n\n' + decl.join('\n');
+}
+
+/** Imports necessários + bloco de rotas admin/fuel (sem outras rotas admin). */
+function extractAppRoutingFuelOnly(text) {
+  const lines = text.split(/\r?\n/);
+  const head = [lines[0], lines[1]];
+  const fuelImports = lines.filter(
+    (l) =>
+      l.includes('fuel-form/fuel-form') || l.includes('fuel-list/fuel-list')
+  );
+  const guard = lines.find((l) => l.includes('auth.guard'));
+  const adminIdx = lines.findIndex(
+    (l) => l.includes("path: 'admin'") && l.includes('GROUP_READ')
+  );
+  if (adminIdx === -1) {
+    throw new Error('Rota admin não encontrada em app-routing.module.ts');
+  }
+  /* 7 linhas: { admin → … fuel … → }, — sem o ramo permissions */
+  const adminFuelBlock = lines.slice(adminIdx, adminIdx + 7).join('\n');
+  return (
+    head.join('\n') +
+    '\n' +
+    fuelImports.join('\n') +
+    '\n' +
+    guard +
+    '\n\n// ...\n\n' +
+    adminFuelBlock
+  );
+}
+
+/** Imports + getFuels + getFuelSearch (o ficheiro real inclui outros métodos). */
+function extractGettersFuelOnly(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [];
+  out.push(lines[0], lines[1], lines[2], lines[3], lines[4]);
+  out.push('');
+  out.push('// Trecho SIG-FROTA: início da classe + apenas métodos fuel/');
+  for (let i = 9; i <= 16; i++) out.push(lines[i]);
+  out.push('');
+  for (let i = 18; i <= 24; i++) out.push(lines[i]);
+  out.push('');
+  for (let i = 57; i <= 64; i++) out.push(lines[i]);
+  out.push('');
+  out.push(
+    '// ... restantes métodos em src/app/service/getters.service.ts (fora deste PDF).'
+  );
+  return out.join('\n');
 }
 
 // --- PDF 2: SIG-PATRIMÔNIO (demo milestone1 + veículo/patrimônio) ---
