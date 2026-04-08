@@ -1,0 +1,5441 @@
+TEXT-FONTE PDF2 — SIG-PATRIMÔNIO — frontend deste repositório
+Incluir acima ou abaixo o código-fonte do Bruno conforme combinado com o cliente.
+
+
+========================================================================
+
+--- FILE: src/app/component/milestone1-demo/milestone1-demo.component.ts ---
+import { DOCUMENT } from '@angular/common';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  HostListener,
+  Inject,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  Renderer2,
+} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import * as L from 'leaflet';
+
+interface MotorResult {
+  id: number;
+  transacaoId: string;
+  transacaoTimestamp: string;
+  placa: string;
+  postoLat: number;
+  postoLng: number;
+  volumeLitros: number;
+  valorTotal: number;
+  glosaStatus: string;
+  observacao: string;
+  integrityHash: string;
+}
+
+interface Supply {
+  id: number;
+  cod_transaction: string;
+  transaction_date: string;
+  license_plate: string;
+  driver_name: string;
+  liters: number;
+  emission_value: number;
+  cidade: string;
+  UF?: string;
+  nome_estabelecimento?: string;
+  integrityHash: string;
+}
+
+interface DemoData {
+  abastecimentos: Supply[];
+  resultados_motor_glosa: MotorResult[];
+  resumo_dashboard: {
+    economia_gerada: number;
+    valor_total_transacoes: number;
+    valor_glosado: number;
+    total_transacoes: number;
+  };
+}
+
+interface IntegrityRow {
+  id: number;
+  date: string;
+  department: string;
+  plate: string;
+  liters: number;
+  amount: number;
+  providedHash: string;
+  calculatedHash: string;
+  verified: boolean;
+}
+
+interface ControlTowerToast {
+  id: number;
+  message: string;
+  kind: 'ok' | 'info' | 'warn';
+}
+
+export type MilestoneHubView =
+  | 'hub'
+  | 'governance'
+  | 'fuel-map'
+  | 'fuel-integrity'
+  | 'assets-map'
+  | 'assets-report';
+
+@Component({
+  selector: 'app-milestone1-demo',
+  templateUrl: './milestone1-demo.component.html',
+  styleUrls: ['./milestone1-demo.component.scss'],
+})
+export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy {
+  private static readonly bodyDarkClass = 'milestone1-demo-dark';
+
+  loading = true;
+  /** Governance Center hub or a module screen */
+  activeView: MilestoneHubView = 'hub';
+  darkMode = false;
+
+  demoData?: DemoData;
+  map?: L.Map;
+  mapReady = false;
+  selectedMapRecord?: MotorResult;
+  pinDetailModalVisible = false;
+  pinDetailRecord?: MotorResult;
+  viewportRecords: MotorResult[] = [];
+  integrityRows: IntegrityRow[] = [];
+  departmentFilter = 'all';
+  dateFilter = '';
+
+  /** Pulsating skeleton while “heavy security query” runs after filter change */
+  integrityFilterLoading = false;
+  /** Increments after each filter settle to retrigger integrity scanner beam */
+  integrityScanGeneration = 0;
+  /** Toggles to force CSS animation restart on the integrity scanner overlay */
+  integrityScannerReset = false;
+
+  /** Animated KPI values on governance */
+  displaySavings = 0;
+  displayLiters = 0;
+  displayGrossSpending = 0;
+  displayActualSpending = 0;
+  displaySavingsPercent = 0;
+  private kpiAnimationFrame = 0;
+
+  /** Torre de controle — toasts automáticos (canto superior direito) */
+  controlTowerToasts: ControlTowerToast[] = [];
+  private toastSeq = 0;
+  private toastIntervalId?: ReturnType<typeof setInterval>;
+  private toastTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+  /** Bar / irregularity chart entrance */
+  dashboardChartsAnimated = false;
+
+  /** Modal: conservation % (mock), animated width */
+  modalConservationTarget = 85;
+  modalConservationDisplay = 0;
+  private conservationRaf = 0;
+
+  /** Photo scanner replay when opening modal */
+  modalScannerKey = 0;
+  modalPhotoScanReset = false;
+
+  /** Matches SCSS `@media (max-width: 640px)` — stacked cards instead of the fixed-width table. */
+  integrityMobileLayout = false;
+
+  /** Relatório de patrimônio — hodômetro com rolos (app-m1-odometer) */
+  assetsReportCatalogedTotal = 0;
+  assetsReportAuditTotal = 0;
+  assetsKpiOdometerRollKey = 0;
+
+  /** Aura na modal de ficha (patrimônio) ao abrir — ~2s */
+  modalPatrimonyValidationFlash = false;
+
+  /** Cobertura laser sobre filtros + tabela (auditoria em conformidade) */
+  integrityLaserSweep = false;
+
+  private integrityFilterDebounce?: ReturnType<typeof setTimeout>;
+
+  /** Root-absolute path; file is PNG (ChatGPT export was mislabeled as .svg). */
+  readonly logoSrc = '/assets/imagens/inovathec-logo.png';
+
+  constructor(
+    private readonly http: HttpClient,
+    @Inject(DOCUMENT) private readonly document: Document,
+    private readonly renderer: Renderer2,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
+
+  async ngOnInit(): Promise<void> {
+    this.refreshIntegrityMobileLayout();
+    this.http.get<DemoData>('assets/mock/auditoria_motor_exemplo.json').subscribe({
+      next: async (data) => {
+        this.demoData = data;
+        this.selectedMapRecord = data.resultados_motor_glosa[0];
+        this.viewportRecords = data.resultados_motor_glosa;
+        this.integrityRows = await this.buildIntegrityRows(data);
+        this.loading = false;
+        if (this.activeView === 'assets-report') {
+          setTimeout(() => {
+            this.triggerAssetsKpiOdometerRoll();
+            this.cdr.markForCheck();
+          }, 0);
+        }
+        if (this.activeView === 'governance') {
+          this.queueKpiAnimation();
+          setTimeout(() => {
+            this.dashboardChartsAnimated = true;
+            this.cdr.markForCheck();
+          }, 80);
+        }
+        this.syncControlTowerToasts();
+        setTimeout(() => this.ensureMapInitialized(), 0);
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.refreshIntegrityMobileLayout();
+    this.ensureMapInitialized();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyMap();
+    this.clearControlTowerToasts();
+    if (this.integrityFilterDebounce) {
+      clearTimeout(this.integrityFilterDebounce);
+    }
+    if (this.kpiAnimationFrame) {
+      cancelAnimationFrame(this.kpiAnimationFrame);
+    }
+    if (this.conservationRaf) {
+      cancelAnimationFrame(this.conservationRaf);
+    }
+    this.renderer.removeClass(this.document.body, Milestone1DemoComponent.bodyDarkClass);
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.refreshIntegrityMobileLayout();
+  }
+
+  private refreshIntegrityMobileLayout(): void {
+    const next = typeof window !== 'undefined' && window.innerWidth <= 640;
+    if (next !== this.integrityMobileLayout) {
+      this.integrityMobileLayout = next;
+    }
+  }
+
+  toggleDarkMode(): void {
+    this.darkMode = !this.darkMode;
+    if (this.darkMode) {
+      this.renderer.addClass(this.document.body, Milestone1DemoComponent.bodyDarkClass);
+    } else {
+      this.renderer.removeClass(this.document.body, Milestone1DemoComponent.bodyDarkClass);
+    }
+  }
+
+  /** Fuel module: governance, geo audit, integrity */
+  get isFuelModuleView(): boolean {
+    return (
+      this.activeView === 'governance' ||
+      this.activeView === 'fuel-map' ||
+      this.activeView === 'fuel-integrity'
+    );
+  }
+
+  /** Assets module: map + report */
+  get isAssetsModuleView(): boolean {
+    return this.activeView === 'assets-map' || this.activeView === 'assets-report';
+  }
+
+  get moduleTitleLine(): string {
+    switch (this.activeView) {
+      case 'governance':
+        return 'Monitoramento e Inteligência Fiscal';
+      case 'fuel-map':
+        return 'Georreferenciamento de Prova';
+      case 'fuel-integrity':
+        return 'Conformidade e Anti-Fraude';
+      case 'assets-map':
+        return 'Vistoria e Censo (Fé Pública)';
+      case 'assets-report':
+        return 'Inventário e Tombamento';
+      default:
+        return '';
+    }
+  }
+
+  get moduleSubtitle(): string {
+    if (this.isFuelModuleView) {
+      return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
+    }
+    if (this.activeView === 'assets-report') {
+      return 'SIG-PATRIMÔNIO — inventário, tombamento e trilha de integridade documental.';
+    }
+    if (this.isAssetsModuleView) {
+      return 'SIG-PATRIMÔNIO — vistoria, censo e georreferenciamento para prova técnica.';
+    }
+    return 'Centro de governança — Inovathec Soluções Ltda.';
+  }
+
+  goToHub(): void {
+    if (this.activeView === 'fuel-map' || this.activeView === 'assets-map') {
+      this.destroyMap();
+    }
+    this.activeView = 'hub';
+    this.dashboardChartsAnimated = false;
+    this.syncControlTowerToasts();
+  }
+
+  setView(view: MilestoneHubView): void {
+    if (
+      (this.activeView === 'fuel-map' || this.activeView === 'assets-map') &&
+      view !== 'fuel-map' &&
+      view !== 'assets-map'
+    ) {
+      this.destroyMap();
+    }
+
+    this.activeView = view;
+
+    if (view === 'governance') {
+      this.queueKpiAnimation();
+      setTimeout(() => {
+        this.dashboardChartsAnimated = true;
+        this.cdr.markForCheck();
+      }, 80);
+    } else {
+      this.dashboardChartsAnimated = false;
+    }
+
+    if (view === 'fuel-map' || view === 'assets-map') {
+      setTimeout(() => {
+        this.ensureMapInitialized();
+        this.map?.invalidateSize();
+        this.renderViewportMarkers(view === 'assets-map');
+      }, 150);
+    }
+
+    if (view === 'fuel-integrity') {
+      this.triggerIntegrityScan();
+    }
+
+    if (view === 'assets-report' && this.demoData) {
+      setTimeout(() => {
+        this.triggerAssetsKpiOdometerRoll();
+        this.cdr.markForCheck();
+      }, 0);
+    }
+
+    this.syncControlTowerToasts();
+  }
+
+  onIntegrityFilterInteraction(): void {
+    if (this.integrityFilterDebounce) {
+      clearTimeout(this.integrityFilterDebounce);
+    }
+    this.integrityFilterLoading = true;
+    this.integrityFilterDebounce = setTimeout(() => {
+      this.integrityFilterLoading = false;
+      this.triggerIntegrityScan();
+      this.cdr.markForCheck();
+    }, 550);
+  }
+
+  private triggerIntegrityScan(): void {
+    this.integrityScanGeneration++;
+    this.integrityScannerReset = true;
+    this.integrityLaserSweep = true;
+    this.cdr.markForCheck();
+    setTimeout(() => {
+      this.integrityScannerReset = false;
+      this.cdr.markForCheck();
+    }, 40);
+    setTimeout(() => {
+      this.integrityLaserSweep = false;
+      this.cdr.markForCheck();
+    }, 3600);
+  }
+
+  private queueKpiAnimation(): void {
+    const targetS = this.totalSavings;
+    const targetL = this.totalLiters;
+    const targetG = this.grossSpending;
+    const targetA = this.actualSpending;
+    const targetP = this.savingsPercent;
+    this.displaySavings = 0;
+    this.displayLiters = 0;
+    this.displayGrossSpending = 0;
+    this.displayActualSpending = 0;
+    this.displaySavingsPercent = 0;
+    if (this.kpiAnimationFrame) {
+      cancelAnimationFrame(this.kpiAnimationFrame);
+    }
+    const reduceMotion =
+      typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      this.displaySavings = targetS;
+      this.displayLiters = targetL;
+      this.displayGrossSpending = targetG;
+      this.displayActualSpending = targetA;
+      this.displaySavingsPercent = targetP;
+      this.cdr.markForCheck();
+      return;
+    }
+    const duration = 2400;
+    const t0 = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - t0) / duration);
+      const ease = 1 - Math.pow(1 - t, 3);
+      this.displaySavings = targetS * ease;
+      this.displayLiters = targetL * ease;
+      this.displayGrossSpending = targetG * ease;
+      this.displayActualSpending = targetA * ease;
+      this.displaySavingsPercent = targetP * ease;
+      this.cdr.markForCheck();
+      if (t < 1) {
+        this.kpiAnimationFrame = requestAnimationFrame(tick);
+      } else {
+        this.displaySavings = targetS;
+        this.displayLiters = targetL;
+        this.displayGrossSpending = targetG;
+        this.displayActualSpending = targetA;
+        this.displaySavingsPercent = targetP;
+        this.cdr.markForCheck();
+      }
+    };
+    this.kpiAnimationFrame = requestAnimationFrame(tick);
+  }
+
+  private triggerAssetsKpiOdometerRoll(): void {
+    if (!this.demoData) {
+      return;
+    }
+    this.assetsReportCatalogedTotal = this.demoData.resultados_motor_glosa.length;
+    this.assetsReportAuditTotal = this.demoData.abastecimentos.length;
+    this.assetsKpiOdometerRollKey++;
+    this.cdr.markForCheck();
+  }
+
+  scrollToSha256Footer(): void {
+    const el = this.document.getElementById('m1-sha256-footer-anchor');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }
+
+  get totalLiters(): number {
+    return (this.demoData?.abastecimentos || []).reduce((acc, item) => acc + item.liters, 0);
+  }
+
+  get totalFleet(): number {
+    return 3150;
+  }
+
+  get grossSpending(): number {
+    return this.demoData?.resumo_dashboard.valor_total_transacoes || 0;
+  }
+
+  get actualSpending(): number {
+    return this.grossSpending - this.totalSavings;
+  }
+
+  get totalSavings(): number {
+    return this.demoData?.resumo_dashboard.economia_gerada || 0;
+  }
+
+  get savingsPercent(): number {
+    if (!this.grossSpending) {
+      return 0;
+    }
+    return (this.totalSavings / this.grossSpending) * 100;
+  }
+
+  /** Width % for animated ROI bars (0 until dashboardChartsAnimated) */
+  get roiGrossBarPercent(): number {
+    return this.dashboardChartsAnimated ? 100 : 0;
+  }
+
+  get roiActualBarPercent(): number {
+    if (!this.grossSpending) {
+      return 0;
+    }
+    const p = (this.actualSpending / this.grossSpending) * 100;
+    return this.dashboardChartsAnimated ? p : 0;
+  }
+
+  get topIrregularities(): Array<{ name: string; value: number }> {
+    const source = this.demoData?.resultados_motor_glosa || [];
+    const byDepartment = new Map<string, number>();
+    source.forEach((row, index) => {
+      const key = this.mockDepartment(index);
+      if (row.glosaStatus !== 'APROVADO') {
+        byDepartment.set(key, (byDepartment.get(key) || 0) + 1);
+      }
+    });
+    return Array.from(byDepartment.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+  }
+
+  /** Irregularity row bar length (mock scale max 10) */
+  irregularityBarPercent(item: { value: number }): number {
+    const max = Math.max(...this.topIrregularities.map((i) => i.value), 1);
+    return this.dashboardChartsAnimated ? (item.value / max) * 100 : 0;
+  }
+
+  get filteredIntegrityRows(): IntegrityRow[] {
+    return this.integrityRows.filter((row) => {
+      const byDepartment = this.departmentFilter === 'all' || row.department === this.departmentFilter;
+      const byDate = !this.dateFilter || row.date.startsWith(this.dateFilter);
+      return byDepartment && byDate;
+    });
+  }
+
+  get departments(): string[] {
+    return Array.from(new Set(this.integrityRows.map((row) => row.department)));
+  }
+
+  get auditTickerFuel(): string {
+    const parts: string[] = [];
+    const supplies = this.demoData?.abastecimentos || [];
+    supplies.forEach((s) => {
+      parts.push(
+        `[${s.license_plate}] R$ ${s.emission_value.toFixed(2)} · ${s.liters} L · ${s.cidade}/${s.UF ?? '—'}`
+      );
+      parts.push(`[${s.license_plate}] ${(s.nome_estabelecimento || 'Posto').slice(0, 22)}… confirmado`);
+    });
+    (this.demoData?.resultados_motor_glosa || []).forEach((r) => {
+      parts.push(`[${r.placa}] Motor glosa: ${r.glosaStatus} · R$ ${r.valorTotal.toFixed(2)} · ${r.volumeLitros} L`);
+    });
+    this.filteredIntegrityRows.slice(0, 4).forEach((row) => {
+      const shortHash = row.calculatedHash.slice(0, 8).toUpperCase();
+      parts.push(`[${row.plate}] SHA-256 ${shortHash}… trilha ativa`);
+    });
+    if (!parts.length) {
+      return '[SISTEMA] Aguardando registros de auditoria…';
+    }
+    return parts.join('      ◆      ');
+  }
+
+  get auditTickerAssets(): string {
+    const labels = ['PREDIO-01', 'MONUMENTO-05', 'SITIO-03', 'MUSEU-07', 'CENTRO-12'];
+    const items = (this.demoData?.resultados_motor_glosa || []).slice(0, 6);
+    const parts: string[] = [];
+    items.forEach((r, i) => {
+      const tag = labels[i % labels.length];
+      parts.push(`[${tag}] Tombo ${r.placa} · R$ ${r.valorTotal.toFixed(2)} (referência patrimonial)`);
+      parts.push(`[${tag}] Vistoria AO VIVO · conservação sincronizada · Acre`);
+    });
+    return parts.join('      ◆      ') || '[SIG-PATRIMÔNIO] Monitoramento em tempo real…';
+  }
+
+  /** Ticker no hub — fluxo contínuo para não “congelar” a apresentação */
+  get auditTickerHub(): string {
+    const parts: string[] = [
+      'TORRE DE CONTROLE · Inovathec · Governança SEAGRI',
+      'SIG-FROTA — combustível · SIG-PATRIMÔNIO · SHA-256 · tempo real',
+    ];
+    const supplies = this.demoData?.abastecimentos || [];
+    supplies.forEach((s) => {
+      parts.push(`[${s.license_plate}] R$ ${s.emission_value.toFixed(2)} · auditoria em curso`);
+    });
+    (this.demoData?.resultados_motor_glosa || []).slice(0, 5).forEach((r) => {
+      parts.push(`[${r.placa}] Georef. validado · R$ ${r.valorTotal.toFixed(2)}`);
+    });
+    return parts.join('      ◆      ');
+  }
+
+  get auditTickerText(): string {
+    if (this.activeView === 'hub') {
+      return this.auditTickerHub;
+    }
+    if (this.activeView === 'assets-map' || this.activeView === 'assets-report') {
+      return this.auditTickerAssets;
+    }
+    return this.auditTickerFuel;
+  }
+
+  trackToastById(_index: number, t: ControlTowerToast): number {
+    return t.id;
+  }
+
+  private syncControlTowerToasts(): void {
+    this.clearControlTowerTimers();
+    this.controlTowerToasts = [];
+    if (this.loading || this.activeView === 'hub') {
+      this.cdr.markForCheck();
+      return;
+    }
+    const kick = window.setTimeout(() => {
+      this.pushControlTowerToast();
+      this.cdr.markForCheck();
+    }, 900);
+    this.toastTimeouts.push(kick);
+    this.toastIntervalId = window.setInterval(() => {
+      this.pushControlTowerToast();
+      this.cdr.markForCheck();
+    }, 6800);
+  }
+
+  private clearControlTowerTimers(): void {
+    if (this.toastIntervalId !== undefined) {
+      clearInterval(this.toastIntervalId);
+      this.toastIntervalId = undefined;
+    }
+    this.toastTimeouts.forEach((id) => clearTimeout(id));
+    this.toastTimeouts = [];
+  }
+
+  private clearControlTowerToasts(): void {
+    this.clearControlTowerTimers();
+    this.controlTowerToasts = [];
+  }
+
+  private pushControlTowerToast(): void {
+    const id = ++this.toastSeq;
+    const next = this.nextToastPayload();
+    this.controlTowerToasts = [...this.controlTowerToasts.slice(-2), { id, ...next }];
+    const removeAfter = window.setTimeout(() => {
+      this.controlTowerToasts = this.controlTowerToasts.filter((t) => t.id !== id);
+      this.cdr.markForCheck();
+    }, 5200);
+    this.toastTimeouts.push(removeAfter);
+  }
+
+  private nextToastPayload(): Pick<ControlTowerToast, 'message' | 'kind'> {
+    const fuel: Pick<ControlTowerToast, 'message' | 'kind'>[] = [
+      { message: 'Abastecimento confirmado — cartão e volume validados', kind: 'ok' },
+      { message: 'Georreferenciamento sincronizado com o motor de glosa', kind: 'info' },
+      { message: 'Novo fechamento de perímetro — Acre (área ativa)', kind: 'info' },
+      { message: 'Alerta: transação fora do raio — dedução automática acionada', kind: 'warn' },
+      { message: 'SHA-256 gravado — trilha de imutabilidade atualizada', kind: 'ok' },
+      { message: 'Painel fiscal: ROI dentro da meta operacional', kind: 'info' },
+    ];
+    const assets: Pick<ControlTowerToast, 'message' | 'kind'>[] = [
+      { message: 'Vistoria de patrimônio registrada — fé pública AP 04', kind: 'ok' },
+      { message: 'Tombo sincronizado — inventário em tempo real', kind: 'info' },
+      { message: 'Conservação do bem atualizada no painel pericial', kind: 'info' },
+      { message: 'Geolocalização confirmada — dentro do perímetro delimitado', kind: 'ok' },
+      { message: 'Cadeia de integridade: hash verificado no bloco', kind: 'info' },
+    ];
+    const pool =
+      this.activeView === 'assets-map' || this.activeView === 'assets-report' ? assets : fuel;
+    return pool[(this.toastSeq + this.activeView.length) % pool.length];
+  }
+
+  getMapDistanceMeters(record: MotorResult): number {
+    const vehicleLat = record.postoLat + (record.id % 2 ? 0.0028 : 0.0095);
+    const vehicleLng = record.postoLng + (record.id % 2 ? 0.0015 : 0.009);
+    return this.haversineMeters(record.postoLat, record.postoLng, vehicleLat, vehicleLng);
+  }
+
+  isAutomaticDeduction(record: MotorResult): boolean {
+    return this.getMapDistanceMeters(record) > 500;
+  }
+
+  getMapTooltipText(record: MotorResult): string {
+    const distance = this.getMapDistanceMeters(record);
+    const m = Math.round(distance);
+    if (this.activeView === 'assets-map') {
+      return this.isAutomaticDeduction(record)
+        ? `Fora do perímetro delimitado – ${m} m`
+        : `Localização confirmada – ${m} m (dentro da área delimitada)`;
+    }
+    return this.isAutomaticDeduction(record)
+      ? `Dedução automática – ${m} m`
+      : `Dentro do limite – ${m} m`;
+  }
+
+  /** Índice simulado de conservação para o painel de patrimônio (demo). */
+  patrimonyConservationPercent(record: MotorResult): string {
+    const p = 62 + (record.id * 13) % 34;
+    return `${p}% (índice simulado)`;
+  }
+
+  patrimonyLocationStatusMessage(record: MotorResult): string {
+    if (this.isAutomaticDeduction(record)) {
+      return 'Fora da área delimitada — verificar deslocamento do bem.';
+    }
+    return 'Localização confirmada — dentro da área delimitada.';
+  }
+
+  selectRecord(record: MotorResult): void {
+    this.selectedMapRecord = record;
+    if (this.activeView === 'fuel-map' || this.activeView === 'assets-map') {
+      const vehicleLat = record.postoLat + (record.id % 2 ? 0.0028 : 0.0095);
+      const vehicleLng = record.postoLng + (record.id % 2 ? 0.0015 : 0.009);
+      this.map?.panTo([vehicleLat, vehicleLng], { animate: true, duration: 0.6 });
+      this.renderViewportMarkers(this.activeView === 'assets-map');
+    }
+  }
+
+  openPinDetailModal(record: MotorResult): void {
+    this.pinDetailRecord = record;
+    this.modalConservationTarget = 65 + (record.id * 17) % 35;
+    this.modalConservationDisplay = 0;
+    this.modalPatrimonyValidationFlash = false;
+    this.modalScannerKey++;
+    this.modalPhotoScanReset = true;
+    this.pinDetailModalVisible = true;
+    if (this.conservationRaf) {
+      cancelAnimationFrame(this.conservationRaf);
+    }
+    setTimeout(() => {
+      this.modalPhotoScanReset = false;
+      this.cdr.markForCheck();
+    }, 40);
+    setTimeout(() => this.animateConservationBar(), 120);
+    if (this.activeView === 'assets-map') {
+      requestAnimationFrame(() => {
+        this.modalPatrimonyValidationFlash = true;
+        this.cdr.markForCheck();
+        setTimeout(() => {
+          this.modalPatrimonyValidationFlash = false;
+          this.cdr.markForCheck();
+        }, 2000);
+      });
+    }
+  }
+
+  private animateConservationBar(): void {
+    const target = this.modalConservationTarget;
+    const t0 = performance.now();
+    const dur = 900;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - t0) / dur);
+      const ease = 1 - Math.pow(1 - t, 2);
+      this.modalConservationDisplay = target * ease;
+      this.cdr.markForCheck();
+      if (t < 1) {
+        this.conservationRaf = requestAnimationFrame(step);
+      } else {
+        this.modalConservationDisplay = target;
+        this.cdr.markForCheck();
+      }
+    };
+    this.conservationRaf = requestAnimationFrame(step);
+  }
+
+  closePinDetailModal(): void {
+    this.pinDetailModalVisible = false;
+    this.modalPatrimonyValidationFlash = false;
+  }
+
+  exportMockPdf(): void {
+    const rows = this.filteredIntegrityRows
+      .map(
+        (row) =>
+          `<tr><td>${row.date}</td><td>${row.department}</td><td>${row.plate}</td><td>${row.liters}</td><td>R$ ${row.amount.toFixed(
+            2
+          )}</td><td>${row.calculatedHash}</td><td>${row.verified ? 'Verificado / imutável' : 'Em revisão'}</td></tr>`
+      )
+      .join('');
+    const html = `
+      <html><head><title>Relatório de integridade SIG-FROTA</title></head><body>
+      <h2>Relatório de integridade – Painel de auditoria (PDF simulado)</h2>
+      <table border="1" cellpadding="6" cellspacing="0">
+      <tr><th>Data</th><th>Departamento</th><th>Placa</th><th>Litros</th><th>Valor</th><th>SHA-256</th><th>Situação</th></tr>
+      ${rows}
+      </table>
+      <p><strong>Declaração de integridade:</strong> todas as linhas incluem simulação de hash SHA-256 para auditoria de imutabilidade.</p>
+      </body></html>
+    `;
+    const popup = window.open('', '_blank');
+    if (popup) {
+      popup.document.write(html);
+      popup.document.close();
+      popup.print();
+    }
+  }
+
+  /** Creates the Leaflet map once the container exists (fuel / assets tab). */
+  private ensureMapInitialized(): void {
+    const mapId = 'milestone-map';
+    if (!this.demoData || !document.getElementById(mapId)) {
+      return;
+    }
+    if (this.activeView !== 'fuel-map' && this.activeView !== 'assets-map') {
+      return;
+    }
+    if (this.mapReady && this.map) {
+      return;
+    }
+    this.map = L.map(mapId, { zoomControl: true }).setView([-15.601411, -56.097892], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> (contribuintes)',
+    }).addTo(this.map);
+
+    this.map.on('moveend', () => this.renderViewportMarkers(this.activeView === 'assets-map'));
+    this.renderViewportMarkers(this.activeView === 'assets-map');
+    this.mapReady = true;
+  }
+
+  private destroyMap(): void {
+    if (this.map) {
+      this.map.remove();
+      this.map = undefined;
+    }
+    this.mapReady = false;
+  }
+
+  private renderViewportMarkers(assetMode: boolean): void {
+    if (!this.map || !this.demoData) {
+      return;
+    }
+
+    this.map.eachLayer((layer) => {
+      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+        this.map?.removeLayer(layer);
+      }
+    });
+
+    const bounds = this.map.getBounds();
+    this.viewportRecords = this.demoData.resultados_motor_glosa.filter((record) =>
+      bounds.contains(L.latLng(record.postoLat, record.postoLng))
+    );
+    const dataToRender = this.viewportRecords.length ? this.viewportRecords : this.demoData.resultados_motor_glosa;
+
+    dataToRender.forEach((record, idx) => {
+      const vehicleLat = record.postoLat + (record.id % 2 ? 0.0028 : 0.0095);
+      const vehicleLng = record.postoLng + (record.id % 2 ? 0.0015 : 0.009);
+      const distance = this.haversineMeters(record.postoLat, record.postoLng, vehicleLat, vehicleLng);
+      const automaticDeduction = distance > 500;
+      const isSelected = this.selectedMapRecord?.id === record.id;
+      const color = automaticDeduction ? '#d7263d' : '#1f8b4c';
+
+      const postoGlyph = assetMode ? this.patrimonyReferenceIcon(idx) : '⛽';
+      const postoIcon = L.divIcon({
+        className: 'marker marker-posto',
+        html: `<span class="map-live-pulse map-live-pulse--posto" style="animation-delay:${(idx * 0.11).toFixed(2)}s" aria-hidden="true">${postoGlyph}</span>`,
+        iconSize: [26, 26],
+      });
+      const pulseWarn = automaticDeduction ? ' map-live-pulse--warn' : '';
+      const dropClass = assetMode ? ' asset-drop' : '';
+      const assetLabel = assetMode ? this.assetIconLabel(idx) : 'A/E';
+      const pinTitle = assetMode ? 'Bem patrimonial' : 'Ativo / equipamento';
+      const assetHtml = isSelected
+        ? `<span class="asset-pin asset-pin-selected map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`
+        : `<span class="asset-pin map-live-pulse${pulseWarn}${dropClass}" style="animation-delay:${(idx * 0.09).toFixed(2)}s" title="${pinTitle}" aria-label="${pinTitle}">${assetLabel}</span>`;
+      const assetIcon = L.divIcon({
+        className: 'marker marker-asset',
+        html: assetHtml,
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
+      });
+
+      L.marker([record.postoLat, record.postoLng], { icon: postoIcon }).addTo(this.map!);
+      const assetMarker = L.marker([vehicleLat, vehicleLng], { icon: assetIcon }).addTo(this.map!);
+      assetMarker.on('click', () => {
+        this.ngZone.run(() => {
+          this.selectRecord(record);
+          this.openPinDetailModal(record);
+        });
+      });
+
+      L.polyline(
+        [
+          [record.postoLat, record.postoLng],
+          [vehicleLat, vehicleLng],
+        ],
+        { color, weight: 3, dashArray: automaticDeduction ? '8 6' : undefined }
+      ).addTo(this.map!);
+    });
+  }
+
+  private assetIconLabel(index: number): string {
+    const icons = ['🏛', '🏢', '📍', '⛪', '🗿'];
+    return icons[index % icons.length];
+  }
+
+  /** Ponto de referência no mapa de patrimônio (sem posto de combustível). */
+  private patrimonyReferenceIcon(index: number): string {
+    const icons = ['🏛', '🏛', '📍', '⛪', '🏢'];
+    return icons[index % icons.length];
+  }
+
+  private async buildIntegrityRows(data: DemoData): Promise<IntegrityRow[]> {
+    const rows = await Promise.all(
+      data.abastecimentos.map(async (item, index) => {
+        const payload = `${item.cod_transaction}|${item.transaction_date}|${item.license_plate}|${item.driver_name}|${item.liters}|${item.emission_value}`;
+        const calculatedHash = await this.sha256(payload);
+        const providedHash = item.integrityHash || '';
+        return {
+          id: item.id,
+          date: item.transaction_date.slice(0, 10),
+          department: this.mockDepartment(index),
+          plate: item.license_plate,
+          liters: item.liters,
+          amount: item.emission_value,
+          providedHash,
+          calculatedHash,
+          verified: !!providedHash,
+        };
+      })
+    );
+    return rows;
+  }
+
+  private async sha256(value: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(value);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  private mockDepartment(index: number): string {
+    const departments = ['Operações', 'Saúde', 'Educação', 'Infraestrutura', 'Administração'];
+    return departments[index % departments.length];
+  }
+
+  private haversineMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const toRad = (x: number) => (x * Math.PI) / 180;
+    const R = 6371000;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+}
+
+
+========================================================================
+
+--- FILE: src/app/component/milestone1-demo/milestone1-demo.component.html ---
+<div
+  class="m1-wrapper"
+  [class.dark]="darkMode"
+  [class.m1-assets-theme]="isAssetsModuleView"
+  [class.m1-has-ticker]="!loading"
+>
+  <!-- Governance Center: hub -->
+  <ng-container *ngIf="activeView === 'hub' && !loading">
+    <header class="m1-hub-header">
+      <div class="m1-logo-showcase">
+        <div class="m1-logo-showcase__energy" aria-hidden="true"></div>
+        <div class="m1-logo-showcase__mesh" aria-hidden="true"></div>
+        <div class="m1-logo-showcase__panel">
+          <div class="m1-logo-showcase__scan" aria-hidden="true"></div>
+          <img
+            class="m1-inovathec-logo"
+            [src]="logoSrc"
+            width="176"
+            height="50"
+            alt="Inovathec Soluções Ltda"
+            decoding="sync"
+            fetchpriority="high"
+          />
+        </div>
+      </div>
+      <p class="m1-hub-tagline">Centro de governança — identidade visual por módulo (combustível / ativos).</p>
+    </header>
+
+    <div class="m1-hub-sections">
+      <section class="m1-hub-section" aria-labelledby="m1-hub-fuel-heading">
+        <h2 id="m1-hub-fuel-heading" class="m1-hub-section-title m1-hub-section-title--fuel">
+          SIG-FROTA — GESTÃO DE COMBUSTÍVEL
+        </h2>
+        <nav class="m1-hub-grid m1-hub-grid--fuel" aria-label="SIG-FROTA — gestão de combustível">
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('governance')">
+            <span class="m1-hub-tile-title">Monitoramento e Inteligência Fiscal</span>
+          </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-map')">
+            <span class="m1-hub-tile-title">Georreferenciamento de Prova</span>
+          </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-integrity')">
+            <span class="m1-hub-tile-title">Conformidade e Anti-Fraude</span>
+          </button>
+        </nav>
+      </section>
+
+      <section class="m1-hub-section" aria-labelledby="m1-hub-asset-heading">
+        <h2 id="m1-hub-asset-heading" class="m1-hub-section-title m1-hub-section-title--asset">
+          SIG-PATRIMÔNIO — GESTÃO DE ATIVOS
+        </h2>
+        <nav class="m1-hub-grid m1-hub-grid--asset" aria-label="SIG-PATRIMÔNIO — gestão de ativos">
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-map')">
+            <span class="m1-hub-tile-title">Vistoria e Censo (Fé Pública)</span>
+          </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--asset" type="button" (click)="setView('assets-report')">
+            <span class="m1-hub-tile-title">Inventário e Tombamento</span>
+          </button>
+        </nav>
+      </section>
+    </div>
+
+    <div class="m1-hub-footer-tools">
+      <button nz-button nzType="default" class="m1-theme-toggle" (click)="toggleDarkMode()">
+        {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- Module screens -->
+  <ng-container *ngIf="activeView !== 'hub' && !loading">
+    <div class="m1-module-topbar">
+      <button nz-button nzType="default" class="milestone-back-btn" type="button" (click)="goToHub()">
+        Menu principal
+      </button>
+      <button nz-button nzType="default" class="m1-theme-toggle" type="button" (click)="toggleDarkMode()">
+        {{ darkMode ? 'Modo claro' : 'Modo escuro' }}
+      </button>
+    </div>
+    <header class="m1-hero m1-hero--module">
+      <div class="m1-hero-main">
+        <div class="m1-brand-strip">
+          <div class="m1-logo-showcase m1-logo-showcase--compact">
+            <div class="m1-logo-showcase__energy" aria-hidden="true"></div>
+            <div class="m1-logo-showcase__mesh" aria-hidden="true"></div>
+            <div class="m1-logo-showcase__panel">
+              <div class="m1-logo-showcase__scan" aria-hidden="true"></div>
+              <img
+                class="m1-inovathec-logo m1-inovathec-logo--compact"
+                [src]="logoSrc"
+                width="124"
+                height="35"
+                alt="Inovathec Soluções Ltda"
+                decoding="sync"
+              />
+            </div>
+          </div>
+        </div>
+        <p class="m1-eyebrow">{{ isFuelModuleView ? 'SIG-FROTA — GESTÃO DE COMBUSTÍVEL' : 'SIG-PATRIMÔNIO — GESTÃO DE ATIVOS' }}</p>
+        <h2 class="m1-title">{{ moduleTitleLine }}</h2>
+        <p class="m1-subtitle">{{ moduleSubtitle }}</p>
+      </div>
+    </header>
+
+    <ng-container *ngIf="demoData">
+      <section *ngIf="activeView === 'governance'" class="grid cards m1-dashboard">
+        <nz-card class="m1-stat-card m1-stat-fleet">
+          <h4 class="m1-stat-label">Frota total</h4>
+          <div class="m1-stat-value">{{ totalFleet | number }}</div>
+        </nz-card>
+        <nz-card class="m1-stat-card m1-stat-liters">
+          <h4 class="m1-stat-label">Total de litros auditados</h4>
+          <div class="m1-stat-value">{{ displayLiters | number: '1.0-2' }} <span class="m1-stat-unit">L</span></div>
+        </nz-card>
+        <nz-card class="m1-stat-card m1-stat-savings m1-stat-savings--hero">
+          <h4 class="m1-stat-label">Economia total</h4>
+          <div class="m1-stat-value m1-stat-value--pulse"><span class="m1-currency">R$</span> {{ displaySavings | number: '1.2-2' }}</div>
+        </nz-card>
+
+        <nz-card class="span-2 m1-roi-card">
+          <h4 class="m1-card-title">Gráfico de ROI</h4>
+          <div class="roi-bars">
+            <div class="bar-row">
+              <span>Gasto bruto</span>
+              <div class="bar"><div class="bar-fill bar-fill--gasto-bruto" [style.width.%]="roiGrossBarPercent"></div></div>
+              <strong>R$ {{ displayGrossSpending | number: '1.2-2' }}</strong>
+            </div>
+            <div class="bar-row">
+              <span>Gasto real</span>
+              <div class="bar"><div class="bar-fill bar-fill--gasto-real" [style.width.%]="roiActualBarPercent"></div></div>
+              <strong>R$ {{ displayActualSpending | number: '1.2-2' }}</strong>
+            </div>
+          </div>
+          <div class="m1-sparkline-block" *ngIf="dashboardChartsAnimated" aria-hidden="true">
+            <span class="m1-sparkline-label">Índice de consumo (tendência)</span>
+            <svg class="m1-sparkline" viewBox="0 0 280 48" preserveAspectRatio="none">
+              <path
+                class="m1-sparkline-path"
+                pathLength="100"
+                d="M0,38 C45,36 70,8 112,20 S188,4 280,14"
+              />
+            </svg>
+          </div>
+          <p class="highlight m1-roi-highlight">Economia: {{ displaySavingsPercent | number: '1.0-1' }}% <span class="m1-target">meta 15%–25%</span></p>
+        </nz-card>
+
+        <nz-card class="m1-irregularities-card">
+          <h4 class="m1-card-title">Principais irregularidades <span class="m1-badge">5 principais</span></h4>
+          <div *ngFor="let item of topIrregularities" class="irregularity-row">
+            <span>{{ item.name }}</span>
+            <div class="irr-bar-wrap" aria-hidden="true">
+              <div class="irr-bar-fill" [style.width.%]="irregularityBarPercent(item)"></div>
+            </div>
+            <strong>{{ item.value }}</strong>
+          </div>
+        </nz-card>
+      </section>
+
+      <section *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'" class="map-layout">
+        <nz-card class="map-card m1-map-card">
+          <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Vistoria e Censo (Fé Pública)' : 'Georreferenciamento de Prova' }}</h4>
+          <div class="map-wrap">
+            <div
+              class="map-tooltip-corner"
+              *ngIf="selectedMapRecord"
+              role="status"
+              [attr.aria-label]="getMapTooltipText(selectedMapRecord)"
+            >
+              {{ getMapTooltipText(selectedMapRecord) }}
+            </div>
+            <div id="milestone-map"></div>
+          </div>
+          <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
+        </nz-card>
+        <nz-card class="side-card m1-side-panel" *ngIf="selectedMapRecord">
+          <ng-container *ngIf="activeView === 'fuel-map'">
+            <h4 class="m1-card-title">Painel lateral de auditoria</h4>
+            <p><strong>Placa:</strong> {{ selectedMapRecord.placa }}</p>
+            <p><strong>Motorista:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
+            <p><strong>Litros:</strong> {{ selectedMapRecord.volumeLitros }}</p>
+            <p><strong>Distância:</strong> {{ getMapDistanceMeters(selectedMapRecord) | number: '1.0-0' }} m</p>
+            <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
+              {{
+                isAutomaticDeduction(selectedMapRecord)
+                  ? 'Dedução automática (>500 m)'
+                  : 'Sem dedução automática (≤500 m)'
+              }}
+            </p>
+          </ng-container>
+
+          <div *ngIf="activeView === 'assets-map'" class="m1-patrimony-validation-block">
+            <h4 class="m1-card-title">Painel de registro e conservação</h4>
+            <p><strong>Nº de registro / tombamento:</strong> {{ selectedMapRecord.placa }}</p>
+            <p><strong>Responsável / curador:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
+            <p><strong>Estado de conservação:</strong> {{ patrimonyConservationPercent(selectedMapRecord) }}</p>
+            <p>
+              <strong>Perímetro de proteção:</strong> {{ getMapDistanceMeters(selectedMapRecord) | number: '1.0-0' }} m
+              <span class="m1-side-hint">(referência ao limite delimitado)</span>
+            </p>
+            <p [class.deduction]="isAutomaticDeduction(selectedMapRecord)" [class.no-deduction]="!isAutomaticDeduction(selectedMapRecord)">
+              {{ patrimonyLocationStatusMessage(selectedMapRecord) }}
+            </p>
+          </div>
+
+          <div class="record-list">
+            <button nz-button nzBlock nzSize="small" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">
+              <ng-container *ngIf="activeView === 'fuel-map'">{{ r.transacaoId }} — {{ r.placa }}</ng-container>
+              <ng-container *ngIf="activeView === 'assets-map'">{{ r.transacaoId }} · Reg. {{ r.placa }}</ng-container>
+            </button>
+          </div>
+        </nz-card>
+      </section>
+
+      <section *ngIf="activeView === 'fuel-integrity'" class="integrity-layout">
+        <nz-card class="m1-integrity-card">
+          <div class="integrity-process-zone">
+            <div *ngIf="integrityLaserSweep" class="integrity-process-laser" aria-hidden="true"></div>
+            <h4 class="m1-card-title m1-integrity-heading">Conformidade e Anti-Fraude</h4>
+            <div class="filters m1-filters">
+            <div class="filter-field">
+              <span class="filter-label">Data</span>
+              <input
+                nz-input
+                class="filter-control"
+                type="date"
+                [(ngModel)]="dateFilter"
+                (ngModelChange)="onIntegrityFilterInteraction()"
+              />
+            </div>
+            <div class="filter-field">
+              <span class="filter-label">Departamento</span>
+              <select nz-input class="filter-control" [(ngModel)]="departmentFilter" (ngModelChange)="onIntegrityFilterInteraction()">
+                <option value="all">Todos</option>
+                <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+              </select>
+            </div>
+            <div class="filter-actions">
+              <button nz-button nzType="primary" (click)="exportMockPdf()">Exportar PDF (simulação)</button>
+            </div>
+            </div>
+
+          <div
+            *ngIf="integrityFilterLoading"
+            class="integrity-skeleton-list integrity-skeleton-scan"
+            aria-busy="true"
+            aria-label="Consulta de segurança em andamento"
+          >
+            <div class="integrity-skeleton-card" *ngFor="let _ of [1, 2, 3]">
+              <div class="sk sk-line sk-line--lg"></div>
+              <div class="sk sk-line"></div>
+              <div class="sk sk-line sk-line--sm"></div>
+            </div>
+          </div>
+
+          <ng-container *ngIf="!integrityFilterLoading">
+            <div
+              *ngIf="integrityMobileLayout"
+              class="integrity-mobile-list integrity-scan-region"
+              [class.m1-scanner-paused]="integrityScannerReset"
+              [attr.data-scan]="integrityScanGeneration"
+              role="list"
+              aria-label="Registros de integridade"
+            >
+              <div *ngFor="let row of filteredIntegrityRows; let i = index" class="integrity-mobile-card integrity-card-scan" role="listitem">
+                <div class="integrity-beam" aria-hidden="true" [style.animation-delay.ms]="i * 100"></div>
+                <div class="integrity-mobile-card-head">
+                  <span class="integrity-mobile-plate">{{ row.plate }}</span>
+                  <span [class.verified]="row.verified" class="integrity-mobile-status">
+                    {{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}
+                  </span>
+                </div>
+                <dl class="integrity-mobile-dl">
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Data</dt>
+                    <dd>{{ row.date }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Departamento</dt>
+                    <dd>{{ row.department }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Litros</dt>
+                    <dd>{{ row.liters }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row">
+                    <dt>Valor</dt>
+                    <dd>R$ {{ row.amount | number: '1.2-2' }}</dd>
+                  </div>
+                  <div class="integrity-mobile-dl-row integrity-mobile-dl-hash">
+                    <dt>SHA-256</dt>
+                    <dd>
+                      <code class="integrity-mobile-hash hash-glow">{{ row.calculatedHash }}</code>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+              <p *ngIf="!filteredIntegrityRows.length" class="integrity-mobile-empty">Nenhum registro corresponde aos filtros.</p>
+            </div>
+
+            <div
+              *ngIf="!integrityMobileLayout"
+              class="integrity-table-wrap integrity-scan-region"
+              [class.m1-scanner-paused]="integrityScannerReset"
+              [attr.data-scan]="integrityScanGeneration"
+              role="region"
+              aria-label="Tabela de dados de integridade"
+            >
+              <div class="integrity-table-beam" aria-hidden="true"></div>
+              <nz-table [nzData]="filteredIntegrityRows" [nzPageSize]="5" [nzScroll]="{ x: '960px' }">
+                <thead>
+                  <tr>
+                    <th nzWidth="112px">Data</th>
+                    <th nzWidth="120px">Departamento</th>
+                    <th nzWidth="100px">Placa</th>
+                    <th nzWidth="72px">Litros</th>
+                    <th nzWidth="108px">Valor</th>
+                    <th nzWidth="220px">SHA-256</th>
+                    <th nzWidth="148px">Situação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of filteredIntegrityRows" class="integrity-row-scan">
+                    <td class="cell-nowrap">{{ row.date }}</td>
+                    <td>{{ row.department }}</td>
+                    <td class="cell-nowrap">{{ row.plate }}</td>
+                    <td class="cell-nowrap">{{ row.liters }}</td>
+                    <td class="cell-nowrap">R$ {{ row.amount | number: '1.2-2' }}</td>
+                    <td class="hash hash-cell-glow">{{ row.calculatedHash }}</td>
+                    <td>
+                      <span [class.verified]="row.verified">{{ row.verified ? 'Verificado / imutável' : 'Em revisão' }}</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </nz-table>
+            </div>
+          </ng-container>
+          </div>
+        </nz-card>
+      </section>
+
+      <section *ngIf="activeView === 'assets-report'" class="m1-assets-report">
+        <nz-card class="m1-assets-report-card">
+          <h4 class="m1-card-title">Inventário e Tombamento</h4>
+          <p class="m1-assets-report-lead">
+            Consolidação de bens tombados e validação de integridade documental.
+          </p>
+          <div class="m1-assets-kpi">
+            <div class="m1-assets-kpi-item">
+              <span class="m1-assets-kpi-label">Bens catalogados</span>
+              <app-m1-odometer
+                class="m1-assets-kpi-val"
+                [value]="assetsReportCatalogedTotal"
+                [rollKey]="assetsKpiOdometerRollKey"
+                [minDigits]="2"
+                [durationMs]="4000"
+                [staggerMs]="130"
+              ></app-m1-odometer>
+            </div>
+            <div class="m1-assets-kpi-item m1-assets-kpi-item--action">
+              <button type="button" class="m1-assets-kpi-scroll-btn" (click)="scrollToSha256Footer()">
+                <span class="m1-assets-kpi-label">Registros auditados (Blockchain)</span>
+                <app-m1-odometer
+                  class="m1-assets-kpi-val"
+                  [value]="assetsReportAuditTotal"
+                  [rollKey]="assetsKpiOdometerRollKey"
+                  [minDigits]="2"
+                  [durationMs]="4000"
+                  [staggerMs]="130"
+                ></app-m1-odometer>
+                <span class="m1-assets-kpi-hint">Ver trilha SHA-256 no rodapé</span>
+              </button>
+            </div>
+          </div>
+        </nz-card>
+      </section>
+    </ng-container>
+  </ng-container>
+
+  <div *ngIf="loading" class="loading m1-loading-skeleton-screen" aria-busy="true" aria-label="Carregando demonstração">
+    <div class="m1-load-sk m1-load-sk-logo"></div>
+    <div class="m1-load-sk m1-load-sk-title"></div>
+    <div class="m1-load-sk m1-load-sk-sub"></div>
+    <div class="m1-load-sk-grid">
+      <div class="m1-load-sk-card" *ngFor="let _ of [1, 2, 3, 4, 5, 6]">
+        <div class="m1-load-sk-line m1-load-sk-line--lg"></div>
+        <div class="m1-load-sk-line"></div>
+        <div class="m1-load-sk-line m1-load-sk-line--sm"></div>
+      </div>
+    </div>
+    <p class="loading-text">Carregando demonstração…</p>
+  </div>
+
+  <aside
+    class="m1-control-tower-toasts"
+    *ngIf="!loading && activeView !== 'hub'"
+    aria-live="polite"
+    aria-label="Alertas operacionais"
+  >
+    <div
+      *ngFor="let t of controlTowerToasts; trackBy: trackToastById"
+      class="m1-toast"
+      [class.m1-toast--ok]="t.kind === 'ok'"
+      [class.m1-toast--info]="t.kind === 'info'"
+      [class.m1-toast--warn]="t.kind === 'warn'"
+    >
+      <span class="m1-toast-dot" aria-hidden="true"></span>
+      <span class="m1-toast-msg">{{ t.message }}</span>
+    </div>
+  </aside>
+
+  <footer
+    *ngIf="!loading"
+    id="m1-sha256-footer-anchor"
+    class="m1-audit-ticker"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="m1-footer-integrity-strip">SHA-256 · trilha de auditoria e integridade documental</div>
+    <div class="m1-audit-ticker-track">
+      <span class="m1-audit-ticker-text">{{ auditTickerText }}</span>
+      <span class="m1-audit-ticker-text" aria-hidden="true">{{ auditTickerText }}</span>
+    </div>
+    <div class="m1-tce-seal" role="note">
+      <span class="m1-tce-seal__text">Metodologia apresentada ao TCE-AC</span>
+    </div>
+  </footer>
+
+  <nz-modal
+    [nzVisible]="pinDetailModalVisible"
+    [nzTitle]="activeView === 'assets-map' ? 'Bem patrimonial' : 'Ativo / equipamento'"
+    [nzFooter]="null"
+    nzCentered
+    (nzOnCancel)="closePinDetailModal()"
+  >
+    <ng-container *nzModalContent>
+      <div
+        class="pin-detail-modal-content"
+        *ngIf="pinDetailRecord"
+        [class.pin-detail-modal-content--patrimony-flash]="activeView === 'assets-map' && modalPatrimonyValidationFlash"
+      >
+        <div class="pin-photo-scan-wrap" [class.m1-scanner-paused]="modalPhotoScanReset" [attr.data-scan]="modalScannerKey">
+          <div class="pin-detail-photo-placeholder">Foto do ativo (marcador de posição)</div>
+          <div class="pin-photo-scanner" aria-hidden="true"></div>
+        </div>
+        <p class="pin-detail-gps">Localização validada por GPS — verificação de imagem e SHA-256</p>
+        <div class="pin-conservation">
+          <span class="pin-conservation-label">Conservação</span>
+          <div class="pin-conservation-bar">
+            <div class="pin-conservation-fill" [style.width.%]="modalConservationDisplay"></div>
+          </div>
+          <span class="pin-conservation-pct">{{ modalConservationDisplay | number: '1.0-0' }}%</span>
+        </div>
+        <div class="pin-detail-hash">
+          <strong>SHA-256</strong>
+          <code>{{ pinDetailRecord.integrityHash || '—' }}</code>
+        </div>
+      </div>
+    </ng-container>
+  </nz-modal>
+</div>
+
+
+========================================================================
+
+--- FILE: src/app/component/milestone1-demo/milestone1-demo.component.scss ---
+:host {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m1-wrapper {
+  --m1-radius: 1rem;
+  --m1-radius-lg: 1.25rem;
+  --m1-text-muted: #64748b;
+  --m1-border: rgba(15, 23, 42, 0.08);
+  --m1-accent: #0f766e;
+  --m1-accent-blue: #2563eb;
+  --m1-accent-amber: #d97706;
+  --m1-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 14px 44px -12px rgba(15, 23, 42, 0.14);
+  --m1-shadow-hover: 0 8px 32px -8px rgba(15, 23, 42, 0.18);
+  --m1-page-bg-light: #f1f5f9;
+  --m1-page-bg-dark: #0b1220;
+
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+
+  padding: clamp(1rem, 3vw, 1.75rem);
+  max-width: 1400px;
+  margin: 0 auto;
+  /* background-color + opacity das camadas interpolam; shorthand background entre gradientes diferentes “salta” no escuro */
+  background-color: var(--m1-page-bg-light);
+  transition:
+    background-color 0.55s ease,
+    color 0.55s ease;
+  color: #0f172a;
+  min-height: 100vh;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.m1-wrapper::before,
+.m1-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 0.55s ease;
+}
+
+/* Camada clara (combustível / hub) */
+.m1-wrapper::before {
+  opacity: 1;
+  background-image:
+    radial-gradient(ellipse 100% 90% at 100% -15%, rgba(15, 118, 110, 0.1) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(37, 99, 235, 0.07) 0%, transparent 48%);
+}
+
+/* Camada escura — revelada com fade (transição simétrica claro ↔ escuro) */
+.m1-wrapper::after {
+  opacity: 0;
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.22) 0%, transparent 42%),
+    radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.1) 0%, transparent 38%),
+    radial-gradient(circle at 15% 20%, #1f2937 0%, #111827 45%, #0b1220 100%);
+}
+
+.m1-wrapper.m1-has-ticker {
+  padding-bottom: 3rem;
+}
+
+.m1-wrapper.dark {
+  --m1-text-muted: #94a3b8;
+  --m1-border: rgba(148, 163, 184, 0.18);
+  --m1-shadow: 0 10px 36px rgba(0, 0, 0, 0.35);
+  --m1-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.4);
+  background-color: var(--m1-page-bg-dark);
+  color: #e5e7eb;
+}
+
+.m1-wrapper.dark::before {
+  opacity: 0;
+}
+
+.m1-wrapper.dark::after {
+  opacity: 1;
+}
+
+.m1-wrapper.dark,
+.m1-wrapper.dark h1,
+.m1-wrapper.dark h2,
+.m1-wrapper.dark h3,
+.m1-wrapper.dark h4,
+.m1-wrapper.dark h5,
+.m1-wrapper.dark p,
+.m1-wrapper.dark span,
+.m1-wrapper.dark label,
+.m1-wrapper.dark small,
+.m1-wrapper.dark strong,
+.m1-wrapper.dark td,
+.m1-wrapper.dark th,
+.m1-wrapper.dark li {
+  color: #e5e7eb;
+}
+
+.m1-module-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  width: 100%;
+  margin: 0 0 0.35rem;
+}
+
+.m1-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--m1-border);
+}
+
+.m1-hero--module {
+  padding-top: 0.15rem;
+}
+
+.m1-hero-main {
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.m1-eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--m1-accent);
+}
+
+.m1-wrapper.dark .m1-eyebrow {
+  color: #5eead4;
+}
+
+.m1-wrapper.m1-assets-theme .m1-eyebrow {
+  color: #1e3a8a;
+}
+
+.m1-wrapper.m1-assets-theme.dark .m1-eyebrow {
+  color: #93c5fd;
+}
+
+.m1-title {
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.6rem, 4.2vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  color: #0f172a;
+}
+
+.m1-wrapper.dark .m1-title {
+  color: #f8fafc;
+  text-shadow: 0 1px 20px rgba(15, 23, 42, 0.55);
+}
+
+.m1-subtitle {
+  margin: 0;
+  max-width: 40rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .m1-subtitle {
+  color: #94a3b8;
+}
+
+.m1-tabs {
+  margin-bottom: 1.5rem;
+}
+
+.m1-tabs-track {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--m1-border);
+  border-radius: 999px;
+  box-shadow: var(--m1-shadow);
+}
+
+.m1-wrapper.dark .m1-tabs-track {
+  background: rgba(30, 41, 59, 0.55);
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+/* Pill tabs: round buttons inside the track */
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn {
+  border-radius: 999px !important;
+  height: 38px;
+  padding: 0 1.2rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+  border: none !important;
+  box-shadow: none !important;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default {
+  background: transparent !important;
+  color: #475569 !important;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default:hover {
+  background: rgba(15, 23, 42, 0.06) !important;
+  color: #0f172a !important;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-primary,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-primary {
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 50%, #115e59 100%) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35) !important;
+}
+
+.m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-primary:hover,
+.m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
+
+/* Dark mode: main section tabs — explicit class beats ng-zorro light theme */
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-default,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-default {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-default:focus,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-default:focus {
+  background-color: #1e293b !important;
+  border-color: #64748b !important;
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark .m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default,
+.m1-wrapper.dark .m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.m1-wrapper.dark .m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn-default:hover,
+.m1-wrapper.dark .m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary,
+.m1-wrapper.dark ::ng-deep .m1-tab-btn.ant-btn-primary {
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 45%, #0d9488 100%) !important;
+  background-color: #0f766e !important;
+  border-color: transparent !important;
+  color: #f0fdfa !important;
+  box-shadow: 0 4px 20px rgba(20, 184, 166, 0.35) !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:focus,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-tab-btn.ant-btn-primary:focus {
+  background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%) !important;
+  background-color: #0d9488 !important;
+  color: #fff !important;
+}
+
+/* Theme toggle — mesmo “chrome” moderno que o botão Centro de governança */
+:host ::ng-deep .m1-theme-toggle.ant-btn {
+  height: 40px !important;
+  padding: 0 1.2rem !important;
+  border-radius: 12px !important;
+  font-weight: 500 !important;
+  font-size: 0.8125rem !important;
+  letter-spacing: 0.04em !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #0f172a !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 6px 20px -4px rgba(15, 23, 42, 0.08) !important;
+  align-self: center;
+  transition:
+    transform 0.2s ease,
+    background 0.45s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease !important;
+}
+
+:host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+:host ::ng-deep .m1-theme-toggle.ant-btn:focus {
+  border-color: rgba(15, 118, 110, 0.4) !important;
+  color: #0d9488 !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 4px 14px -2px rgba(15, 118, 110, 0.18) !important;
+  transform: translateY(-1px);
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn,
+.m1-wrapper.dark ::ng-deep .m1-theme-toggle.ant-btn {
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  background: rgba(30, 41, 59, 0.55) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #f1f5f9 !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 4px 24px -6px rgba(0, 0, 0, 0.45) !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:focus,
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+.m1-wrapper.dark :host ::ng-deep .m1-theme-toggle.ant-btn:focus {
+  border-color: rgba(94, 234, 212, 0.45) !important;
+  color: #f8fafc !important;
+  background: rgba(51, 65, 85, 0.65) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 6px 28px -4px rgba(0, 0, 0, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+/* Dark mode: TXN list (Geographic Audit side panel) */
+.m1-wrapper.dark :host ::ng-deep .record-list .ant-btn,
+.m1-wrapper.dark ::ng-deep .record-list .ant-btn {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%) !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .record-list .ant-btn:hover,
+.m1-wrapper.dark :host ::ng-deep .record-list .ant-btn:focus {
+  border-color: #6366f1 !important;
+  color: #f8fafc !important;
+  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%) !important;
+}
+
+.grid.cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1rem;
+  min-width: 0;
+}
+
+.grid.cards > nz-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.grid.cards ::ng-deep nz-card.ant-card {
+  max-width: 100%;
+  border-radius: var(--m1-radius-lg);
+  border: 1px solid var(--m1-border);
+  box-shadow: var(--m1-shadow);
+  overflow: hidden;
+  transition: box-shadow 0.25s ease, transform 0.2s ease;
+}
+
+section.m1-dashboard.grid.cards ::ng-deep nz-card.ant-card:hover,
+.grid.cards ::ng-deep nz-card.ant-card:hover {
+  box-shadow: var(--m1-shadow-hover);
+}
+
+.m1-stat-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-stat-fleet ::ng-deep .ant-card {
+  border-top: 3px solid #0d9488;
+}
+
+.m1-stat-liters ::ng-deep .ant-card {
+  border-top: 3px solid #2563eb;
+}
+
+.m1-stat-savings ::ng-deep .ant-card {
+  border-top: 3px solid #d97706;
+}
+
+.m1-wrapper.dark .m1-stat-fleet ::ng-deep .ant-card {
+  border-top-color: #2dd4bf;
+}
+
+.m1-wrapper.dark .m1-stat-liters ::ng-deep .ant-card {
+  border-top-color: #60a5fa;
+}
+
+.m1-wrapper.dark .m1-stat-savings ::ng-deep .ant-card {
+  border-top-color: #fbbf24;
+}
+
+.m1-stat-label {
+  margin: 0 0 0.65rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .m1-stat-label {
+  color: #94a3b8;
+}
+
+.m1-stat-value {
+  font-size: clamp(1.65rem, 3.5vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.m1-wrapper.dark .m1-stat-value {
+  color: #f8fafc;
+}
+
+.m1-stat-value--pulse {
+  display: inline-block;
+  animation: m1-savings-attention 2.75s ease-in-out infinite;
+}
+
+@keyframes m1-savings-attention {
+  0%,
+  100% {
+    text-shadow: none;
+    filter: brightness(1);
+  }
+  45% {
+    text-shadow:
+      0 0 12px rgba(16, 185, 129, 0.55),
+      0 0 26px rgba(45, 212, 191, 0.3);
+    filter: brightness(1.07);
+  }
+}
+
+.m1-wrapper.dark .m1-stat-value--pulse {
+  animation-name: m1-savings-attention-dark;
+}
+
+@keyframes m1-savings-attention-dark {
+  0%,
+  100% {
+    text-shadow: none;
+    filter: brightness(1);
+  }
+  48% {
+    text-shadow:
+      0 0 14px rgba(250, 204, 21, 0.5),
+      0 0 28px rgba(45, 212, 191, 0.28);
+    filter: brightness(1.09);
+  }
+}
+
+.m1-stat-unit,
+.m1-currency {
+  font-size: 0.55em;
+  font-weight: 600;
+  opacity: 0.85;
+  vertical-align: baseline;
+}
+
+.m1-card-title {
+  margin: 0 0 1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.m1-wrapper.dark .m1-card-title {
+  color: #f8fafc;
+}
+
+.m1-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+}
+
+.m1-wrapper.dark .m1-badge {
+  background: rgba(94, 234, 212, 0.15);
+  color: #5eead4;
+}
+
+.m1-roi-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-irregularities-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-target {
+  font-weight: 500;
+  font-size: 0.85em;
+  opacity: 0.75;
+}
+
+.m1-integrity-heading {
+  margin-bottom: 1.25rem;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.loading-text {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .loading-text {
+  color: #94a3b8;
+}
+
+.m1-map-footnote {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--m1-text-muted);
+}
+
+.m1-wrapper.dark .m1-map-footnote {
+  color: #94a3b8;
+}
+
+.roi-bars .bar-row {
+  display: grid;
+  grid-template-columns: 150px 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.bar {
+  height: 14px;
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.m1-wrapper.dark .bar {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.roi-bars .bar > .bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.highlight,
+.m1-roi-highlight {
+  margin: 1rem 0 0;
+  font-size: 0.9375rem;
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.m1-wrapper.dark .highlight,
+.m1-wrapper.dark .m1-roi-highlight {
+  color: #5eead4;
+}
+
+.m1-sparkline-block {
+  margin: 0.85rem 0 0.25rem;
+}
+
+.m1-sparkline-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--m1-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.m1-sparkline {
+  display: block;
+  width: 100%;
+  height: 44px;
+}
+
+.m1-sparkline-path {
+  fill: none;
+  stroke: #0ea5e9;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  /* ~1,55s de desenho + pausa; ciclo repete (salto 100%→0% reinicia o traço) */
+  animation: m1-sparkline-draw 6s infinite;
+  animation-delay: 0.2s;
+}
+
+.m1-wrapper.dark .m1-sparkline-path {
+  stroke: #38bdf8;
+}
+
+@keyframes m1-sparkline-draw {
+  0% {
+    stroke-dashoffset: 100;
+    animation-timing-function: cubic-bezier(0.22, 1.15, 0.36, 1);
+  }
+  26% {
+    stroke-dashoffset: 0;
+    animation-timing-function: linear;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.irregularity-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  font-size: 0.875rem;
+}
+
+.irregularity-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.m1-wrapper.dark .irregularity-row {
+  border-bottom-color: #334155;
+}
+
+.map-layout {
+  --milestone-map-height: 420px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.map-layout ::ng-deep nz-card.ant-card,
+.integrity-layout ::ng-deep nz-card.ant-card {
+  border-radius: var(--m1-radius-lg);
+  border: 1px solid var(--m1-border);
+  box-shadow: var(--m1-shadow);
+  transition: box-shadow 0.25s ease;
+}
+
+.map-layout ::ng-deep nz-card.ant-card:hover,
+.integrity-layout ::ng-deep nz-card.ant-card:hover {
+  box-shadow: var(--m1-shadow-hover);
+}
+
+.map-wrap {
+  position: relative;
+}
+
+.map-tooltip-corner {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  max-width: min(320px, 85%);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+  pointer-events: none;
+}
+
+.m1-wrapper.dark .map-tooltip-corner {
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+#milestone-map {
+  height: var(--milestone-map-height);
+  width: 100%;
+  border-radius: var(--m1-radius);
+  box-shadow: inset 0 0 0 1px var(--m1-border);
+  overflow: hidden;
+}
+
+.m1-map-card ::ng-deep .ant-card-body,
+.m1-side-panel ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-side-hint {
+  display: inline;
+  margin-left: 0.25rem;
+  font-weight: 400;
+  font-size: 0.85em;
+  color: var(--m1-muted, #64748b);
+}
+
+.m1-wrapper.dark .m1-side-hint {
+  color: #94a3b8;
+}
+
+.m1-patrimony-validation-block {
+  margin: -0.35rem -0.25rem 0.75rem;
+  padding: 0.5rem 0.65rem 0.35rem;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  /* ~2s de pulso + ~6s de pausa, em ciclo contínuo */
+  animation: m1-patrimony-validation-aura 8s ease-in-out infinite;
+}
+
+.m1-wrapper.dark .m1-patrimony-validation-block {
+  animation-name: m1-patrimony-validation-aura-dark;
+}
+
+@keyframes m1-patrimony-validation-aura {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border-color: transparent;
+    background-color: transparent;
+  }
+  /* Primeiros 25% do ciclo = antigo 0–100% (2s num ciclo de 8s) */
+  4.5% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.65),
+      0 0 28px rgba(34, 211, 238, 0.45),
+      inset 0 0 20px rgba(56, 189, 248, 0.08);
+    border-color: rgba(45, 212, 191, 0.5);
+    background-color: rgba(240, 253, 250, 0.35);
+  }
+  13.75% {
+    box-shadow:
+      0 0 0 1px rgba(59, 130, 246, 0.35),
+      0 0 18px rgba(34, 211, 238, 0.25);
+    border-color: rgba(59, 130, 246, 0.25);
+    background-color: rgba(239, 246, 255, 0.2);
+  }
+  25%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
+@keyframes m1-patrimony-validation-aura-dark {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border-color: transparent;
+    background-color: transparent;
+  }
+  4.5% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.55),
+      0 0 32px rgba(34, 211, 238, 0.35),
+      inset 0 0 24px rgba(15, 118, 110, 0.15);
+    border-color: rgba(94, 234, 212, 0.45);
+    background-color: rgba(15, 23, 42, 0.55);
+  }
+  13.75% {
+    box-shadow:
+      0 0 0 1px rgba(96, 165, 250, 0.4),
+      0 0 20px rgba(56, 189, 248, 0.2);
+    border-color: rgba(96, 165, 250, 0.3);
+    background-color: rgba(30, 41, 59, 0.4);
+  }
+  25%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
+.m1-integrity-card ::ng-deep .ant-card-body {
+  padding: 1.35rem 1.5rem;
+}
+
+.m1-filters {
+  padding: 1rem 1.15rem;
+  margin: 0 0 1.25rem;
+  background: rgba(15, 23, 42, 0.03);
+  border-radius: var(--m1-radius);
+  border: 1px solid var(--m1-border);
+}
+
+.m1-wrapper.dark .m1-filters {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: #334155;
+}
+
+.map-layout .side-card ::ng-deep .ant-card-body {
+  min-height: var(--milestone-map-height);
+  box-sizing: border-box;
+}
+
+:host ::ng-deep #milestone-map .asset-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%);
+  color: #0f172a;
+  border: 1px solid #94a3b8;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+}
+
+:host ::ng-deep #milestone-map .asset-pin.asset-pin-selected {
+  background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #2563eb;
+  color: #1e3a8a;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.m1-wrapper.dark :host ::ng-deep #milestone-map .asset-pin {
+  background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+  color: #f8fafc;
+  border-color: #64748b;
+}
+
+.m1-wrapper.dark :host ::ng-deep #milestone-map .asset-pin.asset-pin-selected {
+  background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%);
+  border-color: #818cf8;
+  color: #e0e7ff;
+}
+
+.pin-detail-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pin-detail-modal-content--patrimony-flash {
+  margin: -0.35rem;
+  padding: 0.35rem;
+  border-radius: 12px;
+  animation: m1-modal-patrimony-aura 2s ease-out forwards;
+}
+
+@keyframes m1-modal-patrimony-aura {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    border: 1px solid transparent;
+    background-color: transparent;
+  }
+  20% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.55),
+      0 0 26px rgba(34, 211, 238, 0.4);
+    border-color: rgba(45, 212, 191, 0.45);
+    background-color: rgba(240, 253, 250, 0.25);
+  }
+  55% {
+    box-shadow:
+      0 0 0 1px rgba(59, 130, 246, 0.35),
+      0 0 16px rgba(34, 211, 238, 0.22);
+    border-color: rgba(59, 130, 246, 0.22);
+    background-color: rgba(239, 246, 255, 0.12);
+  }
+  100% {
+    box-shadow: none;
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
+.m1-wrapper.dark .pin-detail-modal-content--patrimony-flash {
+  animation-name: m1-modal-patrimony-aura-dark;
+}
+
+@keyframes m1-modal-patrimony-aura-dark {
+  0% {
+    box-shadow: none;
+    border-color: transparent;
+    background-color: transparent;
+  }
+  20% {
+    box-shadow:
+      0 0 0 2px rgba(45, 212, 191, 0.45),
+      0 0 28px rgba(34, 211, 238, 0.3);
+    border-color: rgba(94, 234, 212, 0.4);
+    background-color: rgba(15, 23, 42, 0.45);
+  }
+  55% {
+    box-shadow:
+      0 0 0 1px rgba(96, 165, 250, 0.35),
+      0 0 18px rgba(56, 189, 248, 0.18);
+    border-color: rgba(96, 165, 250, 0.25);
+    background-color: rgba(30, 41, 59, 0.35);
+  }
+  100% {
+    box-shadow: none;
+    border-color: transparent;
+    background-color: transparent;
+  }
+}
+
+.pin-detail-photo-placeholder {
+  aspect-ratio: 4 / 3;
+  max-height: 200px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #e2e8f0 0%, #cbd5e1 50%, #94a3b8 100%);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 1rem;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 1px dashed #64748b;
+  box-sizing: border-box;
+}
+
+.pin-detail-gps {
+  margin: 0;
+  font-weight: 600;
+  color: #15803d;
+  font-size: 0.95rem;
+}
+
+.m1-wrapper.dark .pin-detail-gps {
+  color: #86efac;
+}
+
+.pin-detail-hash {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pin-detail-hash code {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  word-break: break-all;
+  color: #334155;
+  background: #f1f5f9;
+  padding: 0.5rem 0.65rem;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.m1-wrapper.dark .pin-detail-hash code {
+  color: #e2e8f0;
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.record-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.deduction {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.no-deduction {
+  color: #14532d;
+  font-weight: 600;
+}
+
+.m1-wrapper.dark .no-deduction {
+  color: #86efac;
+}
+
+.integrity-layout .filters {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.integrity-layout .filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.integrity-layout .filter-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.m1-wrapper.dark .integrity-layout .filter-label {
+  color: #e2e8f0;
+}
+
+.integrity-layout .filter-control {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: 40px;
+  min-height: 40px;
+  line-height: 1.25;
+}
+
+.integrity-layout .filter-control[type='date'] {
+  padding: 0.25rem 0.5rem;
+}
+
+.integrity-layout select.filter-control {
+  padding: 0.25rem 0.75rem;
+}
+
+.integrity-layout .filter-actions {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 0;
+}
+
+.integrity-layout {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.integrity-layout ::ng-deep nz-card.ant-card {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-layout ::ng-deep .ant-card-body {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.integrity-process-zone {
+  position: relative;
+}
+
+.integrity-process-laser {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0) 40%,
+    rgba(56, 189, 248, 0.72) 50%,
+    rgba(34, 211, 238, 0) 60%,
+    transparent 100%
+  );
+  background-size: 100% 260%;
+  animation: m1-process-laser-sweep 3.35s cubic-bezier(0.3, 0.55, 0.2, 1) forwards;
+}
+
+@keyframes m1-process-laser-sweep {
+  0% {
+    background-position: 0 -130%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 230%;
+    opacity: 0;
+  }
+}
+
+.integrity-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+
+/* nz-table horizontal scroll: pin scroll viewport to card width (flex min-width:auto otherwise grows with table) */
+.integrity-table-wrap ::ng-deep .ant-spin-nested-loading,
+.integrity-table-wrap ::ng-deep .ant-spin-container {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-table-wrap ::ng-deep .ant-table {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-table-wrap ::ng-deep nz-table-inner-scroll.ant-table-container {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.integrity-table-wrap ::ng-deep .ant-table-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Narrow viewports: same pattern as dashboard cards — no 960px-wide table */
+.integrity-mobile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.integrity-mobile-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  background: #fafafa;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m1-wrapper.dark .integrity-mobile-card {
+  background: rgba(15, 23, 42, 0.65);
+  border-color: #334155;
+}
+
+.integrity-mobile-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.m1-wrapper.dark .integrity-mobile-card-head {
+  border-bottom-color: #334155;
+}
+
+.integrity-mobile-plate {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.m1-wrapper.dark .integrity-mobile-plate {
+  color: #f8fafc;
+}
+
+.integrity-mobile-status {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.integrity-mobile-dl {
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.integrity-mobile-dl-row {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, 32%) 1fr;
+  gap: 0.5rem;
+  align-items: start;
+  font-size: 0.875rem;
+  min-width: 0;
+}
+
+.integrity-mobile-dl-row dt {
+  margin: 0;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.m1-wrapper.dark .integrity-mobile-dl-row dt {
+  color: #94a3b8;
+}
+
+.integrity-mobile-dl-row dd {
+  margin: 0;
+  min-width: 0;
+  word-break: break-word;
+  color: #111827;
+}
+
+.m1-wrapper.dark .integrity-mobile-dl-row dd {
+  color: #e5e7eb;
+}
+
+.integrity-mobile-dl-hash .integrity-mobile-hash {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1.4;
+  word-break: break-all;
+  white-space: pre-wrap;
+  color: #374151;
+}
+
+.m1-wrapper.dark .integrity-mobile-dl-hash .integrity-mobile-hash {
+  color: #cbd5e1;
+}
+
+.integrity-mobile-empty {
+  margin: 0.5rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.m1-wrapper.dark .integrity-mobile-empty {
+  color: #94a3b8;
+}
+
+.integrity-layout .cell-nowrap {
+  white-space: nowrap;
+}
+
+.hash {
+  font-family: monospace;
+  font-size: 11px;
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.verified {
+  color: #166534;
+  font-weight: 600;
+}
+
+.m1-wrapper.dark .verified {
+  color: #86efac;
+}
+
+.m1-wrapper.dark .hash {
+  color: #d1d5db;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-card,
+.m1-wrapper.dark ::ng-deep .ant-card {
+  background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.35);
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-card-head,
+.m1-wrapper.dark ::ng-deep .ant-card-head,
+.m1-wrapper.dark :host ::ng-deep .ant-card-body,
+.m1-wrapper.dark ::ng-deep .ant-card-body {
+  color: #f1f5f9;
+  border-color: #334155;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-card-head-title,
+.m1-wrapper.dark ::ng-deep .ant-card-head-title,
+.m1-wrapper.dark :host ::ng-deep .ant-typography,
+.m1-wrapper.dark ::ng-deep .ant-typography,
+.m1-wrapper.dark :host ::ng-deep .ant-statistic-content,
+.m1-wrapper.dark ::ng-deep .ant-statistic-content {
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-table,
+.m1-wrapper.dark ::ng-deep .ant-table,
+.m1-wrapper.dark :host ::ng-deep .ant-table-thead > tr > th,
+.m1-wrapper.dark ::ng-deep .ant-table-thead > tr > th,
+.m1-wrapper.dark :host ::ng-deep .ant-table-tbody > tr > td,
+.m1-wrapper.dark ::ng-deep .ant-table-tbody > tr > td {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+/* nz-table pagination — dark mode (avoid white prev/next/page buttons) */
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item a,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item a {
+  color: #e2e8f0 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item-active,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item-active {
+  background: #312e81 !important;
+  border-color: #6366f1 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-item-active a,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-item-active a {
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-next .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #e2e8f0 !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-disabled .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-disabled .ant-pagination-item-link {
+  background: #0f172a !important;
+  border-color: #334155 !important;
+  color: #64748b !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+  background: #334155 !important;
+  border-color: #475569 !important;
+  color: #f8fafc !important;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-pagination .ant-pagination-options,
+.m1-wrapper.dark ::ng-deep .ant-pagination .ant-pagination-options {
+  color: #e2e8f0;
+}
+
+.m1-wrapper.dark :host ::ng-deep .ant-btn-default,
+.m1-wrapper.dark ::ng-deep .ant-btn-default {
+  background: #1f2937;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.m1-wrapper.dark :host ::ng-deep input,
+.m1-wrapper.dark ::ng-deep input,
+.m1-wrapper.dark :host ::ng-deep select,
+.m1-wrapper.dark ::ng-deep select {
+  background: #111827;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+@media (max-width: 1024px) {
+  /* Single column: avoids 2+1 KPI layout and half-width last card on tablets / large phones */
+  .grid.cards {
+    grid-template-columns: 1fr;
+  }
+
+  .grid.cards .span-2 {
+    grid-column: 1 / -1;
+  }
+
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .roi-bars .bar-row {
+    grid-template-columns: 1fr;
+  }
+
+  .m1-title {
+    font-size: 1.35rem;
+  }
+
+  .m1-subtitle {
+    font-size: 0.875rem;
+  }
+
+  /* Hero: em coluna; botões ocupam toda a largura (evita bloco à esquerda com vazio à direita) */
+  .m1-hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .m1-hero-main {
+    flex: none;
+    width: 100%;
+  }
+
+  .m1-module-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .m1-module-topbar .m1-theme-toggle {
+    width: 100%;
+  }
+
+  .m1-module-topbar :host ::ng-deep .ant-btn,
+  .m1-module-topbar ::ng-deep .ant-btn {
+    width: 100%;
+    max-width: 100%;
+    white-space: normal;
+    line-height: 1.25;
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+    height: auto !important;
+    min-height: 40px;
+  }
+
+  .m1-module-topbar :host ::ng-deep .m1-theme-toggle.ant-btn,
+  .m1-module-topbar ::ng-deep .m1-theme-toggle.ant-btn {
+    height: auto !important;
+    min-height: 40px;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+
+  .m1-tabs-track {
+    width: 100%;
+    justify-content: stretch;
+    border-radius: var(--m1-radius-lg);
+  }
+
+  .m1-tabs-track :host ::ng-deep .m1-tab-btn.ant-btn,
+  .m1-tabs-track ::ng-deep .m1-tab-btn.ant-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .m1-tab-btn {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .integrity-layout .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .integrity-layout .filter-field {
+    width: 100%;
+  }
+
+  .integrity-layout .filter-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .integrity-layout .filter-actions button {
+    width: 100%;
+  }
+}
+
+/* ——— Governance Center hub (Inovathec + module tiles) ——— */
+.m1-hub-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Logo “stage”: aurora + glass + subtle scanner line (transparent PNG friendly) */
+.m1-logo-showcase {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 1.35rem;
+  max-width: min(210px, 94vw);
+  padding: 0.15rem;
+}
+
+.m1-logo-showcase--compact {
+  margin: 0 0 0.5rem;
+  max-width: 148px;
+  padding: 0.05rem;
+  justify-content: flex-start;
+}
+
+.m1-brand-strip .m1-logo-showcase--compact {
+  margin-bottom: 0;
+}
+
+.m1-logo-showcase__energy {
+  position: absolute;
+  inset: -18% -12% -22% -12%;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 48% at 28% 42%, rgba(45, 212, 191, 0.42) 0%, transparent 58%),
+    radial-gradient(ellipse 48% 44% at 78% 58%, rgba(56, 189, 248, 0.38) 0%, transparent 52%),
+    radial-gradient(ellipse 40% 36% at 50% 100%, rgba(20, 184, 166, 0.22) 0%, transparent 55%);
+  filter: blur(32px);
+  opacity: 0.95;
+  animation: m1-logo-energy 12s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.m1-wrapper.dark .m1-logo-showcase__energy {
+  background:
+    radial-gradient(ellipse 55% 48% at 30% 40%, rgba(45, 212, 191, 0.35) 0%, transparent 58%),
+    radial-gradient(ellipse 48% 44% at 75% 55%, rgba(56, 189, 248, 0.32) 0%, transparent 52%),
+    radial-gradient(ellipse 42% 38% at 48% 95%, rgba(94, 234, 212, 0.18) 0%, transparent 55%);
+  filter: blur(36px);
+}
+
+@keyframes m1-logo-energy {
+  0% {
+    transform: scale(1) translate(0, 0) rotate(0deg);
+    opacity: 0.88;
+  }
+  100% {
+    transform: scale(1.07) translate(3%, -4%) rotate(2deg);
+    opacity: 1;
+  }
+}
+
+.m1-logo-showcase__mesh {
+  position: absolute;
+  inset: 8%;
+  z-index: 0;
+  border-radius: 1rem;
+  background-image: radial-gradient(rgba(15, 118, 110, 0.12) 1px, transparent 1px);
+  background-size: 10px 10px;
+  mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, #000 20%, transparent 72%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 50%, #000 20%, transparent 72%);
+  opacity: 0.55;
+  animation: m1-logo-mesh-drift 20s linear infinite;
+  pointer-events: none;
+}
+
+.m1-wrapper.dark .m1-logo-showcase__mesh {
+  background-image: radial-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
+  opacity: 0.35;
+}
+
+@keyframes m1-logo-mesh-drift {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 10px 10px;
+  }
+}
+
+.m1-logo-showcase__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.85rem;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.78) 100%);
+  /* Light blur only — heavy backdrop-filter + filtered children often softens <img> bitmaps */
+  backdrop-filter: blur(6px) saturate(1.05);
+  -webkit-backdrop-filter: blur(6px) saturate(1.05);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 0 0 1px rgba(15, 118, 110, 0.06),
+    0 22px 56px -28px rgba(15, 23, 42, 0.28),
+    0 0 80px -40px rgba(45, 212, 191, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+}
+
+.m1-logo-showcase--compact .m1-logo-showcase__panel {
+  padding: 0.2rem 0.38rem;
+  border-radius: 0.55rem;
+  justify-content: flex-start;
+}
+
+/* Dark UI: logo art is dark — use a light “stamp” so marks stay legible (same idea as light mode). */
+.m1-wrapper.dark .m1-logo-showcase__panel {
+  background: linear-gradient(168deg, #f8fafc 0%, #f1f5f9 50%, #e8eef4 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-color: rgba(148, 163, 184, 0.55);
+  box-shadow:
+    0 0 0 1px rgba(15, 23, 42, 0.07),
+    0 14px 36px -12px rgba(0, 0, 0, 0.55),
+    0 0 40px -18px rgba(56, 189, 248, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  padding: 0.28rem 0.45rem;
+}
+
+.m1-wrapper.dark .m1-logo-showcase--compact .m1-logo-showcase__panel {
+  padding: 0.16rem 0.3rem;
+}
+
+.m1-logo-showcase__panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    125deg,
+    rgba(45, 212, 191, 0.65) 0%,
+    rgba(56, 189, 248, 0.45) 35%,
+    rgba(20, 184, 166, 0.25) 55%,
+    transparent 70%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.85;
+  animation: m1-logo-border-shift 8s ease-in-out infinite alternate;
+}
+
+.m1-wrapper.dark .m1-logo-showcase__panel::before {
+  background: linear-gradient(
+    125deg,
+    rgba(13, 148, 136, 0.55) 0%,
+    rgba(2, 132, 199, 0.45) 40%,
+    rgba(20, 184, 166, 0.2) 60%,
+    transparent 75%
+  );
+  opacity: 0.95;
+}
+
+@keyframes m1-logo-border-shift {
+  0% {
+    opacity: 0.65;
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    opacity: 0.95;
+    filter: hue-rotate(12deg);
+  }
+}
+
+.m1-logo-showcase__scan {
+  position: absolute;
+  left: -50%;
+  right: -50%;
+  top: -40%;
+  height: 45%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(165, 243, 252, 0.22) 48%,
+    rgba(56, 189, 248, 0.12) 52%,
+    rgba(255, 255, 255, 0) 65%,
+    transparent 100%
+  );
+  animation: m1-logo-scan 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.m1-wrapper.dark .m1-logo-showcase__scan {
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(34, 211, 238, 0.18) 50%,
+    rgba(56, 189, 248, 0.1) 52%,
+    rgba(255, 255, 255, 0) 62%,
+    transparent 100%
+  );
+}
+
+@keyframes m1-logo-scan {
+  0%,
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(180%);
+    opacity: 0.85;
+  }
+  55% {
+    opacity: 0;
+  }
+}
+
+.m1-inovathec-logo {
+  position: relative;
+  z-index: 1;
+  max-width: min(200px, 92vw);
+  width: auto;
+  height: auto;
+  max-height: 72px;
+  display: block;
+  object-fit: contain;
+  /* No filter: drop-shadow() here — it re-rasterizes the bitmap and often looks blurry at small sizes */
+  image-rendering: auto;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.m1-hub-tagline {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--m1-text-muted);
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.5;
+}
+
+.m1-hub-sections {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.5rem, 4vw, 2.25rem);
+  margin-bottom: 2rem;
+}
+
+.m1-hub-section {
+  min-width: 0;
+}
+
+.m1-hub-section-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--m1-border);
+}
+
+.m1-hub-section-title--fuel {
+  color: #14532d;
+  border-bottom-color: rgba(15, 118, 110, 0.22);
+}
+
+.m1-wrapper.dark .m1-hub-section-title--fuel {
+  color: #6ee7b7;
+  border-bottom-color: rgba(52, 211, 153, 0.35);
+}
+
+.m1-hub-section-title--asset {
+  color: #0c4a6e;
+  border-bottom-color: rgba(37, 99, 235, 0.2);
+}
+
+.m1-wrapper.dark .m1-hub-section-title--asset {
+  color: #7dd3fc;
+  border-bottom-color: rgba(56, 189, 248, 0.35);
+}
+
+.m1-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 0;
+}
+
+.m1-hub-tile {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  min-height: 76px !important;
+  height: auto !important;
+  padding: 1rem 1.15rem !important;
+  border-radius: var(--m1-radius-lg) !important;
+  text-align: left !important;
+  white-space: normal !important;
+  line-height: 1.35 !important;
+  font-weight: 600 !important;
+  border: 1px solid var(--m1-border) !important;
+  box-shadow: var(--m1-shadow) !important;
+  transition: transform 0.18s ease, box-shadow 0.2s ease !important;
+}
+
+.m1-hub-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--m1-shadow-hover) !important;
+}
+
+.m1-hub-tile-kicker {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 0.35rem;
+}
+
+.m1-hub-tile-title {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+/* Fuel = green block */
+.m1-hub-tile--fuel {
+  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 45%, #a7f3d0 100%) !important;
+  color: #064e3b !important;
+}
+
+.m1-wrapper.dark .m1-hub-tile--fuel {
+  background: linear-gradient(145deg, #064e3b 0%, #047857 50%, #0f766e 100%) !important;
+  color: #ecfdf5 !important;
+  border-color: rgba(52, 211, 153, 0.35) !important;
+}
+
+/* Assets = petrol blue */
+.m1-hub-tile--asset {
+  background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 40%, #7dd3fc 100%) !important;
+  color: #0c4a6e !important;
+}
+
+.m1-wrapper.dark .m1-hub-tile--asset {
+  background: linear-gradient(145deg, #0c4a6e 0%, #075985 50%, #0369a1 100%) !important;
+  color: #e0f2fe !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+.m1-hub-footer-tools {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.m1-brand-strip {
+  margin-bottom: 0.65rem;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.m1-inovathec-logo--compact {
+  max-width: 128px;
+  max-height: 36px;
+  height: auto;
+}
+
+.m1-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m1-logo-showcase__energy,
+  .m1-logo-showcase__mesh,
+  .m1-logo-showcase__panel::before,
+  .m1-logo-showcase__scan {
+    animation: none !important;
+  }
+
+  .m1-logo-showcase__energy {
+    transform: none;
+  }
+
+  :host ::ng-deep .m1-theme-toggle.ant-btn:hover,
+  :host ::ng-deep .m1-theme-toggle.ant-btn:focus {
+    transform: none;
+  }
+
+  .m1-audit-ticker-track {
+    animation: none !important;
+    transform: translateX(0);
+  }
+
+  .m1-toast {
+    animation: none !important;
+  }
+
+  .m1-toast-dot {
+    animation: none !important;
+  }
+
+  :host ::ng-deep #milestone-map .map-live-pulse::before {
+    animation: none !important;
+    opacity: 0.35;
+    transform: scale(1);
+  }
+}
+
+/* Assets module subtle theme hook — só camada clara */
+.m1-wrapper.m1-assets-theme:not(.dark)::before {
+  background-image:
+    radial-gradient(ellipse 100% 90% at 100% -15%, rgba(14, 165, 233, 0.12) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, rgba(12, 74, 110, 0.06) 0%, transparent 48%);
+}
+
+/* ——— Audit ticker (footer) ——— */
+.m1-audit-ticker {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 1.25rem -1rem -1rem;
+  padding: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, #0f172a 100%);
+  border-top: 1px solid rgba(56, 189, 248, 0.25);
+  overflow: hidden;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+}
+
+.m1-footer-integrity-strip {
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #5eead4;
+  padding: 0.35rem 0.75rem;
+  background: rgba(56, 189, 248, 0.12);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.m1-wrapper.dark .m1-footer-integrity-strip {
+  color: #a5f3fc;
+  background: rgba(6, 182, 212, 0.15);
+}
+
+.m1-audit-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: m1-ticker-marquee 28s linear infinite;
+  padding: 0.45rem 0;
+  will-change: transform;
+}
+
+.m1-audit-ticker-text {
+  flex-shrink: 0;
+  padding: 0 3rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #a5f3fc;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Selo institucional — discreto, rodapé da demonstração */
+.m1-tce-seal {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.35rem 0.75rem 0.45rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.12);
+  background: rgba(2, 6, 23, 0.35);
+}
+
+.m1-tce-seal__text {
+  display: inline-block;
+  max-width: 100%;
+  text-align: center;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+  color: rgba(226, 232, 240, 0.5);
+  padding: 0.2rem 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+@keyframes m1-ticker-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Torre de controle — toasts (canto superior direito) */
+.m1-control-tower-toasts {
+  position: fixed;
+  top: max(0.75rem, env(safe-area-inset-top));
+  right: max(0.75rem, env(safe-area-inset-right));
+  z-index: 10050;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+  pointer-events: none;
+  max-width: min(22rem, calc(100vw - 1.5rem));
+}
+
+.m1-toast {
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem 0.55rem 0.65rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.15),
+    0 12px 40px -8px rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: m1-toast-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.m1-wrapper.dark .m1-toast {
+  color: #f1f5f9;
+  background: rgba(15, 23, 42, 0.92);
+  border-color: rgba(56, 189, 248, 0.28);
+  box-shadow:
+    0 0 0 1px rgba(34, 211, 238, 0.2),
+    0 16px 48px -10px rgba(0, 0, 0, 0.55);
+}
+
+.m1-toast-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 0.28rem;
+  border-radius: 50%;
+  background: #0ea5e9;
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.75);
+  animation: m1-toast-blink 1.4s ease-in-out infinite;
+}
+
+.m1-toast--ok .m1-toast-dot {
+  background: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.75);
+}
+
+.m1-toast--warn .m1-toast-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.75);
+}
+
+.m1-toast-msg {
+  text-align: left;
+}
+
+@keyframes m1-toast-in {
+  0% {
+    opacity: 0;
+    transform: translateX(12px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes m1-toast-blink {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.88);
+  }
+}
+
+/* ——— ROI bars: slow “fill”, flowing-water gradients (distinct palettes) ——— */
+.roi-bars .bar-fill {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 2.45s cubic-bezier(0.34, 1.35, 0.55, 1.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.roi-bars .bar-fill--gasto-real {
+  transition-delay: 0.4s;
+}
+
+/* Gasto bruto: cool indigo → sapphire → sky (depth / “volume”) */
+.bar-fill--gasto-bruto {
+  background: linear-gradient(
+    95deg,
+    #312e81 0%,
+    #4338ca 18%,
+    #2563eb 42%,
+    #0ea5e9 68%,
+    #38bdf8 88%,
+    #7dd3fc 100%
+  );
+  background-size: 240% 100%;
+  animation: m1-roi-water-flow-a 3.8s ease-in-out infinite;
+}
+
+/* Gasto real: deep teal → jade → mint (clearly different from blue bar) */
+.bar-fill--gasto-real {
+  background: linear-gradient(
+    95deg,
+    #134e4a 0%,
+    #0f766e 22%,
+    #0d9488 48%,
+    #14b8a6 72%,
+    #5eead4 92%,
+    #ccfbf1 100%
+  );
+  background-size: 240% 100%;
+  animation: m1-roi-water-flow-b 4.4s ease-in-out infinite;
+}
+
+/* Shimmer wave over the fill */
+.bar-fill--gasto-bruto::after,
+.bar-fill--gasto-real::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.35) 48%,
+    rgba(255, 255, 255, 0.12) 52%,
+    rgba(255, 255, 255, 0) 65%,
+    transparent 100%
+  );
+  background-size: 180% 100%;
+  animation: m1-roi-water-shine 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.bar-fill--gasto-real::after {
+  animation-duration: 2.6s;
+  animation-delay: 0.35s;
+}
+
+@keyframes m1-roi-water-flow-a {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes m1-roi-water-flow-b {
+  0%,
+  100% {
+    background-position: 100% 50%;
+  }
+  50% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes m1-roi-water-shine {
+  0% {
+    background-position: -60% 50%;
+    opacity: 0.5;
+  }
+  45% {
+    opacity: 0.95;
+  }
+  100% {
+    background-position: 160% 50%;
+    opacity: 0.45;
+  }
+}
+
+.m1-wrapper.dark .roi-bars .bar-fill {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.m1-wrapper.dark .bar-fill--gasto-bruto::after,
+.m1-wrapper.dark .bar-fill--gasto-real::after {
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.22) 50%,
+    rgba(255, 255, 255, 0.06) 54%,
+    rgba(255, 255, 255, 0) 62%,
+    transparent 100%
+  );
+  background-size: 180% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roi-bars .bar-fill {
+    transition-duration: 0.01ms;
+    transition-delay: 0s !important;
+  }
+
+  .bar-fill--gasto-bruto,
+  .bar-fill--gasto-real {
+    animation: none !important;
+    background-size: 100% 100%;
+  }
+
+  .bar-fill--gasto-bruto::after,
+  .bar-fill--gasto-real::after {
+    animation: none !important;
+    display: none;
+  }
+
+  .m1-wrapper {
+    transition: none !important;
+  }
+
+  .m1-wrapper::before,
+  .m1-wrapper::after {
+    transition: none !important;
+  }
+
+  .m1-stat-value--pulse {
+    animation: none !important;
+  }
+
+  .m1-patrimony-validation-block {
+    animation: none !important;
+  }
+
+  .m1-sparkline-path {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .integrity-process-laser {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+
+  .m1-load-sk,
+  .m1-load-sk-line {
+    animation: none !important;
+  }
+
+  .integrity-skeleton-card::after {
+    animation: none !important;
+  }
+
+  .pin-detail-modal-content--patrimony-flash {
+    animation: none !important;
+  }
+
+  .integrity-skeleton-scan::before {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+}
+
+.irregularity-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.irr-bar-wrap {
+  height: 8px;
+  background: rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 48px;
+}
+
+.m1-wrapper.dark .irr-bar-wrap {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.irr-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ea580c 0%, #fb923c 100%);
+  transition: width 1.2s cubic-bezier(0.34, 1.35, 0.55, 1.02);
+}
+
+@media (max-width: 640px) {
+  .irregularity-row {
+    grid-template-columns: 1fr;
+  }
+
+  .irr-bar-wrap {
+    width: 100%;
+  }
+}
+
+/* ——— Integrity scanner beam (SHA-256) ——— */
+.integrity-scan-region {
+  position: relative;
+  overflow: hidden;
+}
+
+.integrity-table-wrap.integrity-scan-region {
+  padding-top: 0;
+}
+
+.integrity-table-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0) 38%,
+    rgba(34, 211, 238, 0.35) 48%,
+    rgba(56, 189, 248, 0.55) 50%,
+    rgba(34, 211, 238, 0.35) 52%,
+    rgba(34, 211, 238, 0) 62%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  opacity: 0.95;
+}
+
+.integrity-scan-region:not(.m1-scanner-paused) .integrity-table-beam {
+  animation: m1-integrity-table-scan 3.1s cubic-bezier(0.25, 0.5, 0.35, 1) forwards;
+}
+
+@keyframes m1-integrity-table-scan {
+  0% {
+    background-position: 0 -80%;
+    opacity: 0.35;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 200%;
+    opacity: 0.08;
+  }
+}
+
+.integrity-card-scan {
+  position: relative;
+  overflow: hidden;
+}
+
+.integrity-beam {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0) 40%,
+    rgba(34, 211, 238, 0.45) 50%,
+    rgba(6, 182, 212, 0) 60%,
+    transparent 100%
+  );
+  background-size: 100% 200%;
+}
+
+.integrity-scan-region:not(.m1-scanner-paused) .integrity-beam {
+  animation: m1-integrity-card-scan 2.6s cubic-bezier(0.25, 0.5, 0.35, 1) forwards;
+}
+
+@keyframes m1-integrity-card-scan {
+  0% {
+    background-position: 0 -100%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 160%;
+    opacity: 0;
+  }
+}
+
+.hash-cell-glow,
+.hash-glow {
+  text-shadow: 0 0 12px rgba(34, 211, 238, 0.45);
+}
+
+/* ——— Filter skeleton ——— */
+.integrity-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.integrity-skeleton-scan {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+  padding: 0.25rem 0;
+}
+
+.integrity-skeleton-scan::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0) 42%,
+    rgba(56, 189, 248, 0.55) 50%,
+    rgba(34, 211, 238, 0) 58%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+  animation: m1-skeleton-laser-sweep 1.85s ease-in-out infinite;
+}
+
+@keyframes m1-skeleton-laser-sweep {
+  0% {
+    background-position: 0 -90%;
+    opacity: 0.4;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 190%;
+    opacity: 0.25;
+  }
+}
+
+.integrity-skeleton-card {
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid var(--m1-border);
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.m1-wrapper.dark .integrity-skeleton-card {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.sk-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 45%, #e2e8f0 100%);
+  background-size: 200% 100%;
+  animation: m1-skeleton-pulse 1.1s ease-in-out infinite;
+  margin-bottom: 0.5rem;
+}
+
+.m1-wrapper.dark .sk-line {
+  background: linear-gradient(90deg, #334155 0%, #475569 45%, #334155 100%);
+  background-size: 200% 100%;
+}
+
+.sk-line--lg {
+  width: 55%;
+}
+
+.sk-line--sm {
+  width: 35%;
+  margin-bottom: 0;
+}
+
+@keyframes m1-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    background-position: 0% 0%;
+  }
+  50% {
+    opacity: 1;
+    background-position: 100% 0%;
+  }
+}
+
+/* ——— Asset map pin drop + pulse ——— */
+:host ::ng-deep #milestone-map .asset-pin.asset-drop {
+  animation: m1-asset-drop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes m1-asset-drop {
+  0% {
+    transform: translateY(-28px) scale(0.85);
+    opacity: 0;
+  }
+  70% {
+    transform: translateY(2px) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pulso “ao vivo” em todos os pontos do mapa (combustível + patrimônio) */
+:host ::ng-deep #milestone-map .map-live-pulse {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:host ::ng-deep #milestone-map .map-live-pulse--posto {
+  min-width: 26px;
+  min-height: 26px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ::before fica atrás do emoji/conteúdo (evita cobrir o marcador) */
+:host ::ng-deep #milestone-map .map-live-pulse::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 211, 238, 0.82);
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.35);
+  animation: m1-sonar-live 2.1s ease-out infinite;
+  animation-delay: inherit;
+  pointer-events: none;
+  z-index: -1;
+}
+
+:host ::ng-deep #milestone-map .map-live-pulse--warn::before {
+  border-color: rgba(251, 191, 36, 0.9);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.4);
+}
+
+:host ::ng-deep #milestone-map .marker-asset .asset-pin {
+  position: relative;
+}
+
+@keyframes m1-sonar-live {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.92;
+  }
+  100% {
+    transform: scale(1.75);
+    opacity: 0;
+  }
+}
+
+/* ——— Modal: photo scanner + conservation ——— */
+.pin-photo-scan-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.pin-detail-photo-placeholder {
+  position: relative;
+  z-index: 0;
+}
+
+.pin-photo-scanner {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(34, 211, 238, 0) 42%,
+    rgba(56, 189, 248, 0.5) 50%,
+    rgba(34, 211, 238, 0) 58%,
+    transparent 100%
+  );
+  background-size: 100% 220%;
+}
+
+.pin-photo-scan-wrap:not(.m1-scanner-paused) .pin-photo-scanner {
+  animation: m1-modal-photo-scan 1.35s ease-out forwards;
+}
+
+@keyframes m1-modal-photo-scan {
+  0% {
+    background-position: 0 -100%;
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    background-position: 0 200%;
+    opacity: 0;
+  }
+}
+
+.pin-conservation {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0.35rem 0.75rem;
+  align-items: center;
+}
+
+.pin-conservation-label {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--m1-text-muted);
+}
+
+.pin-conservation-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.m1-wrapper.dark .pin-conservation-bar {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.pin-conservation-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0d9488 0%, #22d3ee 100%);
+  transition: width 0.05s linear;
+}
+
+.pin-conservation-pct {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #0f766e;
+}
+
+.m1-wrapper.dark .pin-conservation-pct {
+  color: #5eead4;
+}
+
+/* ——— Assets report ——— */
+.m1-assets-report-lead {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--m1-text-muted);
+  line-height: 1.55;
+}
+
+.m1-assets-kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.m1-assets-kpi-item {
+  padding: 1rem 1.15rem;
+  border-radius: var(--m1-radius);
+  border: 1px solid var(--m1-border);
+  background: rgba(14, 165, 233, 0.06);
+}
+
+.m1-wrapper.dark .m1-assets-kpi-item {
+  background: rgba(14, 165, 233, 0.1);
+}
+
+.m1-assets-kpi-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--m1-text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.m1-assets-kpi-val {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+.m1-wrapper.dark .m1-assets-kpi-val {
+  color: #7dd3fc;
+}
+
+app-m1-odometer.m1-assets-kpi-val {
+  margin-top: 0.15rem;
+}
+
+.m1-assets-kpi-item--action {
+  padding: 0;
+  overflow: hidden;
+}
+
+.m1-assets-kpi-scroll-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  width: 100%;
+  margin: 0;
+  padding: 1rem 1.15rem;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.m1-assets-kpi-scroll-btn:hover,
+.m1-assets-kpi-scroll-btn:focus-visible {
+  background: rgba(14, 165, 233, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.35);
+  outline: none;
+}
+
+.m1-wrapper.dark .m1-assets-kpi-scroll-btn:hover,
+.m1-wrapper.dark .m1-assets-kpi-scroll-btn:focus-visible {
+  background: rgba(14, 165, 233, 0.18);
+}
+
+.m1-assets-kpi-hint {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--m1-accent-blue);
+  text-transform: none;
+}
+
+.m1-wrapper.dark .m1-assets-kpi-hint {
+  color: #7dd3fc;
+}
+
+/* ——— Initial load: skeleton + shimmer ——— */
+.m1-loading-skeleton-screen {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.m1-load-sk {
+  border-radius: 10px;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f8fafc 42%, #e2e8f0 100%);
+  background-size: 220% 100%;
+  animation: m1-load-shimmer 1.35s ease-in-out infinite;
+}
+
+.m1-wrapper.dark .m1-load-sk {
+  background: linear-gradient(90deg, #1e293b 0%, #334155 45%, #1e293b 100%);
+  background-size: 220% 100%;
+}
+
+@keyframes m1-load-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+.m1-load-sk-logo {
+  width: 176px;
+  height: 50px;
+  margin: 0 auto 1.25rem;
+}
+
+.m1-load-sk-title {
+  height: 28px;
+  width: 70%;
+  margin: 0 auto 0.65rem;
+}
+
+.m1-load-sk-sub {
+  height: 16px;
+  width: 50%;
+  margin: 0 auto 1.75rem;
+}
+
+.m1-load-sk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.85rem;
+}
+
+.m1-load-sk-card {
+  border-radius: var(--m1-radius);
+  border: 1px solid var(--m1-border);
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.m1-wrapper.dark .m1-load-sk-card {
+  background: rgba(15, 23, 42, 0.45);
+  border-color: #334155;
+}
+
+.m1-load-sk-line {
+  height: 11px;
+  border-radius: 6px;
+  margin-bottom: 0.45rem;
+  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background-size: 200% 100%;
+  animation: m1-load-shimmer 1.2s ease-in-out infinite;
+}
+
+.m1-wrapper.dark .m1-load-sk-line {
+  background: linear-gradient(90deg, #334155 0%, #475569 50%, #334155 100%);
+  background-size: 200% 100%;
+}
+
+.m1-load-sk-line--lg {
+  width: 100%;
+}
+
+.m1-load-sk-line--sm {
+  width: 40%;
+  margin-bottom: 0;
+}
+
+.integrity-skeleton-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.integrity-skeleton-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.45) 50%,
+    rgba(255, 255, 255, 0) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: m1-skeleton-shimmer-sweep 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.m1-wrapper.dark .integrity-skeleton-card::after {
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(148, 163, 184, 0.12) 50%,
+    rgba(255, 255, 255, 0) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+@keyframes m1-skeleton-shimmer-sweep {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.m1-wrapper ::ng-deep .ant-card {
+  transition:
+    background 0.55s ease,
+    border-color 0.55s ease,
+    box-shadow 0.55s ease,
+    color 0.55s ease;
+}
+
+
+========================================================================
+
+--- FILE: src/app/component/milestone1-demo/m1-odometer/m1-odometer.component.ts ---
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from '@angular/core';
+
+@Component({
+  selector: 'app-m1-odometer',
+  templateUrl: './m1-odometer.component.html',
+  styleUrls: ['./m1-odometer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class M1OdometerComponent implements OnChanges, OnDestroy {
+  @Input() value = 0;
+  @Input() rollKey = 0;
+  @Input() minDigits = 1;
+  /** Duração do giro por coluna — mais alto = número sobe mais devagar. */
+  @Input() durationMs = 3600;
+  @Input() staggerMs = 110;
+
+  readonly digits0to9 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+  colCount = 1;
+  offsets: number[] = [0];
+  transitionOn = false;
+
+  private rollFinishTimer?: ReturnType<typeof setTimeout>;
+
+  constructor(private readonly cdr: ChangeDetectorRef) {}
+
+  ngOnDestroy(): void {
+    if (this.rollFinishTimer !== undefined) {
+      clearTimeout(this.rollFinishTimer);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['value'] || changes['rollKey']) {
+      this.startRoll();
+    }
+  }
+
+  staggerDelay(i: number): number {
+    return (this.colCount - 1 - i) * this.staggerMs;
+  }
+
+  transformForCol(i: number): string {
+    const y = this.offsets[i] ?? 0;
+    return `translateY(-${y}em)`;
+  }
+
+  get ariaLabel(): string {
+    return String(Math.max(0, Math.floor(this.value)));
+  }
+
+  private startRoll(): void {
+    const v = Math.max(0, Math.floor(this.value));
+    let digits = v.toString().split('').map((c) => parseInt(c, 10));
+    while (digits.length < this.minDigits) {
+      digits.unshift(0);
+    }
+    this.colCount = digits.length;
+    const targets = [...digits];
+
+    if (this.reducedMotion()) {
+      this.transitionOn = true;
+      this.offsets = [...targets];
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (this.rollFinishTimer !== undefined) {
+      clearTimeout(this.rollFinishTimer);
+      this.rollFinishTimer = undefined;
+    }
+
+    // Fase 1: rolos em 0, sem transição — precisa ser pintado no ecrã.
+    this.transitionOn = false;
+    this.offsets = targets.map(() => 0);
+    this.cdr.detectChanges();
+
+    // Fase 2: após um frame + pequeno atraso, ativar transição até ao alvo.
+    // Sem isto, o browser muitas vezes “salta” direto para o valor final (sem animação).
+    requestAnimationFrame(() => {
+      this.rollFinishTimer = setTimeout(() => {
+        this.rollFinishTimer = undefined;
+        if (this.reducedMotion()) {
+          return;
+        }
+        this.transitionOn = true;
+        this.offsets = [...targets];
+        this.cdr.detectChanges();
+      }, 55);
+    });
+  }
+
+  private reducedMotion(): boolean {
+    return (
+      typeof globalThis.matchMedia === 'function' &&
+      globalThis.matchMedia('(prefers-reduced-motion: reduce)').matches
+    );
+  }
+}
+
+
+========================================================================
+
+--- FILE: src/app/component/milestone1-demo/m1-odometer/m1-odometer.component.html ---
+<span class="m1-odo" role="img" [attr.aria-label]="ariaLabel">
+  <span *ngFor="let _ of offsets; let i = index" class="m1-odo-col">
+    <span
+      class="m1-odo-reel"
+      [class.m1-odo-reel--instant]="!transitionOn"
+      [style.transform]="transformForCol(i)"
+      [style.transition-duration.ms]="durationMs"
+      [style.transition-delay.ms]="staggerDelay(i)"
+    >
+      <span *ngFor="let d of digits0to9" class="m1-odo-cell">{{ d }}</span>
+    </span>
+  </span>
+</span>
+
+
+========================================================================
+
+--- FILE: src/app/component/milestone1-demo/m1-odometer/m1-odometer.component.scss ---
+:host {
+  display: inline-block;
+  vertical-align: baseline;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: 1;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.m1-odo {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 0.04em;
+}
+
+.m1-odo-col {
+  display: inline-block;
+  height: 1em;
+  width: 0.62em;
+  overflow: hidden;
+  vertical-align: bottom;
+  text-align: center;
+  border-radius: 2px;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+:host-context(.m1-wrapper.dark) .m1-odo-col {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.m1-odo-reel {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  transition-property: transform;
+  /* Subida lenta e uniforme (menos “snap” no fim). */
+  transition-timing-function: cubic-bezier(0.35, 0.02, 0.22, 1);
+}
+
+.m1-odo-reel--instant {
+  transition-duration: 0ms !important;
+  transition-delay: 0ms !important;
+}
+
+.m1-odo-cell {
+  flex-shrink: 0;
+  height: 1em;
+  line-height: 1em;
+  font-size: 1em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m1-odo-reel {
+    transition: none !important;
+  }
+}
+
+
+========================================================================
+
+--- FILE: src/assets/mock/auditoria_motor_exemplo.json ---
+{
+  "_descricao": "Arquivo de exemplo - saida do Motor de Auditoria SEAGRI. Dados ficticios para integracao de front-end.",
+  "_versao": "1.0",
+  "_geradoEm": "2026-03-30",
+  "abastecimentos": [
+    {
+      "id": 1,
+      "cod_transaction": "TXN-00101",
+      "transaction_date": "2026-03-28T08:15:00",
+      "license_plate": "ABC1D23",
+      "car_model": "Fiat Strada Endurance",
+      "year": "2022",
+      "matricula": "MAT-0042",
+      "driver_name": "Joao Carlos Pereira",
+      "fuel_type": "Gasolina Comum",
+      "liters": 45,
+      "value_liter": 5.799,
+      "hodometro": 87450,
+      "kms_or_hours": 620,
+      "km_per_liter": 13.78,
+      "emission_value": 261,
+      "cod_estabelecimento": "EST-0012",
+      "nome_estabelecimento": "Posto Ipiranga Centro",
+      "endereco": "Av. Mato Grosso, 1500",
+      "bairro": "Centro",
+      "cidade": "Cuiaba",
+      "UF": "MT",
+      "forma_transacao": "CARTAO",
+      "serie_pos": "POS-07",
+      "numero_cartao": "****-****-****-4421",
+      "familia_veiculo": "Leve",
+      "integrityHash": "a3f8e2d1c9b07654321fedcba9876543210abcdef0123456789abcdef01234567"
+    },
+    {
+      "id": 2,
+      "cod_transaction": "TXN-00102",
+      "transaction_date": "2026-03-28T14:40:00",
+      "license_plate": "XYZ9K87",
+      "car_model": "Toyota Hilux SW4",
+      "year": "2021",
+      "matricula": "MAT-0078",
+      "driver_name": "Maria Aparecida Souza",
+      "fuel_type": "Diesel S-10",
+      "liters": 120,
+      "value_liter": 6.249,
+      "hodometro": 45200,
+      "kms_or_hours": 980,
+      "km_per_liter": 8.17,
+      "emission_value": 982.8,
+      "cod_estabelecimento": "EST-0035",
+      "nome_estabelecimento": "Posto BR Rodovias",
+      "endereco": "Rod. MT-040, Km 12",
+      "bairro": "Zona Rural",
+      "cidade": "Varzea Grande",
+      "UF": "MT",
+      "forma_transacao": "CARTAO",
+      "serie_pos": "POS-02",
+      "numero_cartao": "****-****-****-7893",
+      "familia_veiculo": "Pesado",
+      "integrityHash": "b7c1d2e3f4a5960718293a4b5c6d7e8f90123456789abcdef0123456789abcde"
+    }
+  ],
+  "resultados_motor_glosa": [
+    {
+      "id": 1,
+      "transacaoId": "TXN-00101",
+      "transacaoTimestamp": "2026-03-28T08:15:00",
+      "placa": "ABC1D23",
+      "postoCnpj": "12.345.678/0001-90",
+      "postoLat": -15.601411,
+      "postoLng": -56.097892,
+      "combustivel": "Gasolina Comum",
+      "volumeLitros": 45,
+      "odomteroInformado": 87450,
+      "valorTotal": 261,
+      "glosaStatus": "APROVADO",
+      "observacao": "Transacao dentro dos parametros. Distancia veiculo-posto: 320m. KSD: 13,78 km/L (dentro do limite). Capacidade do tanque: OK.",
+      "integrityHash": "c4d5e6f7a8b9012345678901234567890123456789abcdef0123456789abcdef01",
+      "processedAt": "2026-03-28T08:15:03",
+      "processedBy": "motor-glosa-v1"
+    },
+    {
+      "id": 2,
+      "transacaoId": "TXN-00102",
+      "transacaoTimestamp": "2026-03-28T14:40:00",
+      "placa": "XYZ9K87",
+      "postoCnpj": "98.765.432/0001-10",
+      "postoLat": -15.64892,
+      "postoLng": -56.1321,
+      "combustivel": "Diesel S-10",
+      "volumeLitros": 120,
+      "odomteroInformado": 45200,
+      "valorTotal": 982.8,
+      "glosaStatus": "GLOSA_AUTOMATICA",
+      "observacao": "DISTANCIA EXCEDIDA: veiculo localizado a 1.240m do posto no momento do abastecimento (limite: 500m) [Haversine]. | EXCESSO DE CAPACIDADE: 120L abastecidos, tanque maximo do modelo: 80L.",
+      "integrityHash": "d9e0f1a2b3c4567890abcdef1234567890abcdef1234567890abcdef12345678",
+      "processedAt": "2026-03-28T14:40:02",
+      "processedBy": "motor-glosa-v1"
+    },
+    {
+      "id": 3,
+      "transacaoId": "TXN-00103",
+      "transacaoTimestamp": "2026-03-29T09:05:00",
+      "placa": "DEF5G67",
+      "postoCnpj": "55.444.333/0001-22",
+      "postoLat": -15.57,
+      "postoLng": -56.08,
+      "combustivel": "Gasolina Comum",
+      "volumeLitros": 50,
+      "odomteroInformado": 102300,
+      "valorTotal": 289.95,
+      "glosaStatus": "GLOSA_VOLUMETRICA",
+      "observacao": "KSD FORA DO LIMITE: consumo calculado de 4,20 km/L, abaixo do minimo esperado para o modelo (7,50 km/L). Possivel desvio de combustivel.",
+      "integrityHash": "e1f2a3b4c5d6789012345678901234567890abcdef0123456789abcdef012345",
+      "processedAt": "2026-03-29T09:05:01",
+      "processedBy": "motor-glosa-v1"
+    },
+    {
+      "id": 4,
+      "transacaoId": "TXN-00104",
+      "transacaoTimestamp": "2026-03-29T16:22:00",
+      "placa": "GHI2J34",
+      "postoCnpj": "77.888.999/0001-55",
+      "postoLat": -15.61,
+      "postoLng": -56.095,
+      "combustivel": "Diesel S-10",
+      "volumeLitros": 60,
+      "odomteroInformado": 210500,
+      "valorTotal": 374.94,
+      "glosaStatus": "AUDITORIA_MANUAL",
+      "observacao": "Hodometro inferior ao registro anterior (210.500 vs 211.200). Possivel fraude ou erro de digitacao. Encaminhado para auditoria manual.",
+      "integrityHash": "f3a4b5c6d7e8901234567890abcdef0123456789abcdef0123456789abcdef01",
+      "processedAt": "2026-03-29T16:22:04",
+      "processedBy": "motor-glosa-v1"
+    }
+  ],
+  "resumo_dashboard": {
+    "periodo": "2026-03-01 a 2026-03-30",
+    "total_transacoes": 4,
+    "total_aprovadas": 1,
+    "total_glosas_automaticas": 1,
+    "total_glosas_volumetricas": 1,
+    "total_auditoria_manual": 1,
+    "valor_total_transacoes": 1908.69,
+    "valor_glosado": 1357.74,
+    "economia_gerada": 1357.74,
+    "violacoes_integridade_detectadas": 1
+  }
+}
+
+
+========================================================================
+
+--- FILE: src/app/model/vehicle.ts ---
+import { CarModel } from "./car-model";
+import { Driver } from "./driver";
+import { EVehicleStatus } from "./enums/e-vehicle-status";
+import { Fuel } from "./fuel";
+import { VehicleType } from "./vehicle-type";
+
+export type Vehicle = {
+    id: number;
+    type: VehicleType;
+    carModel: CarModel;
+    licensePlate: string;
+    chassi: string;
+    renavam: string;
+    status: EVehicleStatus;
+    active: boolean;
+    manufacturingDate: string;
+    purchaseDate: string;
+    patrimony: number;
+    drivenQuilometers: number;
+    acquisitionProcessNumber: number;
+    fixedDriver: Driver | null;
+    passengersAmount: number;
+    fuels: Fuel[];
+    
+}
+
+========================================================================
+
+--- FILE: src/app/component/forms/vehicle-form/vehicle-form.component.ts ---
+import { DatePipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { AbstractControl, FormArray, FormBuilder, ValidatorFn, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Brand } from 'src/app/model/brand';
+import { CarModel } from 'src/app/model/car-model';
+import { Driver } from 'src/app/model/driver';
+import { EVehicleStatus } from 'src/app/model/enums/e-vehicle-status';
+import { Fuel } from 'src/app/model/fuel';
+import { Vehicle } from 'src/app/model/vehicle';
+import { VehicleType } from 'src/app/model/vehicle-type';
+import { DriverService } from 'src/app/service/driver.service';
+import { GettersService } from 'src/app/service/getters.service';
+import { StoragesService } from 'src/app/service/storages.service';
+import { VehicleService } from 'src/app/service/vehicle.service';
+
+@Component({
+    selector: 'app-vehicle-form',
+    templateUrl: './vehicle-form.component.html',
+    styleUrls: ['./vehicle-form.component.css'],
+    providers: [DatePipe]
+})
+
+export class VehicleFormComponent implements OnInit {
+
+    vehicle: Vehicle = <Vehicle>{};
+
+    typesList: VehicleType[] = [];
+    modelsList: CarModel[] = [];
+    brandList: Brand[] = [];
+    driversList: Driver[] = [];
+
+    fuelsList: Fuel[] = [];
+    selectedFuels: Fuel[] = [];
+
+    lastSelectedDriver: Driver | null = null;
+
+    isCheckedButton: boolean = false;
+    isAdmin: boolean = false;
+    rentedVehicle: boolean = false;
+
+    id: string | null = null;
+
+    constructor(
+        private formBuilder: FormBuilder,
+        private gettersService: GettersService,
+        private service: VehicleService,
+        private datePipe: DatePipe,
+        private router: Router,
+        private route: ActivatedRoute,
+        private storageService: StoragesService,
+        private driverService: DriverService,
+    ) { }
+
+    ngOnInit(): void {
+        this.getFuelsList();
+
+        this.isAdmin = this.storageService.validateUserPermission("ADMIN");
+
+        this.id = this.route.snapshot.queryParamMap.get('id');
+        if (this.id) {
+            this.setFormValues();
+            this.createArray();
+        } else {
+            this.getBrandsList();
+            this.getTypesList();
+            this.getDriversList()
+            this.addField();
+        }
+
+        const manufacturingDateControl = this.validateForm.get('manufacturingDate');
+        const purchaseDateControl = this.validateForm.get('purchaseDate');
+
+        if (manufacturingDateControl && purchaseDateControl) {
+            const currentDate = new Date();
+            manufacturingDateControl.setValidators([
+                Validators.required,
+                this.dateValidator(currentDate),
+            ]);
+
+            purchaseDateControl.setValidators([
+                Validators.required,
+                this.dateValidator(currentDate),
+                this.dateComparisonValidator(manufacturingDateControl),
+            ]);
+
+            manufacturingDateControl.updateValueAndValidity();
+            purchaseDateControl.updateValueAndValidity();
+        }
+    }
+
+    dateValidator(currentDate: Date): ValidatorFn {
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            const selectedDate = new Date(control.value);
+            return selectedDate > currentDate ? { 'invalidDate': true } : null;
+        };
+    }
+
+    dateComparisonValidator(referenceControl: AbstractControl): ValidatorFn {
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            const selectedDate = new Date(control.value);
+            const referenceDate = new Date(referenceControl.value);
+            return selectedDate < referenceDate ? { 'invalidComparison': true } : null;
+        };
+    }
+
+    setRentValidators() {
+        if (this.rentedVehicle) {
+            this.validateForm.get('fixedDriver')?.enable();
+            this.validateForm.controls['fixedDriver'].setValidators([Validators.required]);
+            this.validateForm.patchValue({ fixedDriver: this.lastSelectedDriver })
+        } else {
+            this.validateForm.get('fixedDriver')?.disable();
+            this.validateForm.controls['fixedDriver'].clearValidators();
+            this.validateForm.patchValue({ fixedDriver: null })
+        }
+        this.validateForm.controls['fixedDriver'].updateValueAndValidity();
+    }
+
+    setFormValues() {
+        this.vehicle = this.storageService.getSession("vehicleEdit");
+
+        this.validateForm.get('rented_vehicle')?.disable();
+
+        this.modelsList.push(this.vehicle.carModel);
+        this.typesList.push(this.vehicle.type);
+        this.brandList.push(this.vehicle.carModel.brand);
+
+        this.fuelsList = this.vehicle.fuels
+
+        if (this.vehicle.fixedDriver != null) {
+            this.rentedVehicle = true;
+            this.validateForm.patchValue({ rented_vehicle: true });
+            this.driversList.push(this.vehicle.fixedDriver);
+            this.setRentValidators();
+        }
+
+        this.validateForm.get('carModel')?.disable();
+        this.validateForm.get('brand')?.disable();
+        this.validateForm.get('type')?.disable();
+        this.validateForm.get('chassi')?.disable();
+        this.validateForm.get('renavam')?.disable();
+        this.validateForm.get('manufacturingDate')?.disable();
+        this.validateForm.get('purchaseDate')?.disable();
+        this.validateForm.get('acquisitionProcessNumber')?.disable();
+
+        this.validateForm.patchValue({
+            patrimony: this.vehicle.patrimony,
+            brand: this.vehicle.carModel.brand,
+            type: this.vehicle.type,
+            carModel: this.vehicle.carModel,
+            licensePlate: this.vehicle.licensePlate,
+            passengersAmount: this.vehicle.passengersAmount,
+            chassi: this.vehicle.chassi,
+            renavam: this.vehicle.renavam,
+            manufacturingDate: this.vehicle.manufacturingDate,
+            purchaseDate: this.vehicle.purchaseDate,
+            drivenQuilometers: this.vehicle.drivenQuilometers,
+            acquisitionProcessNumber: this.vehicle.acquisitionProcessNumber,
+            fuels: this.vehicle.fuels,
+            fixedDriver: this.vehicle.fixedDriver,
+        })
+    }
+
+    validateForm = this.formBuilder.group({
+        type: this.formBuilder.control<VehicleType | null>(null, Validators.required),
+        brand: this.formBuilder.control<Brand | null>(null),
+        carModel: this.formBuilder.control<CarModel | null>(null, Validators.required),
+        licensePlate: this.formBuilder.control<string>(''),
+        passengersAmount: this.formBuilder.control<number | null>(null, Validators.required),
+        chassi: this.formBuilder.control<string>(''),
+        renavam: this.formBuilder.control<string>(''),
+        manufacturingDate: this.formBuilder.control<string>('', Validators.required),
+        purchaseDate: this.formBuilder.control<string>('', Validators.required),
+        patrimony: this.formBuilder.control<number | null>(null, Validators.required),
+        drivenQuilometers: this.formBuilder.control<number | null>(null, Validators.required),
+        acquisitionProcessNumber: this.formBuilder.control<number | null>(null, Validators.required),
+        fuels: this.formBuilder.array([], Validators.required),
+
+        rented_vehicle: this.formBuilder.control<boolean>(this.rentedVehicle),
+
+        fixedDriver: this.formBuilder.control<Driver>({ value: <Driver>{}, disabled: !this.rentedVehicle }),
+    })
+
+    validInput(formVehicle: Vehicle) {
+        formVehicle = this.id ? this.putVehicle(formVehicle) : this.postVehicle(formVehicle)
+        formVehicle.status = EVehicleStatus.AVAILABLE;
+        if (!this.rentedVehicle) {
+            formVehicle.fixedDriver = null;
+        }
+
+        formVehicle.fuels = this.selectedFuels
+
+        this.service.save(formVehicle).subscribe({
+            complete: () => {
+                this.router.navigate(['../'], { relativeTo: this.route });
+            }
+        })
+    }
+
+    putVehicle(formVehicle: Vehicle) {
+        formVehicle.id = this.vehicle.id;
+        formVehicle.carModel = this.vehicle.carModel;
+        formVehicle.type = this.vehicle.type;
+        return formVehicle;
+    }
+
+    postVehicle(formVehicle: Vehicle) {
+        formVehicle.manufacturingDate = this.datePipe.transform(formVehicle.manufacturingDate, "yyyy-MM-dd")!;
+        formVehicle.purchaseDate = this.datePipe.transform(formVehicle.purchaseDate, "yyyy-MM-dd")!;
+        formVehicle.status = EVehicleStatus.AVAILABLE;
+        return formVehicle
+    }
+
+    compareFn = (o1: any, o2: any) => (o1 && o2 ? o1.id === o2.id : o1 === o2);
+
+    get fuels() {
+        return this.validateForm.get('fuels') as FormArray;
+    }
+
+    addField() {
+        const fuelGroup = this.formBuilder.group({
+            id: [0, {
+                validators: Validators.required
+            }],
+            name: ['', {
+                validators: Validators.required
+            }]
+        })
+        this.fuels.push(fuelGroup);
+    }
+
+    removeFuel(index: number) {
+        if (this.fuels.length == 1)
+            return
+        this.fuels.removeAt(index);
+    }
+
+    createArray() {
+        for (let item of this.vehicle.fuels) {
+            let itemGroup = this.formBuilder.group({
+                id: item.id,
+                name: item.name
+            })
+            this.fuels.push(itemGroup);
+        }
+    }
+
+    getCarModelsByBrand(brand: Brand) {
+        this.gettersService.getCarModelsByBrand(brand.id).subscribe({
+            next: (models: CarModel[]) => {
+                this.modelsList = models;
+            }
+        })
+    }
+
+    changeBrand(brand: Brand) {
+        if (brand == null || brand == undefined) return
+        this.getCarModelsByBrand(brand)
+    }
+
+    changeDriver(driver: Driver) {
+        if (driver == null) return
+        this.lastSelectedDriver = driver;
+    }
+
+    getTypesList() {
+        this.gettersService.getVehicleType().subscribe({
+            next: (types: VehicleType[]) => {
+                this.typesList = types;
+            }
+        });
+    }
+
+    getBrandsList() {
+        this.gettersService.getBrands().subscribe({
+            next: (brand: Brand[]) => {
+                this.brandList = brand;
+            }
+        });
+    }
+    
+    getFuelsList() {
+        this.gettersService.getFuels().subscribe({
+            next: (response: Fuel[]) => this.fuelsList = response
+        });
+    }
+
+    getDriversList() {
+        this.driverService.getNotExclusive().subscribe({
+            next: (drivers: Driver[]) => {
+                this.driversList = drivers;
+            }
+        })
+    }
+
+    changeDrivers() {
+        this.getDriversList();
+    }
+
+    checkButton(): void {
+        this.rentedVehicle = !this.rentedVehicle;
+        this.setRentValidators();
+    }
+
+    selectFuel() {
+        this.selectedFuels = []
+        for (let item of this.fuels.controls.values())
+            if (item.value.name != null && item.value.name != undefined) {
+                this.selectedFuels.push(item.value.name)
+            }
+    }
+}
+
+
+========================================================================
+
+--- FILE: src/app/component/forms/vehicle-form/vehicle-form.component.html ---
+<app-form-component
+    [formTitle]="'Cadastrar novo veículo'"
+    [validateForm]="validateForm"
+    (validForm)="validInput($event)"
+>
+    <ng-container formData [formGroup]="validateForm">
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Marca</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                        [compareWith]="compareFn"
+                        formControlName="brand"
+                        (ngModelChange)="changeBrand($event)"
+                        nzAllowClear nzPlaceHolder="Marca do carro">
+                            <nz-option *ngFor="let option of brandList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Modelo</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                        [compareWith]="compareFn"
+                        formControlName="carModel" nzAllowClear nzPlaceHolder="Modelo do carro">
+                            <nz-option *ngFor="let option of modelsList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Tipo de veículo</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                            [compareWith]="compareFn"
+                            formControlName="type" nzAllowClear nzPlaceHolder="Tipo de veículo">
+                            <nz-option *ngFor="let option of typesList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Placa</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="licensePlate" 
+                        placeholder="AAA1A11"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Quantidade de passageiros</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="passengersAmount" 
+                        placeholder="Quantidade de passageiros do carro"
+                        mask="0*"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Patrimônio</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="patrimony"
+                        placeholder="R$ 0000000.00"
+                        mask="0*.00"
+                        prefix="R$ "/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="12">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Chassi</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="chassi"
+                        placeholder="9BWDA05X61TO50136"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="12">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Renavam</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="renavam"
+                        mask="00000000000"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>KMs rodados</nz-form-label>
+                    <nz-form-control>
+                        <input nz-input 
+                        formControlName="drivenQuilometers"
+                        placeholder="12000 Km"
+                        mask="0* SS"
+                        sufix="Km"/>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Data de produção</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="manufacturingDate"
+                         [nzPlacement]="'topRight'" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+            <nz-col nzSpan="8">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Data de aquisição</nz-form-label>
+                    <nz-form-control>
+                        <nz-date-picker nz-col nzSpan="24" formControlName="purchaseDate"
+                         [nzPlacement]="'topRight'" nzFormat="dd/MM/yyyy"></nz-date-picker>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-row>
+            <nz-form-item nz-col nzSpan="24">
+                <nz-form-label nz-col>Número do processo de aquisição</nz-form-label>
+                <nz-form-control>
+                    <input nz-input 
+                    formControlName="acquisitionProcessNumber"
+                    placeholder="ex: 23107.011364/2024-27"
+                    mask="00000.000000/0000-00"/>
+                </nz-form-control>
+            </nz-form-item>
+        </nz-row>
+        <label nz-checkbox formControlName="rented_vehicle" (ngModelChange)="checkButton()">
+            Veículo alugado
+        </label>
+        <nz-row [nzGutter]="[16, 0]">
+            <nz-col nzSpan="12">
+                <nz-form-item nz-col nzSpan="24">
+                    <nz-form-label nz-col>Motorista escohido</nz-form-label>
+                    <nz-form-control>
+                        <nz-select 
+                            (ngModelChange)="changeDriver($event)" 
+                            [compareWith]="compareFn"
+                            formControlName="fixedDriver" nzAllowClear nzPlaceHolder="Motorista fixo">
+                            <nz-option *ngFor="let option of driversList" [nzLabel]="option?.name ? option.name : ''" [nzValue]="option"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                </nz-form-item>
+            </nz-col>
+        </nz-row>
+        <nz-form-item id="new-item" [nzGutter]="[12, 6]">
+            <nz-col nzSpan="24">
+                <button nz-button nzType="primary" type="button" (click)="addField()">Novo item</button>
+            </nz-col>
+            <nz-col [nzXs]="{span: 24}" [nzSm]="{span: 12}" [nzLg]="{span: 8}" formArrayName="fuels" *ngFor="let item of fuels.controls; let i = index">
+                <div [formGroupName]="i">
+                    <nz-form-control nz-col nzSpan="24">
+                        <nz-form-label nz-col>Combustível</nz-form-label>
+                        <nz-select formControlName="name" nzAllowClear nzPlaceHolder="Choose" (ngModelChange)="selectFuel()">
+                            <nz-option *ngFor="let fuel of fuelsList" [nzLabel]="fuel.name" [nzValue]="fuel" [nzHide]="selectedFuels.includes(fuel)"></nz-option>
+                        </nz-select>
+                    </nz-form-control>
+                    <nz-col nzSpan="24">
+                        <button nz-button type="button" [nzType]="'dashed'" (click)="removeFuel(i)">Remover</button>
+                    </nz-col>
+                </div>
+            </nz-col>
+        </nz-form-item>
+    </ng-container>
+</app-form-component>
+
+
+========================================================================
+
+--- FILE: src/app/component/vehicle-info/vehicle-info.component.ts ---
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Vehicle } from 'src/app/model/vehicle';
+import { StoragesService } from 'src/app/service/storages.service';
+
+@Component({
+  selector: 'app-vehicle-info',
+  templateUrl: './vehicle-info.component.html',
+  styleUrls: ['./vehicle-info.component.css']
+})
+export class VehicleInfoComponent implements OnInit{
+
+  vehicle: Vehicle = <Vehicle>{};
+
+  id: string | null = '';
+
+  constructor (
+    private router: Router,
+    private route: ActivatedRoute,
+    private storageService: StoragesService,
+  ) {}
+
+  ngOnInit(): void {
+    this.id = this.route.snapshot.queryParamMap.get('id');
+
+    if (this.id) {
+      this.vehicle = this.storageService.getSession("vehicleEdit")
+    }
+  }
+
+  goToItem(vehicle: Vehicle) {
+    // if(!this.addButton)
+    //   return;
+    this.storageService.setSession('vehicleEdit', vehicle);
+    this.router.navigate(['../form'], {queryParams: {id: vehicle.id}, relativeTo: this.route});
+  }
+
+  discontinueItem(vehicle: Vehicle){
+    this.storageService.setSession('vehicleDelete', vehicle);
+    this.router.navigate(['../discontinue'], {queryParams: {vehicleId: vehicle.id}, relativeTo: this.route});
+  }
+
+}
+
+
+========================================================================
+
+--- FILE: src/app/component/vehicle-info/vehicle-info.component.html ---
+<div class="content">
+    <div class="top-content">
+        <nz-row nzJustify="space-between">
+            <nz-col>
+                <nz-avatar [nzSize]="180" nzIcon="car" style="background-color: rgb(128, 166, 255);"></nz-avatar>
+            </nz-col>
+            <nz-col nzOrder="3" [nzLg]="{ span: 12, order: 2}" [nzXl]="{ span: 12, order: 2 }">
+                <nz-row id="infos-user">
+                    <nz-col nzSpan="24">
+                        <span id="user-name">{{vehicle.carModel.name}}</span>
+                    </nz-col>
+                    <nz-col nzSpan="24">
+                        <span id="full-name"><span id="detail-info">Placa: </span>{{vehicle.licensePlate}}</span>
+                    </nz-col>
+                    <nz-col nzSpan="24">
+                        <nz-tag id="ativo" nzColor="{{vehicle.active === true ? 'green' : 'default'}}">{{vehicle.active === true ? 'Ativo' : 'Desativado'}}</nz-tag>
+                        <nz-tag id="status">{{vehicle.status === "AVAILABLE" ? 'Livre' : 'Ocupado'}}</nz-tag>
+                    </nz-col>
+                </nz-row>
+            </nz-col>
+            <nz-col nzOrder="2" [nzLg]="{ order: 3 }" [nzXl]="{ span: 4, order: 3}">
+                <nz-row nzJustify="end">
+                    <button id="button-discontinue" nz-button nzShape="round" (click)="discontinueItem(vehicle)">
+                        <span>Dar como descontinuado</span>
+                        <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    </button>
+                </nz-row>
+                <nz-row nzJustify="end">
+                    <button id="button-edit" nz-button nzShape="round" (click)="goToItem(vehicle)">
+                        <span>Editar</span>
+                        <span nz-icon nzType="edit" nzTheme="outline"></span>
+                    </button>
+                </nz-row>
+            </nz-col>
+        </nz-row>
+    </div>
+    <nz-row>
+        <nz-tabset id="tabs-options" nzSize="large" nzType="card">
+            <nz-tab nz-row nzTitle="Carro">
+                <nz-row class="body-content">
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Tipo de veiculo: </span><b>{{vehicle.type.name}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Km rodados: </span><b>{{vehicle.drivenQuilometers}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Tipos de combustiveis: </span><b *ngFor="let fuel of vehicle.fuels">{{fuel.name}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Motorista fixo: </span><b>{{vehicle.fixedDriver}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Ano do veiculo: </span><b>{{vehicle.manufacturingDate | date: 'dd/MM/yyyy'}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Numero de passageiros: </span><b>{{vehicle.passengersAmount}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Chassi: </span><b>{{vehicle.chassi}}</b></span>
+                    </nz-col>
+                </nz-row>
+            </nz-tab>
+            <nz-tab nz-row nzTitle="Detalhes">
+                <nz-row class="body-content">
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Patrimonio: </span><b>{{vehicle.patrimony}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Data de aquisição: </span><b>{{vehicle.purchaseDate | date: 'dd/MM/yyyy'}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Renavam: </span><b>{{vehicle.renavam}}</b></span>
+                    </nz-col>
+                    <nz-col [nzXs]="24" [nzLg]="12">
+                        <span><span id="detail-info">Numero de aquisição: </span><b>{{vehicle.acquisitionProcessNumber}}</b></span>
+                    </nz-col>
+                </nz-row>
+            </nz-tab>
+        </nz-tabset>
+    </nz-row>
+</div>
+
+
+========================================================================
+
+--- FILE: src/app/component/vehicle-info/vehicle-info.component.css ---
+.content {
+    background-color: white;
+    width: 100%;
+    min-height: 88vh;
+    height: auto;
+    border-radius: 16px;
+
+    span {
+        font-family: 'Times New Roman';
+    }
+
+    .top-content {
+        padding: 5% 3% 0 3%;
+
+        #infos-user {
+            padding-top: 2%;
+            padding-left: 2%;
+
+            nz-col {
+                margin-bottom: 1%;
+            }
+
+            #detail-info {
+                color: rgb(78, 78, 78);
+            }
+
+            #user-name {
+                font-size: 48px;
+                line-height: auto;
+            }
+            #full-name {
+                font-size: 28px;
+                line-height: 0;
+            }
+            #ativo, #status {
+                border-radius: 16px;
+                width: 100px;
+                height: 35px;
+                text-align: center;
+                text-justify: distribute;
+                padding-top: 7px;
+            }
+        }
+
+        #button-edit {
+            position: absolute;
+        }
+    }
+
+    #tabs-options {
+        width: 100%;
+
+        .body-content {
+            padding: 0 3% 0 3%;
+
+            #detail-info {
+                color: rgb(78, 78, 78);
+            }
+
+            span {
+                font-family: 'Times New Roman';
+                font-size: 18px;
+            }
+
+            #body-text {
+                font-size: 18px;
+            }
+
+            #permissions-list {
+                border-radius: 16px;
+                width: 100px;
+                height: 35px;
+                text-align: center;
+                text-justify: distribute;
+                padding-top: 7px;
+            }
+
+            
+        }
+    }
+}
+
+========================================================================
+
+--- FILE: src/app/app-routing.module.ts (rota milestone1-demo) ---
+import { Milestone1DemoComponent } from './component/milestone1-demo/milestone1-demo.component';
+
+const routes: Routes = [
+  { path: 'login', component: LoginComponent },
+  { path: 'milestone1-demo', component: Milestone1DemoComponent },
+  { path: 'erro/:codigo', component: ErrorComponent },
+
+========================================================================
+
+--- FILE: src/app/app.module.ts (imports e declarations Milestone1 / M1Odometer) ---
+import { Milestone1DemoComponent } from './component/milestone1-demo/milestone1-demo.component';
+import { M1OdometerComponent } from './component/milestone1-demo/m1-odometer/m1-odometer.component';
+    ConsultComponent,
+    Milestone1DemoComponent,
+    M1OdometerComponent
