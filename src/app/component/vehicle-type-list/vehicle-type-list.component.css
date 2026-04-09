@@ -11,7 +11,7 @@
         background-color: white;
         border-radius: 16px;
         text-align: center;
-        button {
+        :is(button) {
             border: 0px;
         }
         /* border: 1px solid #e0e0e0; */
