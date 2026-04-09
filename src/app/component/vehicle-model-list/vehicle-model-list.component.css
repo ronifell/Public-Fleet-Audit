@@ -53,11 +53,11 @@
                 box-shadow: 0px 0px 3px 0.2px gray;
     
                 #edit, #remove {
-                    span {
+                    :is(span) {
                         height: 50%;
                         width: 50%;
     
-                        svg {
+                        :is(svg) {
                             height: 100%;
                             width: 100%;
                         }

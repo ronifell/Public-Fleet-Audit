@@ -15,7 +15,7 @@
             height: 8em;
             margin-top: auto;
             margin-bottom: auto;
-            svg {
+            :is(svg) {
                 height: 100%;
                 width: 100%;
             }
