@@ -5,7 +5,7 @@
     height: auto;
     border-radius: 16px;
 
-    span {
+    :is(span) {
         font-family: 'Times New Roman';
     }
 
@@ -16,7 +16,7 @@
             padding-top: 2%;
             padding-left: 2%;
 
-            nz-col {
+            :is(nz-col) {
                 margin-bottom: 1%;
             }
 
@@ -57,7 +57,7 @@
                 color: rgb(78, 78, 78);
             }
 
-            span {
+            :is(span) {
                 font-family: 'Times New Roman';
                 font-size: 18px;
             }
