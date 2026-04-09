@@ -11,7 +11,7 @@
     height: auto;
     border-radius: 16px;
 
-    span {
+    :is(span) {
         font-family: 'Times New Roman';
     }   
 

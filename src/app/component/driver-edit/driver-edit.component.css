@@ -57,7 +57,7 @@
             width: 100%;
             background: none!important;
             padding-right: 10%;
-            span {
+            :is(span) {
                 width: 100%;
                 svg {
                     width: 3vw;
@@ -79,7 +79,7 @@
             width: 100%;
             height: 100%;
 
-            p {
+            :is(p) {
                 padding-bottom: 0px;
             }
         }

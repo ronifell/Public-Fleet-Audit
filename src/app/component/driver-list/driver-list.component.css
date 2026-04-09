@@ -42,7 +42,7 @@
         #footer-card-driver-status{
             text-align: end !important;
             
-            nz-tag {
+            :is(nz-tag) {
                 margin-right: 4em;
             }
         }
