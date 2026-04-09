@@ -78,7 +78,7 @@
             padding-left: 2%;
             padding-right: 2%;
 
-            nz-divider {
+            :is(nz-divider) {
                 margin-top: 3px;
                 margin-bottom: 0px;
             }

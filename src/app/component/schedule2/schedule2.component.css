@@ -59,7 +59,7 @@
             
         }
         
-        nz-divider {
+        :is(nz-divider) {
             margin-top: 0px;
             margin-bottom: 1vh;
             min-width: 80%;
