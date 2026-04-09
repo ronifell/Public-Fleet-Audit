@@ -29,7 +29,7 @@
       "serie_pos": "POS-07",
       "numero_cartao": "****-****-****-4421",
       "familia_veiculo": "Leve",
-      "integrityHash": "a3f8e2d1c9b07654321fedcba9876543210abcdef0123456789abcdef01234567"
+      "integrityHash": "176e08c3b50171dedb32bcfd45cca01389a3bd2fb9430b41b8ff1909366ec99c"
     },
     {
       "id": 2,
@@ -57,7 +57,7 @@
       "serie_pos": "POS-02",
       "numero_cartao": "****-****-****-7893",
       "familia_veiculo": "Pesado",
-      "integrityHash": "b7c1d2e3f4a5960718293a4b5c6d7e8f90123456789abcdef0123456789abcde"
+      "integrityHash": "8c18f75cc5d5ee1bce6381443acd574a7024fb6cc3d737db2826c1c80e5f2667"
     }
   ],
   "resultados_motor_glosa": [
@@ -75,7 +75,7 @@
       "valorTotal": 261,
       "glosaStatus": "APROVADO",
       "observacao": "Transacao dentro dos parametros. Distancia veiculo-posto: 320m. KSD: 13,78 km/L (dentro do limite). Capacidade do tanque: OK.",
-      "integrityHash": "c4d5e6f7a8b9012345678901234567890123456789abcdef0123456789abcdef01",
+      "integrityHash": "176e08c3b50171dedb32bcfd45cca01389a3bd2fb9430b41b8ff1909366ec99c",
       "processedAt": "2026-03-28T08:15:03",
       "processedBy": "motor-glosa-v1"
     },
@@ -93,7 +93,7 @@
       "valorTotal": 982.8,
       "glosaStatus": "GLOSA_AUTOMATICA",
       "observacao": "DISTANCIA EXCEDIDA: veiculo localizado a 1.240m do posto no momento do abastecimento (limite: 500m) [Haversine]. | EXCESSO DE CAPACIDADE: 120L abastecidos, tanque maximo do modelo: 80L.",
-      "integrityHash": "d9e0f1a2b3c4567890abcdef1234567890abcdef1234567890abcdef12345678",
+      "integrityHash": "8c18f75cc5d5ee1bce6381443acd574a7024fb6cc3d737db2826c1c80e5f2667",
       "processedAt": "2026-03-28T14:40:02",
       "processedBy": "motor-glosa-v1"
     },

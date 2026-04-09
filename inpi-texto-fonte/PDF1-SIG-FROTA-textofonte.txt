@@ -1,16 +1,8 @@
-TEXT-FONTE PDF1 — SIG-FROTA (Combustível) — apenas código-fonte do autor (frontend, repositório atual).
-
-========================================================================
-
---- FILE: src/app/model/fuel.ts ---
 export type Fuel = {
     id: number;
     name: string;
 }
 
-========================================================================
-
---- FILE: src/app/component/fuel-list/fuel-list.component.ts ---
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Fuel } from 'src/app/model/fuel';
@@ -64,9 +56,6 @@ export class FuelListComponent implements OnInit {
 }
 
 
-========================================================================
-
---- FILE: src/app/component/fuel-list/fuel-list.component.html ---
 <app-filters-and-search [tabTitle]="'Combustíveis'" (eventSearch)="getFuelSearch($event)"></app-filters-and-search>
 
 <nz-row class="new-type" nzJustify="end">
@@ -88,9 +77,6 @@ export class FuelListComponent implements OnInit {
 </nz-row>
 
 
-========================================================================
-
---- FILE: src/app/component/fuel-list/fuel-list.component.css ---
 .new-type {
     margin-bottom: 2vh;
     margin-top: 2vh;
@@ -120,9 +106,6 @@ export class FuelListComponent implements OnInit {
 }
 
 
-========================================================================
-
---- FILE: src/app/component/forms/fuel-form/fuel-form.component.ts ---
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -185,9 +168,6 @@ export class FuelFormComponent implements OnInit{
 }
 
 
-========================================================================
-
---- FILE: src/app/component/forms/fuel-form/fuel-form.component.html ---
 <app-form-component
     [formTitle]="'Cadastrar novo tipo de combustível'"
     [validateForm]="validateForm"
@@ -208,16 +188,12 @@ export class FuelFormComponent implements OnInit{
     </div>
 </app-form-component>
 
-========================================================================
-
---- FILE: src/app/service/getters.service.ts (trecho: métodos fuel/) ---
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 import { Fuel } from '../model/fuel';
 
-// Trecho SIG-FROTA: início da classe + apenas métodos fuel/
 @Injectable({
   providedIn: 'root'
 })
@@ -244,18 +220,11 @@ export class GettersService {
     return this.http.get<Fuel[]>(url);
   }
 
-// ... restantes métodos em src/app/service/getters.service.ts (fora deste PDF).
-
-========================================================================
-
---- FILE: src/app/app-routing.module.ts (trechos: imports Fuel + rota admin/fuel) ---
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { FuelFormComponent } from './component/forms/fuel-form/fuel-form.component';
 import { FuelListComponent } from './component/fuel-list/fuel-list.component';
 import { authGuard } from './service/auth.guard';
-
-// ...
 
         path: 'admin', canActivate: [authGuard], data: { permissions: ['ADMIN' , 'GROUP_READ']}, children: [
           {
@@ -265,18 +234,12 @@ import { authGuard } from './service/auth.guard';
             ]
           },
 
-========================================================================
-
---- FILE: src/app/app.module.ts (imports e declarations apenas Fuel) ---
 import { FuelFormComponent } from './component/forms/fuel-form/fuel-form.component';
 import { FuelListComponent } from './component/fuel-list/fuel-list.component';
 
     FuelFormComponent,
     FuelListComponent,
 
-========================================================================
-
---- FILE: src/app/app.component.ts (permissão e menu Combustível) ---
     showSchedules: boolean = true;
     showUsers: boolean = false;
     showFuels: boolean = false;
@@ -293,9 +256,6 @@ import { FuelListComponent } from './component/fuel-list/fuel-list.component';
         this.showFuels = this.checkPermission("FUEL_READ")
     }
 
-========================================================================
-
---- FILE: src/app/app.component.html (item de menu Combustível) ---
                         <li nz-submenu nzTitle="Configurações" nzIcon="setting" *ngIf=" showVehTypes || showBrands || showModels || showGroups">
                             <ul *ngIf="!isLoading">
                                 <ng-container *ngIf="showFuels">
