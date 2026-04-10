@@ -70,3 +70,10 @@
     radial-gradient(circle at 15% 20%, #1f2937 0%, #111827 45%, #0b1220 100%);
 }
 
+@media (max-width: 768px) {
+  :host .it-root {
+    /* Less empty space below the page content; safe-area only on notched phones */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+

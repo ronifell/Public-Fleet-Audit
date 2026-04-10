@@ -58,12 +58,6 @@
         <span class="it-logo__sub">SOLUÇÕES LTDA</span>
       </div>
       <p class="it-portal__project">PROJETO INOVA THEC: PLATAFORMA INTEGRADA DE GOVERNANÇA</p>
-      <div class="it-marquee" aria-label="Letreiro digital">
-        <div class="it-marquee__track">
-          <span class="it-marquee__text">{{ marqueeText }}</span>
-          <span class="it-marquee__text" aria-hidden="true">{{ marqueeText }}</span>
-        </div>
-      </div>
       <div class="it-portal__cta">
         <section class="it-portal-paragraph it-portal-paragraph--frota" aria-labelledby="it-portal-frota-title">
           <p id="it-portal-frota-title" class="it-portal-paragraph__title">SIG-FROTA — GESTÃO DE COMBUSTÍVEL</p>
@@ -109,6 +103,12 @@
         </span>
         <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
       </button>
+      <div class="it-marquee it-marquee--below-theme" aria-label="Letreiro digital">
+        <div class="it-marquee__track">
+          <span class="it-marquee__text">{{ marqueeText }}</span>
+          <span class="it-marquee__text" aria-hidden="true">{{ marqueeText }}</span>
+        </div>
+      </div>
     </div>
   </ng-container>
 
