@@ -347,16 +347,16 @@
       <ng-container *ngIf="tela === 'tribunal'">
         <h2 class="it-screen__h"><span nz-icon nzType="safety-certificate" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>TRIBUNAL DE GLOSAS</h2>
         <p class="it-screen__p">Painel de irregularidades — comandos de gabinete.</p>
-        <div class="it-glosa" *ngFor="let g of glosas">
+        <div class="it-glosa it-glosa--tribunal" *ngFor="let g of glosas">
           <div class="it-glosa__head">
             <strong>{{ g.placa }}</strong>
             <span>{{ g.orgao }}</span>
           </div>
           <p>{{ g.motivo }} — R$ {{ g.valor | number:'1.2-2' }}</p>
-          <div class="it-glosa__cmd">
-            <button type="button" class="it-cmd it-cmd--ok" (click)="setGlosaStatus(g.id, 'homologado')">HOMOLOGAR</button>
-            <button type="button" class="it-cmd it-cmd--warn" (click)="setGlosaStatus(g.id, 'diligenciado')">DILIGENCIAR</button>
-            <button type="button" class="it-cmd it-cmd--bad" (click)="setGlosaStatus(g.id, 'impugnado')">IMPUGNAR</button>
+          <div class="it-glosa__cmd it-glosa__cmd--tribunal">
+            <button type="button" class="it-cmd it-cmd--ok it-cmd--tribunal" (click)="setGlosaStatus(g.id, 'homologado')">HOMOLOGAR</button>
+            <button type="button" class="it-cmd it-cmd--warn it-cmd--tribunal" (click)="setGlosaStatus(g.id, 'diligenciado')">DILIGENCIAR</button>
+            <button type="button" class="it-cmd it-cmd--bad it-cmd--tribunal" (click)="setGlosaStatus(g.id, 'impugnado')">IMPUGNAR</button>
           </div>
           <span class="it-glosa__st">Status: {{ g.status }}</span>
         </div>
@@ -364,14 +364,86 @@
 
       <ng-container *ngIf="tela === 'economicidade'">
         <h2 class="it-screen__h"><span nz-icon nzType="line-chart" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>ANÁLISE DE ECONOMICIDADE</h2>
-        <button type="button" class="it-secondary" (click)="toggleEconomicidadeDevio()">Simular desvio (demo)</button>
-        <div class="it-stream" [class.it-stream--alert]="economicidadeAlert">
-          <svg class="it-stream__svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
-            <path class="it-w1" d="M0,90 C60,40 100,100 160,50 S280,20 400,70 L400,120 L0,120 Z" />
-            <path class="it-w2" d="M0,100 C80,60 140,110 200,65 S300,35 400,85 L400,120 L0,120 Z" />
-            <path class="it-w3" d="M0,80 C50,30 120,95 180,45 S290,15 400,55 L400,120 L0,120 Z" />
+        <p class="it-eco-lead">
+          Curva de consumo observado vs. faixa de referência económica (simulação). Ative o desvio para validar o alerta.
+        </p>
+        <button type="button" class="it-eco-sim-btn" (click)="toggleEconomicidadeDevio()" [attr.aria-pressed]="economicidadeAlert">
+          <span class="it-eco-sim-btn__glow" aria-hidden="true"></span>
+          <span nz-icon nzType="experiment" nzTheme="outline" class="it-eco-sim-btn__ico" aria-hidden="true"></span>
+          <span class="it-eco-sim-btn__label">Simular desvio (demo)</span>
+        </button>
+        <div
+          class="it-eco-chart"
+          [class.it-eco-chart--alert]="economicidadeAlert"
+          role="img"
+          [attr.aria-label]="
+            economicidadeAlert
+              ? 'Gráfico de economicidade: desvio detectado em relação à meta.'
+              : 'Gráfico de economicidade: série dentro da faixa esperada.'
+          "
+        >
+          <div class="it-eco-chart__meta">
+            <span class="it-eco-chart__pill it-eco-chart__pill--ref">Meta económica</span>
+            <span class="it-eco-chart__pill it-eco-chart__pill--obs">Consumo observado</span>
+          </div>
+          <svg class="it-eco-chart__svg" viewBox="0 0 480 210" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs>
+              <linearGradient id="it-eco-fill-norm" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="rgba(45, 212, 191, 0.55)" />
+                <stop offset="55%" stop-color="rgba(20, 184, 166, 0.22)" />
+                <stop offset="100%" stop-color="rgba(15, 118, 110, 0.06)" />
+              </linearGradient>
+              <linearGradient id="it-eco-fill-alert" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#fb923c" stop-opacity="0.52" />
+                <stop offset="55%" stop-color="#f97316" stop-opacity="0.32" />
+                <stop offset="100%" stop-color="#ef4444" stop-opacity="0.22" />
+              </linearGradient>
+              <filter id="it-eco-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="2.2" result="b" />
+                <feMerge>
+                  <feMergeNode in="b" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+            <!-- grid -->
+            <g class="it-eco-chart__grid" stroke="currentColor">
+              <line x1="0" y1="52" x2="480" y2="52" />
+              <line x1="0" y1="96" x2="480" y2="96" />
+              <line x1="0" y1="140" x2="480" y2="140" />
+              <line x1="120" y1="28" x2="120" y2="188" />
+              <line x1="240" y1="28" x2="240" y2="188" />
+              <line x1="360" y1="28" x2="360" y2="188" />
+            </g>
+            <!-- meta horizontal -->
+            <line class="it-eco-chart__ref" x1="0" y1="88" x2="480" y2="88" />
+            <!-- série estável -->
+            <g class="it-eco-chart__layer" [class.it-eco-chart__layer--hide]="economicidadeAlert">
+              <path
+                class="it-eco-chart__area it-eco-chart__area--norm"
+                d="M0,188 L0,128 C100,124 180,96 240,90 S400,98 480,104 L480,188 Z"
+              />
+              <path
+                class="it-eco-chart__line it-eco-chart__line--norm"
+                d="M0,128 C100,124 180,96 240,90 S400,98 480,104"
+              />
+            </g>
+            <!-- série com desvio -->
+            <g class="it-eco-chart__layer it-eco-chart__layer--danger" [class.it-eco-chart__layer--hide]="!economicidadeAlert">
+              <path
+                class="it-eco-chart__area it-eco-chart__area--alert"
+                d="M0,188 L0,130 C140,128 200,36 240,28 S400,112 480,118 L480,188 Z"
+              />
+              <path
+                class="it-eco-chart__line it-eco-chart__line--alert"
+                d="M0,130 C140,128 200,36 240,28 S400,112 480,118"
+              />
+            </g>
           </svg>
-          <p *ngIf="economicidadeAlert" class="it-stream__alert" [class.it-shake]="economicidadeAlert">Desvio detectado — alerta operacional</p>
+          <p *ngIf="economicidadeAlert" class="it-eco-chart__banner" role="status">
+            <span nz-icon nzType="warning" nzTheme="fill" class="it-eco-chart__banner-ico" aria-hidden="true"></span>
+            Desvio detectado — alerta operacional
+          </p>
         </div>
       </ng-container>
 
