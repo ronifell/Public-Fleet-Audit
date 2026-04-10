@@ -64,10 +64,12 @@ export class AppComponent implements OnInit {
         router.events.subscribe(event => {
             if (event instanceof NavigationEnd) {
                 this.currentUrl = event.url || '';
+                const path = (event.urlAfterRedirects || event.url || '').split('?')[0];
 
                 // Define quando mostrar o botão de voltar
                 const hiddenRoutes = ['/', '/home', '/login'];
-                this.showBackButton = !hiddenRoutes.includes(event.urlAfterRedirects || event.url);
+                this.showBackButton =
+                    !hiddenRoutes.includes(path) && !path.startsWith('/inova-thec');
             } else if (event instanceof NavigationStart) {
                 this.isAdmin = false
                 this.showVehTypes = false
@@ -167,6 +169,12 @@ export class AppComponent implements OnInit {
 
     checkPermission(permission: string): boolean {
         return this.storagesService.validateUserPermission(permission);
+    }
+
+    /** Portal INOVA THEC — rota imersiva sem shell do app */
+    isInovaThecRoute(): boolean {
+        const u = (this.currentUrl || '').split('?')[0];
+        return u === '/inova-thec' || u.startsWith('/inova-thec/');
     }
 
 }

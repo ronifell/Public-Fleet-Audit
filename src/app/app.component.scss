@@ -113,6 +113,13 @@ nz-content {
   max-width: 100%;
 }
 
+nz-content.app-immersive-inova-thec .inner-content {
+  padding: 0;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
 .inner-content {
   /* Extra bottom space: OS gesture bar / home indicator (env is 0 on many Android browsers without viewport-fit) */
   padding: 2%;

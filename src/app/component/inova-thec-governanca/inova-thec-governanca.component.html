@@ -1,0 +1,369 @@
+<div class="it-root" [class.it-root--portal]="view === 'portal'">
+  <!-- Loader inicial -->
+  <div *ngIf="loading" class="it-loading-shell" aria-busy="true" aria-live="polite" role="status">
+    <div class="it-loading-shell__mesh" aria-hidden="true"></div>
+    <div class="it-loading-shell__orb" aria-hidden="true">
+      <span class="it-loading-shell__ring it-loading-shell__ring--a"></span>
+      <span class="it-loading-shell__ring it-loading-shell__ring--b"></span>
+      <span class="it-loading-shell__ring it-loading-shell__ring--c"></span>
+      <span class="it-loading-shell__core">⚖</span>
+    </div>
+    <p class="it-loading-shell__brand">INOVA THEC</p>
+    <p class="it-loading-shell__msg">Sincronizando protocolo de governança…</p>
+    <div class="it-loading-shell__bar" aria-hidden="true">
+      <span class="it-loading-shell__bar-fill"></span>
+    </div>
+    <p class="it-loading-shell__hint">SHA-256 · AP04 · Fé pública</p>
+  </div>
+
+  <!-- Conteúdo com transição entre páginas -->
+  <div *ngIf="!loading" class="it-main">
+  <!-- TELA 00 — Portal -->
+  <ng-container *ngIf="view === 'portal'">
+    <div class="it-portal">
+      <div class="it-portal__glow-logo" aria-hidden="true"></div>
+      <div class="it-logo it-logo--hero" role="img" aria-label="INOVA THEC SOLUÇÕES LTDA">
+        <span class="it-logo__name">INOVA THEC</span>
+        <span class="it-logo__sub">SOLUÇÕES LTDA</span>
+      </div>
+      <p class="it-portal__project">PROJETO INOVA THEC: PLATAFORMA INTEGRADA DE GOVERNANÇA</p>
+      <div class="it-marquee" aria-label="Letreiro digital">
+        <div class="it-marquee__track">
+          <span class="it-marquee__text">{{ marqueeText }}</span>
+          <span class="it-marquee__text" aria-hidden="true">{{ marqueeText }}</span>
+        </div>
+      </div>
+      <div class="it-portal__cta">
+        <button type="button" class="it-module-btn it-module-btn--frota" (click)="goFrotaMenu()">
+          <span class="it-module-btn__ico" aria-hidden="true">⛽</span>
+          <span class="it-module-btn__title">SIG-FROTA</span>
+          <span class="it-module-btn__sub">Gestão e Perícia de Combustível</span>
+        </button>
+        <button type="button" class="it-module-btn it-module-btn--pat" (click)="goPatrimonioMenu()">
+          <span class="it-module-btn__ico" aria-hidden="true">📦</span>
+          <span class="it-module-btn__title">SIG-PATRIMÔNIO</span>
+          <span class="it-module-btn__sub">Imutabilidade e Rastreabilidade de Ativos</span>
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- Menus e telas módulo -->
+  <ng-container *ngIf="view !== 'portal'">
+    <header class="it-bar" *ngIf="showHomeInModule">
+      <button type="button" class="it-home-btn" (click)="goPortal()">
+        <span aria-hidden="true">⌂</span> Home — Portal de Acesso
+      </button>
+      <span class="it-bar__gps" role="status">{{ gpsLockBanner }}</span>
+      <span class="it-bar__gps it-bar__gps--short" role="status" aria-hidden="true">Anti-GPS falso · 100%</span>
+    </header>
+
+    <!-- MENU SIG-FROTA -->
+    <div class="it-menu" *ngIf="view === 'frota-menu'">
+      <div class="it-logo it-logo--sm">
+        <span class="it-logo__name">INOVA THEC</span>
+        <span class="it-logo__sub">SOLUÇÕES LTDA</span>
+      </div>
+      <h1 class="it-doc-title">DOCUMENTO 01 — MÓDULO SIG-FROTA (Combustível)</h1>
+      <button type="button" class="it-master it-master--frota" (click)="goFrotaTela('homologacao')">
+        🏛️ PAINEL DE HOMOLOGAÇÃO DO ORDENADOR
+      </button>
+      <nav class="it-nav-grid" aria-label="SIG-FROTA">
+        <button type="button" class="it-tile" (click)="goFrotaTela('vetoracao')">
+          <span class="it-tile__ico">📍</span>
+          <span class="it-tile__t">📍 VETORAÇÃO GEOGRÁFICA</span>
+          <span class="it-tile__s">Tela 1</span>
+        </button>
+        <button type="button" class="it-tile" (click)="goFrotaTela('pericia')">
+          <span class="it-tile__ico">📸</span>
+          <span class="it-tile__t">📸 PERÍCIA DE IMAGEM</span>
+          <span class="it-tile__s">Tela 2</span>
+        </button>
+        <button type="button" class="it-tile" (click)="goFrotaTela('trilha')">
+          <span class="it-tile__ico">📑</span>
+          <span class="it-tile__t">📑 TRILHA DE AUDITORIA</span>
+          <span class="it-tile__s">Tela 3</span>
+        </button>
+        <button type="button" class="it-tile" (click)="goFrotaTela('tribunal')">
+          <span class="it-tile__ico">⚖️</span>
+          <span class="it-tile__t">⚖️ TRIBUNAL DE GLOSAS</span>
+          <span class="it-tile__s">Tela 4</span>
+        </button>
+        <button type="button" class="it-tile" (click)="goFrotaTela('economicidade')">
+          <span class="it-tile__ico">📈</span>
+          <span class="it-tile__t">📈 ANÁLISE DE ECONOMICIDADE</span>
+          <span class="it-tile__s">Tela 5</span>
+        </button>
+        <button type="button" class="it-tile" (click)="goFrotaTela('certificacao')">
+          <span class="it-tile__ico">📜</span>
+          <span class="it-tile__t">📜 CERTIFICAÇÃO DE FÉ PÚBLICA</span>
+          <span class="it-tile__s">Tela 6</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- MENU SIG-PATRIMÔNIO -->
+    <div class="it-menu it-menu--pat" *ngIf="view === 'patrimonio-menu'">
+      <div class="it-logo it-logo--sm">
+        <span class="it-logo__name">INOVA THEC</span>
+        <span class="it-logo__sub">SOLUÇÕES LTDA</span>
+      </div>
+      <p class="it-typewriter" aria-live="polite">{{ typewriterText }}<span class="it-caret"></span></p>
+      <h1 class="it-doc-title">DOCUMENTO 02 — MÓDULO SIG-PATRIMÔNIO (Ativos)</h1>
+      <button type="button" class="it-master it-master--pat" (click)="goPatrimonioTela('central')">
+        🛡️ CENTRAL DE FISCALIZAÇÃO TJ / CGE
+      </button>
+      <nav class="it-nav-grid" aria-label="SIG-PATRIMÔNIO">
+        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('registro')">
+          <span class="it-tile__ico">🆔</span>
+          <span class="it-tile__t">🆔 REGISTRO DE FÉ PÚBLICA</span>
+          <span class="it-tile__s">Tela 1</span>
+        </button>
+        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('cautelas')">
+          <span class="it-tile__ico">🤝</span>
+          <span class="it-tile__t">🤝 ACERVO DE CAUTELAS</span>
+          <span class="it-tile__s">Tela 2</span>
+        </button>
+        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('custodia')">
+          <span class="it-tile__ico">⏳</span>
+          <span class="it-tile__t">⏳ CADEIA DE CUSTÓDIA</span>
+          <span class="it-tile__s">Tela 3</span>
+        </button>
+        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('residual')">
+          <span class="it-tile__ico">📏</span>
+          <span class="it-tile__t">📏 AVALIAÇÃO RESIDUAL</span>
+          <span class="it-tile__s">Tela 4</span>
+        </button>
+        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('georef')">
+          <span class="it-tile__ico">🔥</span>
+          <span class="it-tile__t">🔥 GEORREFERENCIAMENTO</span>
+          <span class="it-tile__s">Tela 5</span>
+        </button>
+        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('extrator')">
+          <span class="it-tile__ico">🛡️</span>
+          <span class="it-tile__t">🛡️ EXTRATOR DE PROVA</span>
+          <span class="it-tile__s">Tela 6</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- TELAS FROTA -->
+    <div class="it-screen" *ngIf="isFrotaTela && demoData">
+      <button type="button" class="it-back it-back--frota" (click)="goFrotaMenu()">
+        <span class="it-back-frota__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </span>
+        <span class="it-back-frota__text">
+          <span class="it-back-frota__kicker">Voltar ao módulo</span>
+          <span class="it-back-frota__title">Cardápio SIG-FROTA</span>
+        </span>
+      </button>
+
+      <ng-container *ngIf="tela === 'homologacao'">
+        <h2 class="it-screen__h">🏛️ PAINEL DE HOMOLOGAÇÃO DO ORDENADOR</h2>
+        <div class="it-kpis">
+          <div class="it-kpi"><span>Frota homologada</span><strong>{{ homologacaoKpis.fleet | number }}</strong></div>
+          <div class="it-kpi"><span>Litros auditados</span><strong>{{ homologacaoKpis.liters | number:'1.0-2' }} L</strong></div>
+          <div class="it-kpi it-kpi--accent"><span>Economia fiscal</span><strong>R$ {{ homologacaoKpis.savings | number:'1.2-2' }}</strong></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'vetoracao'">
+        <h2 class="it-screen__h">📍 VETORAÇÃO GEOGRÁFICA</h2>
+        <p class="it-screen__p">Mapa com marcadores em pulso e linha de conexão ao posto (60fps — canvas Leaflet).</p>
+        <div class="it-map-wrap">
+          <div id="it-map" class="it-map"></div>
+        </div>
+        <div class="it-rec-list">
+          <button type="button" class="it-chip" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">
+            {{ r.placa }} — {{ isOutOf500m(r) ? 'Fora de 500m' : 'Dentro do raio' }}
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'pericia'">
+        <h2 class="it-screen__h">📸 PERÍCIA DE IMAGEM</h2>
+        <p class="it-screen__p">Captura exclusiva por câmera (galeria bloqueada). Scanner laser verde no preview.</p>
+        <div
+          class="it-pericia-preview"
+          [class.it-pericia-preview--laser]="periciaLaserOn"
+          [class.it-pericia-preview--alert]="periciaOutOfRadius"
+        >
+          <div class="it-laser-line" *ngIf="periciaLaserOn" aria-hidden="true"></div>
+          <img *ngIf="periciaPreviewUrl" [src]="periciaPreviewUrl" alt="Preview pericial" />
+          <span *ngIf="!periciaPreviewUrl" class="it-ph">Preview ao vivo</span>
+        </div>
+        <input id="it-pericia-cam" class="it-sr-only" type="file" accept="image/*" capture="environment" (change)="onPericiaFile($event)" />
+        <button type="button" class="it-primary" (click)="triggerPericiaCamera()">Abrir câmera pericial</button>
+        <p class="it-alert it-alert--red" *ngIf="periciaOutOfRadius" role="alert">Alerta vermelho: fora do raio de 500 m — glosa sugerida.</p>
+        <p class="it-alert it-alert--amber" *ngIf="gpsSpoofWarning" role="status">Precisão GPS elevada &gt; 120 m — verificação anti-spoof acionada.</p>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'trilha'">
+        <h2 class="it-screen__h">📑 TRILHA DE AUDITORIA</h2>
+        <div class="it-ticker" aria-live="polite">
+          <div class="it-ticker__track">
+            <span>{{ auditTicker }}</span>
+            <span aria-hidden="true">{{ auditTicker }}</span>
+          </div>
+        </div>
+        <div class="it-table-wrap it-scroll-hash">
+          <table class="it-table">
+            <thead><tr><th>Data</th><th>Órgão</th><th>Placa</th><th>SHA-256</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let row of integrityRows.slice(0, 12)">
+                <td>{{ row.date }}</td>
+                <td>{{ row.department }}</td>
+                <td>{{ row.plate }}</td>
+                <td><code class="it-hash-metal">{{ row.calculatedHash }}</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button type="button" class="it-secondary" (click)="exportPdf('frota')">Extrair PDF (padrão timbrado)</button>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'tribunal'">
+        <h2 class="it-screen__h">⚖️ TRIBUNAL DE GLOSAS</h2>
+        <p class="it-screen__p">Painel de irregularidades — comandos de gabinete.</p>
+        <div class="it-glosa" *ngFor="let g of glosas">
+          <div class="it-glosa__head">
+            <strong>{{ g.placa }}</strong>
+            <span>{{ g.orgao }}</span>
+          </div>
+          <p>{{ g.motivo }} — R$ {{ g.valor | number:'1.2-2' }}</p>
+          <div class="it-glosa__cmd">
+            <button type="button" class="it-cmd it-cmd--ok" (click)="setGlosaStatus(g.id, 'homologado')">HOMOLOGAR</button>
+            <button type="button" class="it-cmd it-cmd--warn" (click)="setGlosaStatus(g.id, 'diligenciado')">DILIGENCIAR</button>
+            <button type="button" class="it-cmd it-cmd--bad" (click)="setGlosaStatus(g.id, 'impugnado')">IMPUGNAR</button>
+          </div>
+          <span class="it-glosa__st">Status: {{ g.status }}</span>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'economicidade'">
+        <h2 class="it-screen__h">📈 ANÁLISE DE ECONOMICIDADE</h2>
+        <button type="button" class="it-secondary" (click)="toggleEconomicidadeDevio()">Simular desvio (demo)</button>
+        <div class="it-stream" [class.it-stream--alert]="economicidadeAlert">
+          <svg class="it-stream__svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
+            <path class="it-w1" d="M0,90 C60,40 100,100 160,50 S280,20 400,70 L400,120 L0,120 Z" />
+            <path class="it-w2" d="M0,100 C80,60 140,110 200,65 S300,35 400,85 L400,120 L0,120 Z" />
+            <path class="it-w3" d="M0,80 C50,30 120,95 180,45 S290,15 400,55 L400,120 L0,120 Z" />
+          </svg>
+          <p *ngIf="economicidadeAlert" class="it-stream__alert" [class.it-shake]="economicidadeAlert">Desvio detectado — alerta operacional</p>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'certificacao'">
+        <h2 class="it-screen__h">📜 CERTIFICAÇÃO DE FÉ PÚBLICA</h2>
+        <p class="it-screen__p">Checklist de 4 fotos periciais. Giro 3D no hash.</p>
+        <div class="it-cert-grid">
+          <div class="it-cert-slot" *ngFor="let s of certSlots; let i = index">
+            <input [id]="'it-cert-' + i" class="it-sr-only" type="file" accept="image/*" capture="environment" (change)="onCertFile(i, $event)" />
+            <button type="button" class="it-cert-btn" (click)="triggerCertSlot(i)">Foto {{ i + 1 }}</button>
+            <img *ngIf="s.url" [src]="s.url" alt="" />
+          </div>
+        </div>
+        <div class="it-flip-scene">
+          <div class="it-flip" [class.it-flip--on]="certCardFlipped" (click)="toggleCertFlip()">
+            <div class="it-flip__face it-flip__face--front">Toque para revelar o hash SHA-256</div>
+            <div class="it-flip__face it-flip__face--back"><code>{{ certHash || '—' }}</code></div>
+          </div>
+        </div>
+        <button type="button" class="it-primary" (click)="exportPdf('frota')">Extrair PDF</button>
+      </ng-container>
+    </div>
+
+    <!-- TELAS PATRIMÔNIO -->
+    <div class="it-screen it-screen--pat" *ngIf="isPatrimonioTela && demoData">
+      <button type="button" class="it-back it-back--pat" (click)="goPatrimonioMenu()">
+        <span class="it-back-pat__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </span>
+        <span class="it-back-pat__text">
+          <span class="it-back-pat__kicker">Voltar ao módulo</span>
+          <span class="it-back-pat__title">Menu SIG-PATRIMÔNIO</span>
+        </span>
+      </button>
+
+      <ng-container *ngIf="tela === 'central'">
+        <h2 class="it-screen__h">🛡️ CENTRAL DE FISCALIZAÇÃO TJ / CGE</h2>
+        <div class="it-kpis it-kpis--pat">
+          <div class="it-kpi"><span>Bens sob custódia</span><strong>{{ demoData.resultados_motor_glosa.length | number }}</strong></div>
+          <div class="it-kpi"><span>Auditorias ativas</span><strong>{{ demoData.abastecimentos.length | number }}</strong></div>
+          <div class="it-kpi it-kpi--gold"><span>Integridade</span><strong>SHA-256</strong></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'registro'">
+        <h2 class="it-screen__h">🆔 REGISTRO DE FÉ PÚBLICA</h2>
+        <div class="it-rec-list it-rec-list--compact">
+          <button type="button" class="it-chip" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">{{ r.placa }}</button>
+        </div>
+        <div class="it-stamp-zone">
+          <div class="it-asset-card" [class.it-asset-card--sealed]="registroSealed">
+            <span>Bem: {{ selectedMapRecord?.placa || demoData.resultados_motor_glosa[0].placa }}</span>
+            <code class="it-hash-royal" *ngIf="registroHash">{{ registroHash }}</code>
+          </div>
+          <div class="it-stamp" [class.it-stamp--down]="registroSealed" aria-hidden="true">FÉ PÚBLICA</div>
+        </div>
+        <button type="button" class="it-primary" (click)="selarRegistro()" [disabled]="registroSealed">Salvar e selar</button>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'cautelas'">
+        <h2 class="it-screen__h">🤝 ACERVO DE CAUTELAS</h2>
+        <div class="it-led-row">
+          <div class="it-server"><span>Servidor A</span><span class="it-led it-led--a"></span></div>
+          <div class="it-server"><span>Servidor B</span><span class="it-led it-led--b"></span></div>
+        </div>
+        <p class="it-screen__p">Prova de redundância — replicação em tempo real (simulação).</p>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'custodia'">
+        <h2 class="it-screen__h">⏳ CADEIA DE CUSTÓDIA</h2>
+        <div class="it-timeline it-timeline--gold">
+          <div class="it-tl-item"><span>Recebimento</span><time>2023-08-14</time></div>
+          <div class="it-tl-item"><span>Cautela assinada</span><time>2024-01-20</time></div>
+          <div class="it-tl-item"><span>Vistoria CGE</span><time>2024-06-02</time></div>
+          <div class="it-tl-item"><span>Encerramento TJ</span><time>2025-03-10</time></div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'residual'">
+        <h2 class="it-screen__h">📏 AVALIAÇÃO RESIDUAL</h2>
+        <p class="it-screen__p">Arraste o tempo — valor cai e a cor acompanha.</p>
+        <input type="range" min="0" max="20" [(ngModel)]="residualAnos" (ngModelChange)="updateResidual()" class="it-slider" />
+        <p class="it-residual-val" [style.color]="'hsl(' + residualHue + ')'">R$ {{ residualValor | number:'1.2-2' }} em {{ residualAnos }} anos</p>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'georef'">
+        <h2 class="it-screen__h">🔥 GEORREFERENCIAMENTO</h2>
+        <p class="it-screen__p">Mapa de calor do Acre com opacidade pulsante. Fly-to ao bem.</p>
+        <div class="it-map-wrap">
+          <div id="it-map" class="it-map"></div>
+        </div>
+        <button type="button" class="it-primary" (click)="flyToSelected()">Fly-to — local do bem</button>
+        <div class="it-rec-list">
+          <button type="button" class="it-chip" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">{{ r.placa }}</button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="tela === 'extrator'">
+        <h2 class="it-screen__h">🛡️ EXTRATOR DE PROVA</h2>
+        <input id="it-extrator-cam" class="it-sr-only" type="file" accept="image/*" capture="environment" (change)="onExtratorFile($event)" />
+        <div class="it-extrator-preview" [class.it-extrator-preview--sweep]="extratorSweep">
+          <div class="it-sweep-blue" *ngIf="extratorSweep" aria-hidden="true"></div>
+          <img *ngIf="extratorPreview" [src]="extratorPreview" alt="Prova com GPS e hora" />
+          <span *ngIf="!extratorPreview" class="it-ph">Foto pericial</span>
+        </div>
+        <button type="button" class="it-primary" (click)="triggerExtratorCam()">Capturar imagem</button>
+        <button type="button" class="it-exarar" (click)="exararCertificado()">EXARAR CERTIFICADO</button>
+      </ng-container>
+    </div>
+  </ng-container>
+  </div>
+</div>

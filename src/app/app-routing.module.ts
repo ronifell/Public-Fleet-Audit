@@ -37,10 +37,16 @@ import { Schedule2FormComponent } from './component/schedule2-form/schedule2-for
 import { ErrorComponent } from './component/error/error.component';
 import { ConsultComponent } from './component/consult/consult.component';
 import { Milestone1DemoComponent } from './component/milestone1-demo/milestone1-demo.component';
+import { InovaThecGovernancaComponent } from './component/inova-thec-governanca/inova-thec-governanca.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'milestone1-demo', component: Milestone1DemoComponent },
+  { path: 'inova-thec', component: InovaThecGovernancaComponent },
+  { path: 'inova-thec/sig-frota', component: InovaThecGovernancaComponent },
+  { path: 'inova-thec/sig-frota/:tela', component: InovaThecGovernancaComponent },
+  { path: 'inova-thec/sig-patrimonio', component: InovaThecGovernancaComponent },
+  { path: 'inova-thec/sig-patrimonio/:tela', component: InovaThecGovernancaComponent },
   { path: 'erro/:codigo', component: ErrorComponent },
   { path: '', canActivate: [authGuard], children: [
       // { path: 'schedules', children: [

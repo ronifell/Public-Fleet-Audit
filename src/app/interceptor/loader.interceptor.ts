@@ -14,10 +14,22 @@ export class LoaderInterceptor implements HttpInterceptor {
   constructor(private loaderService: LoaderService) {}
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    this.loaderService.isLoading.next(true);
-    return next.handle(request).pipe(
-      delay(2000),
-      finalize(() => this.loaderService.isLoading.next(false))
+    // Recursos estáticos (ex.: mock JSON em /assets/) têm loader próprio nas telas — evita sobrepor ao app-loader
+    const skipLoader =
+      request.url.includes('/assets/') || request.url.startsWith('assets/');
+    if (!skipLoader) {
+      this.loaderService.isLoading.next(true);
+    }
+    let stream = next.handle(request);
+    if (!skipLoader) {
+      stream = stream.pipe(delay(2000));
+    }
+    return stream.pipe(
+      finalize(() => {
+        if (!skipLoader) {
+          this.loaderService.isLoading.next(false);
+        }
+      })
     );
   }
 }
