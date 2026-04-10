@@ -468,6 +468,9 @@
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     background 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .it-home-btn:hover {
@@ -1194,6 +1197,10 @@
   color: #f8fafc;
   line-height: 1.25;
   text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+
+.it-inline-icon {
+  margin-right: 0.45rem;
 }
 
 .it-screen--pat .it-screen__h {
@@ -2468,15 +2475,30 @@
 
 /* ——— Responsivo mobile / tablet ——— */
 @media (max-width: 768px) {
-  .it-root::after {
+  .it-root:not(.it-root--light)::after {
     opacity: 1 !important;
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.26) 0%, transparent 42%),
+      radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 18% 22%, #1f2937 0%, #111827 45%, #0b1220 100%);
   }
 
-  .it-portal::before {
+  .it-root:not(.it-root--light) .it-portal::before {
     inset: -28%;
     background:
-      radial-gradient(circle at 18% 24%, rgba(15, 118, 110, 0.13), transparent 44%),
-      radial-gradient(circle at 82% 72%, rgba(67, 56, 202, 0.12), transparent 45%);
+      radial-gradient(circle at 18% 24%, rgba(15, 118, 110, 0.2), transparent 44%),
+      radial-gradient(circle at 82% 72%, rgba(67, 56, 202, 0.16), transparent 45%);
+  }
+
+  .it-root.it-root--light::before {
+    opacity: 1 !important;
+    background-image:
+      radial-gradient(ellipse 110% 92% at 100% -15%, rgba(15, 118, 110, 0.16) 0%, transparent 52%),
+      radial-gradient(ellipse 78% 58% at 0% 100%, rgba(37, 99, 235, 0.11) 0%, transparent 48%);
+  }
+
+  .it-root.it-root--light::after {
+    opacity: 0 !important;
   }
 
   .it-bar {

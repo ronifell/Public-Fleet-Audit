@@ -77,7 +77,8 @@
   <ng-container *ngIf="view !== 'portal'">
     <header class="it-bar" *ngIf="showHomeInModule">
       <button type="button" class="it-home-btn" (click)="goPortal()">
-        <span aria-hidden="true">⌂</span> Home — Portal de Acesso
+        <span nz-icon nzType="home" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
+        Home — Portal de Acesso
       </button>
       <span class="it-bar__gps" role="status">{{ gpsLockBanner }}</span>
       <span class="it-bar__gps it-bar__gps--short" role="status" aria-hidden="true">Anti-GPS falso · 100%</span>
@@ -91,37 +92,38 @@
       </div>
       <h1 class="it-doc-title">DOCUMENTO 01 — MÓDULO SIG-FROTA (Combustível)</h1>
       <button type="button" class="it-master it-master--frota" (click)="goFrotaTela('homologacao')">
-        🏛️ PAINEL DE HOMOLOGAÇÃO DO ORDENADOR
+        <span nz-icon nzType="bank" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
+        PAINEL DE HOMOLOGAÇÃO DO ORDENADOR
       </button>
       <nav class="it-nav-grid" aria-label="SIG-FROTA">
         <button type="button" class="it-tile" (click)="goFrotaTela('vetoracao')">
-          <span class="it-tile__ico">📍</span>
-          <span class="it-tile__t">📍 VETORAÇÃO GEOGRÁFICA</span>
+          <span class="it-tile__ico"><span nz-icon nzType="global" nzTheme="outline"></span></span>
+          <span class="it-tile__t">VETORAÇÃO GEOGRÁFICA</span>
           <span class="it-tile__s">Tela 1</span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('pericia')">
-          <span class="it-tile__ico">📸</span>
-          <span class="it-tile__t">📸 PERÍCIA DE IMAGEM</span>
+          <span class="it-tile__ico"><span nz-icon nzType="camera" nzTheme="outline"></span></span>
+          <span class="it-tile__t">PERÍCIA DE IMAGEM</span>
           <span class="it-tile__s">Tela 2</span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('trilha')">
-          <span class="it-tile__ico">📑</span>
-          <span class="it-tile__t">📑 TRILHA DE AUDITORIA</span>
+          <span class="it-tile__ico"><span nz-icon nzType="file-text" nzTheme="outline"></span></span>
+          <span class="it-tile__t">TRILHA DE AUDITORIA</span>
           <span class="it-tile__s">Tela 3</span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('tribunal')">
-          <span class="it-tile__ico">⚖️</span>
-          <span class="it-tile__t">⚖️ TRIBUNAL DE GLOSAS</span>
+          <span class="it-tile__ico"><span nz-icon nzType="safety-certificate" nzTheme="outline"></span></span>
+          <span class="it-tile__t">TRIBUNAL DE GLOSAS</span>
           <span class="it-tile__s">Tela 4</span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('economicidade')">
-          <span class="it-tile__ico">📈</span>
-          <span class="it-tile__t">📈 ANÁLISE DE ECONOMICIDADE</span>
+          <span class="it-tile__ico"><span nz-icon nzType="line-chart" nzTheme="outline"></span></span>
+          <span class="it-tile__t">ANÁLISE DE ECONOMICIDADE</span>
           <span class="it-tile__s">Tela 5</span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('certificacao')">
-          <span class="it-tile__ico">📜</span>
-          <span class="it-tile__t">📜 CERTIFICAÇÃO DE FÉ PÚBLICA</span>
+          <span class="it-tile__ico"><span nz-icon nzType="file-done" nzTheme="outline"></span></span>
+          <span class="it-tile__t">CERTIFICAÇÃO DE FÉ PÚBLICA</span>
           <span class="it-tile__s">Tela 6</span>
         </button>
       </nav>
@@ -136,37 +138,38 @@
       <p class="it-typewriter" aria-live="polite">{{ typewriterText }}<span class="it-caret"></span></p>
       <h1 class="it-doc-title">DOCUMENTO 02 — MÓDULO SIG-PATRIMÔNIO (Ativos)</h1>
       <button type="button" class="it-master it-master--pat" (click)="goPatrimonioTela('central')">
-        🛡️ CENTRAL DE FISCALIZAÇÃO TJ / CGE
+        <span nz-icon nzType="safety-certificate" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
+        CENTRAL DE FISCALIZAÇÃO TJ / CGE
       </button>
       <nav class="it-nav-grid" aria-label="SIG-PATRIMÔNIO">
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('registro')">
-          <span class="it-tile__ico">🆔</span>
-          <span class="it-tile__t">🆔 REGISTRO DE FÉ PÚBLICA</span>
+          <span class="it-tile__ico"><span nz-icon nzType="idcard" nzTheme="outline"></span></span>
+          <span class="it-tile__t">REGISTRO DE FÉ PÚBLICA</span>
           <span class="it-tile__s">Tela 1</span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('cautelas')">
-          <span class="it-tile__ico">🤝</span>
-          <span class="it-tile__t">🤝 ACERVO DE CAUTELAS</span>
+          <span class="it-tile__ico"><span nz-icon nzType="team" nzTheme="outline"></span></span>
+          <span class="it-tile__t">ACERVO DE CAUTELAS</span>
           <span class="it-tile__s">Tela 2</span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('custodia')">
-          <span class="it-tile__ico">⏳</span>
-          <span class="it-tile__t">⏳ CADEIA DE CUSTÓDIA</span>
+          <span class="it-tile__ico"><span nz-icon nzType="history" nzTheme="outline"></span></span>
+          <span class="it-tile__t">CADEIA DE CUSTÓDIA</span>
           <span class="it-tile__s">Tela 3</span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('residual')">
-          <span class="it-tile__ico">📏</span>
-          <span class="it-tile__t">📏 AVALIAÇÃO RESIDUAL</span>
+          <span class="it-tile__ico"><span nz-icon nzType="calculator" nzTheme="outline"></span></span>
+          <span class="it-tile__t">AVALIAÇÃO RESIDUAL</span>
           <span class="it-tile__s">Tela 4</span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('georef')">
-          <span class="it-tile__ico">🔥</span>
-          <span class="it-tile__t">🔥 GEORREFERENCIAMENTO</span>
+          <span class="it-tile__ico"><span nz-icon nzType="global" nzTheme="outline"></span></span>
+          <span class="it-tile__t">GEORREFERENCIAMENTO</span>
           <span class="it-tile__s">Tela 5</span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('extrator')">
-          <span class="it-tile__ico">🛡️</span>
-          <span class="it-tile__t">🛡️ EXTRATOR DE PROVA</span>
+          <span class="it-tile__ico"><span nz-icon nzType="audit" nzTheme="outline"></span></span>
+          <span class="it-tile__t">EXTRATOR DE PROVA</span>
           <span class="it-tile__s">Tela 6</span>
         </button>
       </nav>
@@ -187,7 +190,7 @@
       </button>
 
       <ng-container *ngIf="tela === 'homologacao'">
-        <h2 class="it-screen__h">🏛️ PAINEL DE HOMOLOGAÇÃO DO ORDENADOR</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="bank" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>PAINEL DE HOMOLOGAÇÃO DO ORDENADOR</h2>
         <div class="it-kpis">
           <div class="it-kpi"><span>Frota homologada</span><strong>{{ homologacaoKpis.fleet | number }}</strong></div>
           <div class="it-kpi"><span>Litros auditados</span><strong>{{ homologacaoKpis.liters | number:'1.0-2' }} L</strong></div>
@@ -196,7 +199,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'vetoracao'">
-        <h2 class="it-screen__h">📍 VETORAÇÃO GEOGRÁFICA</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="global" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>VETORAÇÃO GEOGRÁFICA</h2>
         <p class="it-screen__p">Mapa com marcadores em pulso e linha de conexão ao posto (60fps — canvas Leaflet).</p>
         <div class="it-map-wrap">
           <div id="it-map" class="it-map"></div>
@@ -209,7 +212,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'pericia'">
-        <h2 class="it-screen__h">📸 PERÍCIA DE IMAGEM</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="camera" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>PERÍCIA DE IMAGEM</h2>
         <p class="it-screen__p">Captura exclusiva por câmera (galeria bloqueada). Scanner laser verde no preview.</p>
         <div
           class="it-pericia-preview"
@@ -227,7 +230,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'trilha'">
-        <h2 class="it-screen__h">📑 TRILHA DE AUDITORIA</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="file-text" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>TRILHA DE AUDITORIA</h2>
         <div class="it-ticker" aria-live="polite">
           <div class="it-ticker__track">
             <span>{{ auditTicker }}</span>
@@ -251,7 +254,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'tribunal'">
-        <h2 class="it-screen__h">⚖️ TRIBUNAL DE GLOSAS</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="safety-certificate" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>TRIBUNAL DE GLOSAS</h2>
         <p class="it-screen__p">Painel de irregularidades — comandos de gabinete.</p>
         <div class="it-glosa" *ngFor="let g of glosas">
           <div class="it-glosa__head">
@@ -269,7 +272,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'economicidade'">
-        <h2 class="it-screen__h">📈 ANÁLISE DE ECONOMICIDADE</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="line-chart" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>ANÁLISE DE ECONOMICIDADE</h2>
         <button type="button" class="it-secondary" (click)="toggleEconomicidadeDevio()">Simular desvio (demo)</button>
         <div class="it-stream" [class.it-stream--alert]="economicidadeAlert">
           <svg class="it-stream__svg" viewBox="0 0 400 120" preserveAspectRatio="none" aria-hidden="true">
@@ -282,7 +285,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'certificacao'">
-        <h2 class="it-screen__h">📜 CERTIFICAÇÃO DE FÉ PÚBLICA</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="file-done" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>CERTIFICAÇÃO DE FÉ PÚBLICA</h2>
         <p class="it-screen__p">Checklist de 4 fotos periciais. Giro 3D no hash.</p>
         <div class="it-cert-grid">
           <div class="it-cert-slot" *ngFor="let s of certSlots; let i = index">
@@ -316,7 +319,7 @@
       </button>
 
       <ng-container *ngIf="tela === 'central'">
-        <h2 class="it-screen__h">🛡️ CENTRAL DE FISCALIZAÇÃO TJ / CGE</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="safety-certificate" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>CENTRAL DE FISCALIZAÇÃO TJ / CGE</h2>
         <div class="it-kpis it-kpis--pat">
           <div class="it-kpi"><span>Bens sob custódia</span><strong>{{ demoData.resultados_motor_glosa.length | number }}</strong></div>
           <div class="it-kpi"><span>Auditorias ativas</span><strong>{{ demoData.abastecimentos.length | number }}</strong></div>
@@ -325,7 +328,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'registro'">
-        <h2 class="it-screen__h">🆔 REGISTRO DE FÉ PÚBLICA</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="idcard" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>REGISTRO DE FÉ PÚBLICA</h2>
         <div class="it-rec-list it-rec-list--compact">
           <button type="button" class="it-chip" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">{{ r.placa }}</button>
         </div>
@@ -340,7 +343,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'cautelas'">
-        <h2 class="it-screen__h">🤝 ACERVO DE CAUTELAS</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="team" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>ACERVO DE CAUTELAS</h2>
         <div class="it-led-row">
           <div class="it-server"><span>Servidor A</span><span class="it-led it-led--a"></span></div>
           <div class="it-server"><span>Servidor B</span><span class="it-led it-led--b"></span></div>
@@ -349,7 +352,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'custodia'">
-        <h2 class="it-screen__h">⏳ CADEIA DE CUSTÓDIA</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="history" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>CADEIA DE CUSTÓDIA</h2>
         <div class="it-timeline it-timeline--gold">
           <div class="it-tl-item"><span>Recebimento</span><time>2023-08-14</time></div>
           <div class="it-tl-item"><span>Cautela assinada</span><time>2024-01-20</time></div>
@@ -359,14 +362,14 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'residual'">
-        <h2 class="it-screen__h">📏 AVALIAÇÃO RESIDUAL</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="calculator" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>AVALIAÇÃO RESIDUAL</h2>
         <p class="it-screen__p">Arraste o tempo — valor cai e a cor acompanha.</p>
         <input type="range" min="0" max="20" [(ngModel)]="residualAnos" (ngModelChange)="updateResidual()" class="it-slider" />
         <p class="it-residual-val" [style.color]="'hsl(' + residualHue + ')'">R$ {{ residualValor | number:'1.2-2' }} em {{ residualAnos }} anos</p>
       </ng-container>
 
       <ng-container *ngIf="tela === 'georef'">
-        <h2 class="it-screen__h">🔥 GEORREFERENCIAMENTO</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="global" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>GEORREFERENCIAMENTO</h2>
         <p class="it-screen__p">Mapa de calor do Acre com opacidade pulsante. Fly-to ao bem.</p>
         <div class="it-map-wrap">
           <div id="it-map" class="it-map"></div>
@@ -378,7 +381,7 @@
       </ng-container>
 
       <ng-container *ngIf="tela === 'extrator'">
-        <h2 class="it-screen__h">🛡️ EXTRATOR DE PROVA</h2>
+        <h2 class="it-screen__h"><span nz-icon nzType="audit" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>EXTRATOR DE PROVA</h2>
         <input id="it-extrator-cam" class="it-sr-only" type="file" accept="image/*" capture="environment" (change)="onExtratorFile($event)" />
         <div class="it-extrator-preview" [class.it-extrator-preview--sweep]="extratorSweep">
           <div class="it-sweep-blue" *ngIf="extratorSweep" aria-hidden="true"></div>
