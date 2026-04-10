@@ -106,6 +106,8 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   private portalReturnTimer?: ReturnType<typeof setTimeout>;
   view: ItView = 'portal';
   module: 'frota' | 'patrimonio' | null = null;
+  darkMode = true;
+  themeIconSpinning = false;
   /** Rota: homologacao | vetoracao | pericia | trilha | tribunal | economicidade | certificacao | central | registro | cautelas | custodia | residual | georef | extrator */
   tela = '';
 
@@ -454,6 +456,16 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       return;
     }
     this.queueInovaNavigation(['/inova-thec']);
+  }
+
+  toggleDarkMode(): void {
+    this.themeIconSpinning = true;
+    window.setTimeout(() => {
+      this.themeIconSpinning = false;
+      this.cdr.markForCheck();
+    }, 700);
+    this.darkMode = !this.darkMode;
+    this.cdr.markForCheck();
   }
 
   /** Volta ao portal: navega já e mantém o shell de loading ~0,5 s (sem o overlay pré-rota de 0,5 s). */

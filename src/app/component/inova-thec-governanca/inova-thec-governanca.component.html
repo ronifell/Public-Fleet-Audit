@@ -1,8 +1,23 @@
 <div
   class="it-root"
   [class.it-root--portal]="view === 'portal'"
+  [class.it-root--light]="!darkMode"
   [class.it-root--nav-pending]="routeTransitionOverlay && !loading"
 >
+  <button
+    nz-button
+    nzType="default"
+    class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-ripple-target"
+    type="button"
+    (click)="toggleDarkMode()"
+    [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
+  >
+    <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+      <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+    </span>
+    <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
+  </button>
+
   <!-- Loader inicial -->
   <div *ngIf="loading" class="it-loading-shell" aria-busy="true" aria-live="polite" role="status">
     <div class="it-loading-shell__mesh" aria-hidden="true"></div>
@@ -39,12 +54,18 @@
       </div>
       <div class="it-portal__cta">
         <button type="button" class="it-module-btn it-module-btn--frota" (click)="goFrotaMenu()">
-          <span class="it-module-btn__ico" aria-hidden="true">⛽</span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--frota" aria-hidden="true">
+            <span nz-icon nzType="dashboard" nzTheme="outline"></span>
+          </span>
           <span class="it-module-btn__title">SIG-FROTA</span>
           <span class="it-module-btn__sub">Gestão e Perícia de Combustível</span>
         </button>
         <button type="button" class="it-module-btn it-module-btn--pat" (click)="goPatrimonioMenu()">
-          <span class="it-module-btn__ico" aria-hidden="true">📦</span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--pat" aria-hidden="true">
+            <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+          </span>
           <span class="it-module-btn__title">SIG-PATRIMÔNIO</span>
           <span class="it-module-btn__sub">Imutabilidade e Rastreabilidade de Ativos</span>
         </button>
