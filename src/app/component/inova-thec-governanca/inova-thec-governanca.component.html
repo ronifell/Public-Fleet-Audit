@@ -255,9 +255,9 @@
       <ng-container *ngIf="tela === 'homologacao'">
         <h2 class="it-screen__h"><span nz-icon nzType="bank" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>PAINEL DE HOMOLOGAÇÃO DO ORDENADOR</h2>
         <div class="it-kpis">
-          <div class="it-kpi"><span>Frota homologada</span><strong>{{ homologacaoKpis.fleet | number }}</strong></div>
-          <div class="it-kpi"><span>Litros auditados</span><strong>{{ homologacaoKpis.liters | number:'1.0-2' }} L</strong></div>
-          <div class="it-kpi it-kpi--accent"><span>Economia fiscal</span><strong>R$ {{ homologacaoKpis.savings | number:'1.2-2' }}</strong></div>
+          <div class="it-kpi"><span>Frota homologada</span><strong>{{ homologDisplay.fleet | number }}</strong></div>
+          <div class="it-kpi"><span>Litros auditados</span><strong>{{ homologDisplay.liters | number:'1.0-2' }} L</strong></div>
+          <div class="it-kpi it-kpi--accent"><span>Economia fiscal</span><strong>R$ {{ homologDisplay.savings | number:'1.2-2' }}</strong></div>
         </div>
       </ng-container>
 
@@ -300,18 +300,46 @@
             <span aria-hidden="true">{{ auditTicker }}</span>
           </div>
         </div>
-        <div class="it-table-wrap it-scroll-hash">
-          <table class="it-table">
-            <thead><tr><th>Data</th><th>Órgão</th><th>Placa</th><th>SHA-256</th></tr></thead>
-            <tbody>
-              <tr *ngFor="let row of integrityRows.slice(0, 12)">
-                <td>{{ row.date }}</td>
-                <td>{{ row.department }}</td>
-                <td>{{ row.plate }}</td>
-                <td><code class="it-hash-metal">{{ row.calculatedHash }}</code></td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="it-trilha-data">
+          <!-- Mobile: mesmo formato visual da Timeline de Auditoria (perícia digital) do Marco 1 -->
+          <div class="it-trilha-timeline" role="list" aria-label="Trilha de auditoria">
+            <div class="it-timeline-track it-timeline-track--active">
+              <div
+                *ngFor="let row of integrityRows.slice(0, 12); let i = index; let last = last"
+                class="it-timeline-node"
+                [class.it-timeline-node--latest]="last"
+                role="listitem"
+                [style.animation-delay.ms]="i * 80"
+              >
+                <div class="it-timeline-node__rail" aria-hidden="true"></div>
+                <div class="it-timeline-node__dot-wrap" [class.it-timeline-node__dot-wrap--radar]="last">
+                  <span class="it-timeline-node__dot"></span>
+                </div>
+                <div class="it-timeline-node__card">
+                  <span class="it-timeline-node__kicker">{{ row.department }}</span>
+                  <time class="it-timeline-node__time" [attr.datetime]="row.date">{{ row.date }}</time>
+                  <p class="it-timeline-node__detail">Placa {{ row.plate }} — registro na trilha SHA-256 do SIG-FROTA.</p>
+                  <div class="it-timeline-hash">
+                    <span class="it-timeline-hash__label">SHA-256</span>
+                    <code class="it-sha256-official it-sha256-official--compact">{{ row.calculatedHash }}</code>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="it-table-wrap it-scroll-hash it-trilha-table-desktop">
+            <table class="it-table">
+              <thead><tr><th>Data</th><th>Órgão</th><th>Placa</th><th>SHA-256</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let row of integrityRows.slice(0, 12)">
+                  <td>{{ row.date }}</td>
+                  <td>{{ row.department }}</td>
+                  <td>{{ row.plate }}</td>
+                  <td><code class="it-hash-metal">{{ row.calculatedHash }}</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
         <button type="button" class="it-secondary" (click)="exportPdf('frota')">Extrair PDF (padrão timbrado)</button>
       </ng-container>
@@ -384,8 +412,8 @@
       <ng-container *ngIf="tela === 'central'">
         <h2 class="it-screen__h"><span nz-icon nzType="safety-certificate" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>CENTRAL DE FISCALIZAÇÃO TJ / CGE</h2>
         <div class="it-kpis it-kpis--pat">
-          <div class="it-kpi"><span>Bens sob custódia</span><strong>{{ demoData.resultados_motor_glosa.length | number }}</strong></div>
-          <div class="it-kpi"><span>Auditorias ativas</span><strong>{{ demoData.abastecimentos.length | number }}</strong></div>
+          <div class="it-kpi"><span>Bens sob custódia</span><strong>{{ centralDisplay.custody | number }}</strong></div>
+          <div class="it-kpi"><span>Auditorias ativas</span><strong>{{ centralDisplay.audits | number }}</strong></div>
           <div class="it-kpi it-kpi--gold"><span>Integridade</span><strong>SHA-256</strong></div>
         </div>
       </ng-container>

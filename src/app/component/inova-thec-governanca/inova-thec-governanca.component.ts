@@ -113,6 +113,12 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   /** Rota: homologacao | vetoracao | pericia | trilha | tribunal | economicidade | certificacao | central | registro | cautelas | custodia | residual | georef | extrator */
   tela = '';
 
+  /** Valores exibidos com contagem 0 → alvo (homologação / central) */
+  homologDisplay = { fleet: 0, savings: 0, liters: 0 };
+  centralDisplay = { custody: 0, audits: 0 };
+  private kpiCountUpRaf = 0;
+  private static readonly KPI_COUNT_UP_MS = 950;
+
   demoData?: DemoData;
   integrityRows: IntegrityRow[] = [];
   selectedMapRecord?: MotorResult;
@@ -192,11 +198,13 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       const path = (e.urlAfterRedirects || e.url || '').split('?')[0];
       this.syncFromUrl(path);
+      this.syncKpiCountUpAfterNavigate();
       this.cdr.markForCheck();
     });
     /* Após o router fixar a URL (deep link / reutilização do mesmo componente) */
     queueMicrotask(() => {
       this.syncFromUrl();
+      this.syncKpiCountUpAfterNavigate();
       this.cdr.markForCheck();
     });
     this.http.get<DemoData>('assets/mock/auditoria_motor_exemplo.json').subscribe({
@@ -206,6 +214,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
         this.integrityRows = await this.buildIntegrityRows(data);
         this.glosas = this.buildGlosasMock(data);
         this.updateResidual();
+        this.syncKpiCountUpAfterNavigate();
         this.cdr.markForCheck();
         this.scheduleEndInitialLoad();
       },
@@ -265,6 +274,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     if (this.typewriterTimer) {
       clearInterval(this.typewriterTimer);
     }
+    this.cancelKpiCountUpAnimation();
   }
 
   @HostListener('window:resize')
@@ -286,6 +296,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       this.stopPatrimonioTypewriter();
       this.stopPericiaGps();
       this.applyMapLifecycle();
+      this.syncKpiCountUpAfterNavigate();
       return;
     }
     if (parts[1] === 'sig-frota') {
@@ -305,6 +316,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
         }
       }
       this.applyMapLifecycle();
+      this.syncKpiCountUpAfterNavigate();
       return;
     }
     if (parts[1] === 'sig-patrimonio') {
@@ -320,8 +332,112 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
         this.stopPatrimonioTypewriter();
       }
       this.applyMapLifecycle();
+      this.syncKpiCountUpAfterNavigate();
       return;
     }
+  }
+
+  private cancelKpiCountUpAnimation(): void {
+    if (this.kpiCountUpRaf !== 0) {
+      cancelAnimationFrame(this.kpiCountUpRaf);
+      this.kpiCountUpRaf = 0;
+    }
+  }
+
+  private kpiCountUpPrefersReducedMotion(): boolean {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return false;
+    }
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  /** Inicia ou reinicia contagem quando a rota é homologação / central e há dados. */
+  private syncKpiCountUpAfterNavigate(): void {
+    this.cancelKpiCountUpAnimation();
+    if (!this.demoData) {
+      return;
+    }
+    if (this.tela === 'homologacao') {
+      this.startHomologacaoKpiCountUp();
+    } else if (this.tela === 'central') {
+      this.startCentralKpiCountUp();
+    }
+  }
+
+  private startHomologacaoKpiCountUp(): void {
+    const target = this.homologacaoKpis;
+    if (this.kpiCountUpPrefersReducedMotion()) {
+      this.homologDisplay = { fleet: target.fleet, savings: target.savings, liters: target.liters };
+      this.cdr.markForCheck();
+      return;
+    }
+    const duration = InovaThecGovernancaComponent.KPI_COUNT_UP_MS;
+    const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const ease = (u: number) => 1 - (1 - u) ** 3;
+
+    this.homologDisplay = { fleet: 0, savings: 0, liters: 0 };
+    this.cdr.markForCheck();
+
+    const step = (now: number) => {
+      const elapsed = now - t0;
+      const u = Math.min(1, elapsed / duration);
+      const e = ease(u);
+      this.homologDisplay = {
+        fleet: Math.round(target.fleet * e),
+        savings: target.savings * e,
+        liters: target.liters * e,
+      };
+      this.cdr.markForCheck();
+      if (u < 1) {
+        this.kpiCountUpRaf = requestAnimationFrame(step);
+      } else {
+        this.homologDisplay = {
+          fleet: target.fleet,
+          savings: target.savings,
+          liters: target.liters,
+        };
+        this.kpiCountUpRaf = 0;
+        this.cdr.markForCheck();
+      }
+    };
+
+    this.kpiCountUpRaf = requestAnimationFrame(step);
+  }
+
+  private startCentralKpiCountUp(): void {
+    const custody = this.demoData!.resultados_motor_glosa.length;
+    const audits = this.demoData!.abastecimentos.length;
+    if (this.kpiCountUpPrefersReducedMotion()) {
+      this.centralDisplay = { custody, audits };
+      this.cdr.markForCheck();
+      return;
+    }
+    const duration = InovaThecGovernancaComponent.KPI_COUNT_UP_MS;
+    const t0 = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const ease = (u: number) => 1 - (1 - u) ** 3;
+
+    this.centralDisplay = { custody: 0, audits: 0 };
+    this.cdr.markForCheck();
+
+    const step = (now: number) => {
+      const elapsed = now - t0;
+      const u = Math.min(1, elapsed / duration);
+      const e = ease(u);
+      this.centralDisplay = {
+        custody: Math.round(custody * e),
+        audits: Math.round(audits * e),
+      };
+      this.cdr.markForCheck();
+      if (u < 1) {
+        this.kpiCountUpRaf = requestAnimationFrame(step);
+      } else {
+        this.centralDisplay = { custody, audits };
+        this.kpiCountUpRaf = 0;
+        this.cdr.markForCheck();
+      }
+    };
+
+    this.kpiCountUpRaf = requestAnimationFrame(step);
   }
 
   private applyMapLifecycle(): void {
