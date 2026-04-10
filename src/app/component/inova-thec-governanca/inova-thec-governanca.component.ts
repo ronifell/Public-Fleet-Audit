@@ -86,6 +86,7 @@ type ItView =
 })
 export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly bodyClass = 'inova-thec-body';
+  private static readonly themeStorageKey = 'vehicle-management-theme';
   /** Overlay com a mesma animação do carregamento inicial (~500 ms antes da troca de rota). */
   private static readonly INOVA_ROUTE_DELAY_MS = 500;
   /** Só na primeira carga com URL do portal (`/inova-thec`): loader mínimo ~3 s + dados. */
@@ -175,6 +176,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   ) {}
 
   ngOnInit(): void {
+    this.restoreThemeMode();
     this.initialEntryWasDefaultPortal = this.isPathDefaultPortalOnly(
       (this.router.url || '').split('?')[0]
     );
@@ -465,7 +467,29 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       this.cdr.markForCheck();
     }, 700);
     this.darkMode = !this.darkMode;
+    this.persistThemeMode();
     this.cdr.markForCheck();
+  }
+
+  private restoreThemeMode(): void {
+    try {
+      const saved = localStorage.getItem(InovaThecGovernancaComponent.themeStorageKey);
+      if (saved === 'light') {
+        this.darkMode = false;
+      } else if (saved === 'dark') {
+        this.darkMode = true;
+      }
+    } catch {
+      // no-op: keep default when storage is unavailable
+    }
+  }
+
+  private persistThemeMode(): void {
+    try {
+      localStorage.setItem(InovaThecGovernancaComponent.themeStorageKey, this.darkMode ? 'dark' : 'light');
+    } catch {
+      // no-op
+    }
   }
 
   /** Volta ao portal: navega já e mantém o shell de loading ~0,5 s (sem o overlay pré-rota de 0,5 s). */

@@ -53,22 +53,36 @@
         </div>
       </div>
       <div class="it-portal__cta">
-        <button type="button" class="it-module-btn it-module-btn--frota" (click)="goFrotaMenu()">
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--frota" aria-hidden="true">
-            <span nz-icon nzType="dashboard" nzTheme="outline"></span>
-          </span>
-          <span class="it-module-btn__title">SIG-FROTA</span>
-          <span class="it-module-btn__sub">Gestão e Perícia de Combustível</span>
-        </button>
-        <button type="button" class="it-module-btn it-module-btn--pat" (click)="goPatrimonioMenu()">
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--pat" aria-hidden="true">
-            <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
-          </span>
-          <span class="it-module-btn__title">SIG-PATRIMÔNIO</span>
-          <span class="it-module-btn__sub">Imutabilidade e Rastreabilidade de Ativos</span>
-        </button>
+        <section class="it-portal-paragraph it-portal-paragraph--frota" aria-labelledby="it-portal-frota-title">
+          <p id="it-portal-frota-title" class="it-portal-paragraph__title">SIG-FROTA — GESTÃO DE COMBUSTÍVEL</p>
+          <button type="button" class="it-module-btn it-module-btn--portal it-module-btn--frota" (click)="goFrotaMenu()">
+            <span class="it-module-btn__row">
+              <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--frota" aria-hidden="true">
+                <span nz-icon nzType="dashboard" nzTheme="outline"></span>
+              </span>
+              <span class="it-module-btn__text">
+                <span class="it-module-btn__title">SIG-FROTA</span>
+                <span class="it-module-btn__sub">Gestão e Perícia de Combustível</span>
+              </span>
+              <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+            </span>
+          </button>
+        </section>
+        <section class="it-portal-paragraph it-portal-paragraph--pat" aria-labelledby="it-portal-pat-title">
+          <p id="it-portal-pat-title" class="it-portal-paragraph__title">SIG-PATRIMÔNIO — GESTÃO DE ATIVOS</p>
+          <button type="button" class="it-module-btn it-module-btn--portal it-module-btn--pat" (click)="goPatrimonioMenu()">
+            <span class="it-module-btn__row">
+              <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--pat" aria-hidden="true">
+                <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+              </span>
+              <span class="it-module-btn__text">
+                <span class="it-module-btn__title">SIG-PATRIMÔNIO</span>
+                <span class="it-module-btn__sub">Imutabilidade e Rastreabilidade de Ativos</span>
+              </span>
+              <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+            </span>
+          </button>
+        </section>
       </div>
     </div>
   </ng-container>
