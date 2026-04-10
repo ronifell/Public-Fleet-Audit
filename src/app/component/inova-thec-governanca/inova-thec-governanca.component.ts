@@ -87,6 +87,7 @@ type ItView =
 export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly bodyClass = 'inova-thec-body';
   private static readonly themeStorageKey = 'vehicle-management-theme';
+  private static readonly firstPortalBootKey = 'inova-thec-default-booted';
   /** Overlay com a mesma animação do carregamento inicial (~500 ms antes da troca de rota). */
   private static readonly INOVA_ROUTE_DELAY_MS = 500;
   /** Só na primeira carga com URL do portal (`/inova-thec`): loader mínimo ~3 s + dados. */
@@ -177,9 +178,16 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
 
   ngOnInit(): void {
     this.restoreThemeMode();
-    this.initialEntryWasDefaultPortal = this.isPathDefaultPortalOnly(
-      (this.router.url || '').split('?')[0]
-    );
+    const isDefaultPortalUrl = this.isPathDefaultPortalOnly((this.router.url || '').split('?')[0]);
+    if (isDefaultPortalUrl) {
+      const alreadyBooted = this.readPortalBootFlag();
+      this.initialEntryWasDefaultPortal = !alreadyBooted;
+      if (!alreadyBooted) {
+        this.writePortalBootFlag();
+      }
+    } else {
+      this.initialEntryWasDefaultPortal = false;
+    }
     this.renderer.addClass(this.document.body, InovaThecGovernancaComponent.bodyClass);
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       const path = (e.urlAfterRedirects || e.url || '').split('?')[0];
@@ -492,21 +500,37 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     }
   }
 
+  private readPortalBootFlag(): boolean {
+    try {
+      return sessionStorage.getItem(InovaThecGovernancaComponent.firstPortalBootKey) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private writePortalBootFlag(): void {
+    try {
+      sessionStorage.setItem(InovaThecGovernancaComponent.firstPortalBootKey, '1');
+    } catch {
+      // no-op
+    }
+  }
+
   /** Volta ao portal: navega já e mantém o shell de loading ~0,5 s (sem o overlay pré-rota de 0,5 s). */
   private showReturnToPortalLoader(): void {
     if (this.portalReturnTimer != null) {
       return;
     }
-    void this.router.navigate(['/inova-thec']);
-    this.loading = true;
+    this.routeTransitionOverlay = true;
     this.cdr.markForCheck();
+    void this.router.navigate(['/inova-thec']);
     const ms =
       typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
         ? 0
         : InovaThecGovernancaComponent.RETURN_TO_PORTAL_LOAD_MS;
     this.portalReturnTimer = window.setTimeout(() => {
       this.portalReturnTimer = undefined;
-      this.loading = false;
+      this.routeTransitionOverlay = false;
       this.cdr.markForCheck();
       this.scheduleEnsureMap();
     }, ms);

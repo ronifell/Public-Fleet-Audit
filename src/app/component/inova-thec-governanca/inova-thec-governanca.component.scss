@@ -10,6 +10,8 @@
 .it-root--nav-pending .it-main {
   pointer-events: none;
   user-select: none;
+  opacity: 0.42;
+  transition: opacity 0.22s ease;
 }
 
 .it-main {
@@ -19,6 +21,7 @@
   color: #e5e7eb;
   opacity: 1;
   position: relative;
+  transition: opacity 0.22s ease;
 }
 
 .it-root:not(.it-root--portal) .it-main::before {
@@ -839,9 +842,9 @@
 
 .it-tile {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.3rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.72rem;
   padding: 1.1rem 1.15rem;
   min-height: 78px;
   border-radius: var(--m1-radius-lg);
@@ -864,6 +867,14 @@
   box-shadow: var(--m1-shadow);
   position: relative;
   overflow: hidden;
+}
+
+.it-tile__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.14rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .it-master::after,
@@ -909,6 +920,12 @@
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), transparent 55%, rgba(37, 99, 235, 0.05));
 }
 
+.it-tile--pat .it-tile__ico {
+  border-radius: 10px;
+  background: rgba(224, 242, 254, 0.1);
+  color: #bae6fd;
+}
+
 .it-tile--pat:hover {
   border-color: rgba(56, 189, 248, 0.45);
   box-shadow:
@@ -917,7 +934,16 @@
 }
 
 .it-tile__ico {
-  font-size: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
+  border-radius: 50%;
+  background: rgba(236, 253, 245, 0.12);
+  color: #a7f3d0;
+  flex-shrink: 0;
 }
 
 .it-tile__t {
@@ -2352,6 +2378,13 @@
   z-index: 10000;
   min-height: 100dvh;
   padding-top: max(2rem, env(safe-area-inset-top));
+  background: rgba(5, 10, 24, 0.52);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+.it-loading-shell--route .it-loading-shell__mesh {
+  display: none;
 }
 
 .it-loading-shell__mesh {
@@ -2768,20 +2801,60 @@
   -webkit-text-fill-color: #bae6fd !important;
 }
 
+.it-root.it-root--light .it-menu:not(.it-menu--pat) .it-tile {
+  background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 52%, #bbf7d0 100%) !important;
+  color: #14532d !important;
+  border-color: rgba(22, 163, 74, 0.22) !important;
+}
+
+.it-root.it-root--light .it-menu:not(.it-menu--pat) .it-master {
+  background: linear-gradient(145deg, #ecfdf5 0%, #d1fae5 52%, #a7f3d0 100%) !important;
+  color: #14532d !important;
+  border-color: rgba(22, 163, 74, 0.24) !important;
+}
+
+.it-root.it-root--light .it-menu:not(.it-menu--pat) .it-tile .it-tile__ico {
+  background: rgba(22, 163, 74, 0.12);
+  color: #166534;
+}
+
+.it-root.it-root--light .it-menu:not(.it-menu--pat) .it-tile .it-tile__s {
+  color: #166534 !important;
+  -webkit-text-fill-color: #166534 !important;
+}
+
+.it-root.it-root--light .it-menu--pat .it-tile {
+  background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 52%, #bfdbfe 100%) !important;
+  color: #1e3a8a !important;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+}
+
+.it-root.it-root--light .it-menu--pat .it-master {
+  background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 52%, #93c5fd 100%) !important;
+  color: #1e3a8a !important;
+  border-color: rgba(37, 99, 235, 0.22) !important;
+}
+
+.it-root.it-root--light .it-menu--pat .it-tile .it-tile__ico {
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+}
+
+.it-root.it-root--light .it-menu--pat .it-tile .it-tile__s {
+  color: #1d4ed8 !important;
+  -webkit-text-fill-color: #1d4ed8 !important;
+}
+
 @media (max-width: 520px) {
   .it-theme-toggle {
-    position: fixed;
+    position: sticky;
     top: max(0.45rem, env(safe-area-inset-top));
     left: 50%;
     right: auto;
     bottom: auto;
     transform: translateX(-50%);
-    margin: 0;
-    z-index: 12000;
-  }
-
-  .it-main {
-    padding-top: 3.55rem;
+    margin: 0 auto 0.65rem;
+    z-index: 80;
   }
 
   .it-portal__cta {
@@ -2791,6 +2864,21 @@
   .it-marquee__text {
     font-size: 0.68rem;
     padding: 0.5rem 1.25rem;
+  }
+
+  .it-rec-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .it-chip {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.35;
+    padding: 0.62rem 0.9rem;
   }
 
   .it-glosa__cmd {
