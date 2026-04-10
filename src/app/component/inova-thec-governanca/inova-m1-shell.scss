@@ -26,9 +26,9 @@
   z-index: 0;
   isolation: isolate;
   padding: clamp(1rem, 3vw, 1.75rem);
-  max-width: 1400px;
-  margin: 0 auto;
-  background-color: var(--m1-page-bg-dark);
+  max-width: none;
+  margin: 0;
+  background-color: transparent;
   transition:
     background-color 0.55s ease,
     color 0.55s ease;

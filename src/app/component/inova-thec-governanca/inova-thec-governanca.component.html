@@ -5,6 +5,18 @@
   [class.it-root--nav-pending]="routeTransitionOverlay && !loading"
 >
   <button
+    *ngIf="!loading && view === 'portal'"
+    type="button"
+    class="it-portal-back"
+    (click)="goBack()"
+    aria-label="Voltar"
+  >
+    <span nz-icon nzType="arrow-left" nzTheme="outline" aria-hidden="true"></span>
+    Voltar
+  </button>
+
+  <button
+    *ngIf="view !== 'portal'"
     nz-button
     nzType="default"
     class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-ripple-target"
@@ -84,6 +96,19 @@
           </button>
         </section>
       </div>
+      <button
+        nz-button
+        nzType="default"
+        class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-theme-toggle--portal-bottom it-ripple-target"
+        type="button"
+        (click)="toggleDarkMode()"
+        [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
+      >
+        <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+          <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+        </span>
+        <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
+      </button>
     </div>
   </ng-container>
 

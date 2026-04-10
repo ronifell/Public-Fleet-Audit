@@ -468,6 +468,14 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     this.queueInovaNavigation(['/inova-thec']);
   }
 
+  goBack(): void {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    void this.router.navigate(['/']);
+  }
+
   toggleDarkMode(): void {
     this.themeIconSpinning = true;
     window.setTimeout(() => {
