@@ -369,7 +369,7 @@
         </p>
         <button type="button" class="it-eco-sim-btn" (click)="toggleEconomicidadeDevio()" [attr.aria-pressed]="economicidadeAlert">
           <span class="it-eco-sim-btn__glow" aria-hidden="true"></span>
-          <span nz-icon nzType="experiment" nzTheme="outline" class="it-eco-sim-btn__ico" aria-hidden="true"></span>
+          <span nz-icon nzType="area-chart" nzTheme="outline" class="it-eco-sim-btn__ico" aria-hidden="true"></span>
           <span class="it-eco-sim-btn__label">Simular desvio (demo)</span>
         </button>
         <div
@@ -451,16 +451,40 @@
         <h2 class="it-screen__h"><span nz-icon nzType="file-done" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>CERTIFICAÇÃO DE FÉ PÚBLICA</h2>
         <p class="it-screen__p">Checklist de 4 fotos periciais. Giro 3D no hash.</p>
         <div class="it-cert-grid">
-          <div class="it-cert-slot" *ngFor="let s of certSlots; let i = index">
+          <div
+            class="it-cert-slot"
+            [class.it-cert-slot--filled]="!!s.url"
+            *ngFor="let s of certSlots; let i = index"
+          >
             <input [id]="'it-cert-' + i" class="it-sr-only" type="file" accept="image/*" capture="environment" (change)="onCertFile(i, $event)" />
-            <button type="button" class="it-cert-btn" (click)="triggerCertSlot(i)">Foto {{ i + 1 }}</button>
-            <img *ngIf="s.url" [src]="s.url" alt="" />
+            <div class="it-cert-slot__head">
+              <span class="it-cert-slot__badge" aria-hidden="true">{{ i + 1 }}</span>
+              <span class="it-cert-slot__kicker">Foto pericial</span>
+            </div>
+            <div class="it-cert-slot__preview">
+              <img *ngIf="s.url" [src]="s.url!" alt="Pré-visualização da foto pericial {{ i + 1 }}" />
+              <div *ngIf="!s.url" class="it-cert-slot__placeholder">
+                <span nz-icon nzType="camera" nzTheme="outline" class="it-cert-slot__cam" aria-hidden="true"></span>
+                <span class="it-cert-slot__hint">Toque para capturar</span>
+              </div>
+            </div>
+            <button type="button" class="it-cert-btn" (click)="triggerCertSlot(i)">
+              <span nz-icon nzType="camera" nzTheme="outline" class="it-cert-btn__ico" aria-hidden="true"></span>
+              <span class="it-cert-btn__text">Foto {{ i + 1 }}</span>
+            </button>
           </div>
         </div>
         <div class="it-flip-scene">
           <div class="it-flip" [class.it-flip--on]="certCardFlipped" (click)="toggleCertFlip()">
-            <div class="it-flip__face it-flip__face--front">Toque para revelar o hash SHA-256</div>
-            <div class="it-flip__face it-flip__face--back"><code>{{ certHash || '—' }}</code></div>
+            <div class="it-flip__face it-flip__face--front">
+              <span class="it-flip__chip" aria-hidden="true">SHA-256</span>
+              <span class="it-flip__title">Toque para revelar o hash</span>
+              <span class="it-flip__sub">Integridade do conjunto fotográfico</span>
+            </div>
+            <div class="it-flip__face it-flip__face--back">
+              <span class="it-flip__hash-label">Digest</span>
+              <code class="it-flip__hash">{{ certHash || '—' }}</code>
+            </div>
           </div>
         </div>
         <button type="button" class="it-primary" (click)="exportPdf('frota')">Extrair PDF</button>

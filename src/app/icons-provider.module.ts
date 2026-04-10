@@ -14,9 +14,28 @@ import {
   LineOutline,
   SolutionOutline,
   CalendarOutline,
+  AreaChartOutline,
+  WarningFill,
+  CameraOutline,
 } from '@ant-design/icons-angular/icons';
 
-const icons = [MenuFoldOutline, MenuUnfoldOutline, FormOutline, CarOutline, UserOutline, ScheduleOutline, TeamOutline, CompassOutline, DatabaseOutline, LineOutline, SolutionOutline, CalendarOutline];
+const icons = [
+  MenuFoldOutline,
+  MenuUnfoldOutline,
+  FormOutline,
+  CarOutline,
+  UserOutline,
+  ScheduleOutline,
+  TeamOutline,
+  CompassOutline,
+  DatabaseOutline,
+  LineOutline,
+  SolutionOutline,
+  CalendarOutline,
+  AreaChartOutline,
+  WarningFill,
+  CameraOutline,
+];
 
 @NgModule({
   imports: [NzIconModule],
