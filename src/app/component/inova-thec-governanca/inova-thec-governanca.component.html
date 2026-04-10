@@ -1,4 +1,8 @@
-<div class="it-root" [class.it-root--portal]="view === 'portal'">
+<div
+  class="it-root"
+  [class.it-root--portal]="view === 'portal'"
+  [class.it-root--nav-pending]="routeTransitionOverlay && !loading"
+>
   <!-- Loader inicial -->
   <div *ngIf="loading" class="it-loading-shell" aria-busy="true" aria-live="polite" role="status">
     <div class="it-loading-shell__mesh" aria-hidden="true"></div>
@@ -365,5 +369,28 @@
       </ng-container>
     </div>
   </ng-container>
+  </div>
+
+  <!-- Mesma animação do loader inicial; ~0,5 s antes de navegar (ver TS) -->
+  <div
+    *ngIf="routeTransitionOverlay && !loading"
+    class="it-loading-shell it-loading-shell--route"
+    aria-busy="true"
+    aria-live="polite"
+    role="status"
+  >
+    <div class="it-loading-shell__mesh" aria-hidden="true"></div>
+    <div class="it-loading-shell__orb" aria-hidden="true">
+      <span class="it-loading-shell__ring it-loading-shell__ring--a"></span>
+      <span class="it-loading-shell__ring it-loading-shell__ring--b"></span>
+      <span class="it-loading-shell__ring it-loading-shell__ring--c"></span>
+      <span class="it-loading-shell__core">⚖</span>
+    </div>
+    <p class="it-loading-shell__brand">INOVA THEC</p>
+    <p class="it-loading-shell__msg">Sincronizando protocolo de governança…</p>
+    <div class="it-loading-shell__bar" aria-hidden="true">
+      <span class="it-loading-shell__bar-fill"></span>
+    </div>
+    <p class="it-loading-shell__hint">SHA-256 · AP04 · Fé pública</p>
   </div>
 </div>

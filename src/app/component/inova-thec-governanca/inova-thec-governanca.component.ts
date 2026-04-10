@@ -86,8 +86,24 @@ type ItView =
 })
 export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly bodyClass = 'inova-thec-body';
+  /** Overlay com a mesma animação do carregamento inicial (~500 ms antes da troca de rota). */
+  private static readonly INOVA_ROUTE_DELAY_MS = 500;
+  /** Só na primeira carga com URL do portal (`/inova-thec`): loader mínimo ~3 s + dados. */
+  private static readonly INITIAL_PORTAL_LOAD_MIN_MS = 3000;
+  /** Ao voltar ao portal pelo botão Home após o boot: mesmo shell por ~0,5 s. */
+  private static readonly RETURN_TO_PORTAL_LOAD_MS = 500;
 
   loading = true;
+  /** Mostra o shell de loading durante transições internas (portal ↔ módulos ↔ telas). */
+  routeTransitionOverlay = false;
+  private routeTransitionTimer?: ReturnType<typeof setTimeout>;
+  private readonly initialLoadStartedAt = typeof performance !== 'undefined' ? performance.now() : Date.now();
+  private initialLoadHideTimer?: ReturnType<typeof setTimeout>;
+  /** Primeira URL ao montar o componente era só o portal (sem /sig-frota/...). */
+  private initialEntryWasDefaultPortal = false;
+  /** Primeiro ciclo de loader inicial já terminou (dados prontos + delay aplicado). */
+  private initialBootComplete = false;
+  private portalReturnTimer?: ReturnType<typeof setTimeout>;
   view: ItView = 'portal';
   module: 'frota' | 'patrimonio' | null = null;
   /** Rota: homologacao | vetoracao | pericia | trilha | tribunal | economicidade | certificacao | central | registro | cautelas | custodia | residual | georef | extrator */
@@ -157,6 +173,9 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   ) {}
 
   ngOnInit(): void {
+    this.initialEntryWasDefaultPortal = this.isPathDefaultPortalOnly(
+      (this.router.url || '').split('?')[0]
+    );
     this.renderer.addClass(this.document.body, InovaThecGovernancaComponent.bodyClass);
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       const path = (e.urlAfterRedirects || e.url || '').split('?')[0];
@@ -174,15 +193,39 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
         this.selectedMapRecord = data.resultados_motor_glosa[0];
         this.integrityRows = await this.buildIntegrityRows(data);
         this.glosas = this.buildGlosasMock(data);
-        this.loading = false;
         this.updateResidual();
         this.cdr.markForCheck();
-        this.scheduleEnsureMap();
+        this.scheduleEndInitialLoad();
       },
       error: () => {
-        this.loading = false;
+        this.scheduleEndInitialLoad();
       },
     });
+  }
+
+  /** Encerra o loader inicial: ~3 s só se a entrada foi no portal; outras rotas só esperam os dados. */
+  private scheduleEndInitialLoad(): void {
+    if (this.initialLoadHideTimer != null) {
+      clearTimeout(this.initialLoadHideTimer);
+    }
+    const minMs = this.initialEntryWasDefaultPortal
+      ? InovaThecGovernancaComponent.INITIAL_PORTAL_LOAD_MIN_MS
+      : 0;
+    const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    const elapsed = now - this.initialLoadStartedAt;
+    const remaining = Math.max(0, minMs - elapsed);
+    this.initialLoadHideTimer = window.setTimeout(() => {
+      this.initialLoadHideTimer = undefined;
+      this.loading = false;
+      this.initialBootComplete = true;
+      this.cdr.markForCheck();
+      this.scheduleEnsureMap();
+    }, remaining);
+  }
+
+  private isPathDefaultPortalOnly(path: string): boolean {
+    const parts = path.split('/').filter((p) => p);
+    return parts.length === 1 && parts[0] === 'inova-thec';
   }
 
   ngAfterViewInit(): void {
@@ -190,6 +233,19 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   }
 
   ngOnDestroy(): void {
+    if (this.routeTransitionTimer != null) {
+      clearTimeout(this.routeTransitionTimer);
+      this.routeTransitionTimer = undefined;
+    }
+    if (this.initialLoadHideTimer != null) {
+      clearTimeout(this.initialLoadHideTimer);
+      this.initialLoadHideTimer = undefined;
+    }
+    if (this.portalReturnTimer != null) {
+      clearTimeout(this.portalReturnTimer);
+      this.portalReturnTimer = undefined;
+    }
+    this.routeTransitionOverlay = false;
     this.mapScheduleGen++;
     this.renderer.removeClass(this.document.body, InovaThecGovernancaComponent.bodyClass);
     this.destroyMap();
@@ -354,24 +410,86 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     }
   }
 
+  private routeTransitionDelayMs(): number {
+    if (typeof window === 'undefined') {
+      return 0;
+    }
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      ? 0
+      : InovaThecGovernancaComponent.INOVA_ROUTE_DELAY_MS;
+  }
+
+  private queueInovaNavigation(commands: (string | number)[]): void {
+    if (this.loading || this.routeTransitionOverlay) {
+      return;
+    }
+    const delay = this.routeTransitionDelayMs();
+    if (delay <= 0) {
+      void this.router.navigate(commands);
+      return;
+    }
+    this.routeTransitionOverlay = true;
+    this.cdr.markForCheck();
+    this.routeTransitionTimer = window.setTimeout(() => {
+      this.routeTransitionTimer = undefined;
+      void this.router.navigate(commands).then(
+        () => {
+          this.routeTransitionOverlay = false;
+          this.cdr.markForCheck();
+        },
+        () => {
+          this.routeTransitionOverlay = false;
+          this.cdr.markForCheck();
+        }
+      );
+    }, delay);
+  }
+
   goPortal(): void {
-    this.router.navigate(['/inova-thec']);
+    if (this.loading || this.routeTransitionOverlay) {
+      return;
+    }
+    if (this.initialBootComplete) {
+      this.showReturnToPortalLoader();
+      return;
+    }
+    this.queueInovaNavigation(['/inova-thec']);
+  }
+
+  /** Volta ao portal: navega já e mantém o shell de loading ~0,5 s (sem o overlay pré-rota de 0,5 s). */
+  private showReturnToPortalLoader(): void {
+    if (this.portalReturnTimer != null) {
+      return;
+    }
+    void this.router.navigate(['/inova-thec']);
+    this.loading = true;
+    this.cdr.markForCheck();
+    const ms =
+      typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+        ? 0
+        : InovaThecGovernancaComponent.RETURN_TO_PORTAL_LOAD_MS;
+    this.portalReturnTimer = window.setTimeout(() => {
+      this.portalReturnTimer = undefined;
+      this.loading = false;
+      this.cdr.markForCheck();
+      this.scheduleEnsureMap();
+    }, ms);
   }
 
   goFrotaMenu(): void {
-    this.router.navigate(['/inova-thec/sig-frota']);
+    this.queueInovaNavigation(['/inova-thec/sig-frota']);
   }
 
   goFrotaTela(t: string): void {
-    this.router.navigate(['/inova-thec/sig-frota', t]);
+    this.queueInovaNavigation(['/inova-thec/sig-frota', t]);
   }
 
   goPatrimonioMenu(): void {
-    this.router.navigate(['/inova-thec/sig-patrimonio']);
+    this.queueInovaNavigation(['/inova-thec/sig-patrimonio']);
   }
 
   goPatrimonioTela(t: string): void {
-    this.router.navigate(['/inova-thec/sig-patrimonio', t]);
+    this.queueInovaNavigation(['/inova-thec/sig-patrimonio', t]);
   }
 
   get isFrotaTela(): boolean {
