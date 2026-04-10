@@ -516,17 +516,43 @@
 
       <ng-container *ngIf="tela === 'registro'">
         <h2 class="it-screen__h"><span nz-icon nzType="idcard" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>REGISTRO DE FÉ PÚBLICA</h2>
-        <div class="it-rec-list it-rec-list--compact">
-          <button type="button" class="it-chip" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">{{ r.placa }}</button>
-        </div>
-        <div class="it-stamp-zone">
-          <div class="it-asset-card" [class.it-asset-card--sealed]="registroSealed">
-            <span>Bem: {{ selectedMapRecord?.placa || demoData.resultados_motor_glosa[0].placa }}</span>
-            <code class="it-hash-royal" *ngIf="registroHash">{{ registroHash }}</code>
+        <p class="it-screen__p it-registro__lead">Escolha a placa na base, confira o bem identificado e finalize com o selo de fé pública (SHA-256).</p>
+        <div class="it-registro">
+          <section class="it-registro__panel it-registro__panel--placas" aria-labelledby="it-registro-placas-title">
+            <div class="it-registro__panel-head">
+              <span class="it-registro__eyebrow">Base de dados</span>
+              <h3 id="it-registro-placas-title" class="it-registro__subh">Seleção de placa</h3>
+            </div>
+            <div class="it-rec-list it-rec-list--compact it-rec-list--registro">
+              <button
+                type="button"
+                class="it-chip"
+                [class.it-chip--active]="selectedMapRecord?.placa === r.placa"
+                *ngFor="let r of demoData.resultados_motor_glosa"
+                (click)="selectRecord(r)"
+              >
+                {{ r.placa }}
+              </button>
+            </div>
+          </section>
+
+          <div class="it-stamp-zone it-registro-stamp">
+            <div class="it-asset-card" [class.it-asset-card--sealed]="registroSealed">
+              <div class="it-asset-card__top">
+                <span class="it-asset-card__label">Bem em registo</span>
+                <span class="it-asset-card__plate">{{ selectedMapRecord?.placa || demoData.resultados_motor_glosa[0].placa }}</span>
+              </div>
+              <div class="it-asset-card__hash-block" *ngIf="registroHash">
+                <span class="it-asset-card__hash-eyebrow">Digest SHA-256</span>
+                <code class="it-hash-royal it-asset-card__hash">{{ registroHash }}</code>
+              </div>
+              <p class="it-asset-card__pending" *ngIf="!registroHash">O hash é calculado e exibido após selar o registo.</p>
+            </div>
+            <div class="it-stamp" [class.it-stamp--down]="registroSealed" aria-hidden="true">FÉ PÚBLICA</div>
           </div>
-          <div class="it-stamp" [class.it-stamp--down]="registroSealed" aria-hidden="true">FÉ PÚBLICA</div>
+
+          <button type="button" class="it-primary it-registro__cta" (click)="selarRegistro()" [disabled]="registroSealed">Salvar e selar</button>
         </div>
-        <button type="button" class="it-primary" (click)="selarRegistro()" [disabled]="registroSealed">Salvar e selar</button>
       </ng-container>
 
       <ng-container *ngIf="tela === 'cautelas'">
