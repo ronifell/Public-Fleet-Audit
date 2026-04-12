@@ -4403,12 +4403,9 @@
       inset 0 0 36px rgba(16, 185, 129, 0.32);
   }
 
+  /* Mesmo fundo profundo que no modo claro (sem radial escura em tela cheia) */
   .it-root:not(.it-root--light)::after {
-    opacity: 1 !important;
-    background-image:
-      radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.26) 0%, transparent 42%),
-      radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.2) 0%, transparent 40%),
-      radial-gradient(circle at 18% 22%, #1f2937 0%, #111827 45%, #0b1220 100%);
+    opacity: 0 !important;
   }
 
   .it-root:not(.it-root--light) .it-portal::before {
@@ -4508,12 +4505,9 @@
     inset 0 0 30px rgba(16, 185, 129, 0.22);
 }
 
+/* Plano mais ao fundo: igual ao modo claro (sem radial #0b1220 no ::after) */
 .it-root:not(.it-root--light)::after {
-  opacity: 1 !important;
-  background-image:
-    radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.24) 0%, transparent 42%),
-    radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.24) 0%, transparent 40%),
-    radial-gradient(circle at 15% 20%, #1f2937 0%, #111827 45%, #0b1220 100%);
+  opacity: 0 !important;
 }
 
 .it-menu:not(.it-menu--pat) .it-tile,
@@ -4801,9 +4795,9 @@
   opacity: 0 !important;
 }
 
-/* Reduce full-page dark glow so main box framing matches M1 */
+/* Mesmo plano profundo do modo claro: sem vinheta escura no ::after */
 .it-root:not(.it-root--light)::after {
-  opacity: 0.45 !important;
+  opacity: 0 !important;
 }
 
 @media (max-width: 768px) {
@@ -5044,9 +5038,9 @@
   color: #0f172a;
 }
 
-/* Dark mode portal: slightly deeper panel + gutters read darker */
+/* Modo escuro: mantém o plano mais externo igual ao modo claro (sem gutter #020617). */
 .it-root:not(.it-root--light).it-root--portal {
-  background-color: #020617 !important;
+  background-color: transparent !important;
 }
 
 .it-root:not(.it-root--light).it-root--portal .it-main > .it-portal {
