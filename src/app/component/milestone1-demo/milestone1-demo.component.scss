@@ -5045,6 +5045,18 @@ app-m1-odometer.m1-assets-kpi-val {
   color: var(--m1-text-muted);
 }
 
+.m1-fuel-reserve-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #14532d;
+}
+
+.m1-wrapper.dark .m1-fuel-reserve-hint {
+  color: #6ee7b7;
+}
+
 .m1-fuel-proof-btn {
   width: 100%;
   border-radius: 10px !important;

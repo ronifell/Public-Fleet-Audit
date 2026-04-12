@@ -46,6 +46,15 @@
               <span class="m1-hub-online-dot" title="Online e monitorando"></span>
             </span>
           </button>
+          <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-reserve')">
+            <span class="m1-hub-tile__row">
+              <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                <span nz-icon nzType="carry-out" nzTheme="outline"></span>
+              </span>
+              <span class="m1-hub-tile-title">Abastecimento Reserva</span>
+              <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+            </span>
+          </button>
           <button nz-button nzType="default" class="m1-hub-tile m1-hub-tile--fuel" type="button" (click)="setView('fuel-integrity')">
             <span class="m1-hub-tile__row">
               <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
@@ -217,16 +226,22 @@
       </section>
 
       <section
-        *ngIf="activeView === 'fuel-map' || activeView === 'assets-map'"
+        *ngIf="isFuelGeoView || activeView === 'assets-map'"
         class="map-layout"
         [class.map-layout--patrimony]="activeView === 'assets-map'"
-        [class.map-layout--fuel]="activeView === 'fuel-map'"
-        [class.m1-fuel-pane-enter]="activeView === 'fuel-map'"
+        [class.map-layout--fuel]="isFuelGeoView"
+        [class.m1-fuel-pane-enter]="isFuelGeoView"
       >
         <nz-card class="map-card m1-map-card">
-          <h4 class="m1-card-title">{{ activeView === 'assets-map' ? 'Vistoria e Censo (Fé Pública)' : 'Georreferenciamento de Prova' }}</h4>
+          <h4 class="m1-card-title">{{
+            activeView === 'assets-map'
+              ? 'Vistoria e Censo (Fé Pública)'
+              : activeView === 'fuel-reserve'
+                ? 'Abastecimento Reserva'
+                : 'Georreferenciamento de Prova'
+          }}</h4>
           <div
-            *ngIf="activeView === 'fuel-map' && selectedMapRecord && isAutomaticDeduction(selectedMapRecord)"
+            *ngIf="isFuelGeoView && selectedMapRecord && isAutomaticDeduction(selectedMapRecord)"
             class="m1-fuel-glosa-alert"
             role="alert"
           >
@@ -257,13 +272,13 @@
           <small class="m1-map-footnote">Área visível: {{ viewportRecords.length }} registros</small>
         </nz-card>
         <button
-          *ngIf="activeView === 'fuel-map'"
+          *ngIf="isFuelGeoView"
           type="button"
           class="m1-fuel-proof-fab m1-ripple-target"
           (mousedown)="playRipple($event)"
           (click)="triggerFuelCamera($event)"
           [class.m1-fuel-proof-fab--pulse]="fuelShutterPulse"
-          aria-label="Capturar prova — câmera nativa com marca d'água"
+          [attr.aria-label]="activeView === 'fuel-reserve' ? 'Abastecimento reserva — câmera nativa com marca dágua e GPS' : 'Capturar prova — câmera nativa com marca dágua'"
         >
           <span class="m1-fuel-proof-fab__ring" aria-hidden="true"></span>
           <span nz-icon nzType="camera" nzTheme="outline"></span>
@@ -281,8 +296,11 @@
           <span nz-icon nzType="camera" nzTheme="outline" class="m1-ap04-fab__icon"></span>
         </button>
         <nz-card class="side-card m1-side-panel" *ngIf="selectedMapRecord">
-          <ng-container *ngIf="activeView === 'fuel-map'">
+          <ng-container *ngIf="isFuelGeoView">
             <h4 class="m1-card-title">Painel lateral de auditoria</h4>
+            <p *ngIf="activeView === 'fuel-reserve'" class="m1-fuel-reserve-hint">
+              Combustível extra em galões para trechos sem posto — mesmo protocolo de foto e GPS.
+            </p>
             <p><strong>Placa:</strong> {{ selectedMapRecord.placa }}</p>
             <p><strong>Motorista:</strong> {{ demoData.abastecimentos[0].driver_name }}</p>
             <p><strong>Litros:</strong> {{ selectedMapRecord.volumeLitros }}</p>
@@ -305,7 +323,13 @@
               aria-hidden="true"
             />
             <div class="m1-fuel-proof-block">
-              <p class="m1-fuel-proof-lead">Prova pericial — câmera nativa (galeria bloqueada no protocolo).</p>
+              <p class="m1-fuel-proof-lead">
+                {{
+                  activeView === 'fuel-reserve'
+                    ? 'Abastecimento reserva — câmera nativa e marca dágua com GPS (galeria bloqueada no protocolo).'
+                    : 'Prova pericial — câmera nativa (galeria bloqueada no protocolo).'
+                }}
+              </p>
               <button
                 nz-button
                 nzType="primary"
@@ -375,7 +399,7 @@
 
           <div class="record-list">
             <button nz-button nzBlock nzSize="small" *ngFor="let r of demoData.resultados_motor_glosa" (click)="selectRecord(r)">
-              <ng-container *ngIf="activeView === 'fuel-map'">{{ r.transacaoId }} — {{ r.placa }}</ng-container>
+              <ng-container *ngIf="isFuelGeoView">{{ r.transacaoId }} — {{ r.placa }}</ng-container>
               <ng-container *ngIf="activeView === 'assets-map'">{{ r.transacaoId }} · Reg. {{ r.placa }}</ng-container>
             </button>
           </div>

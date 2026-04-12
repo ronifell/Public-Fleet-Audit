@@ -74,6 +74,7 @@ export type MilestoneHubView =
   | 'hub'
   | 'governance'
   | 'fuel-map'
+  | 'fuel-reserve'
   | 'fuel-integrity'
   | 'assets-map'
   | 'assets-report'
@@ -380,11 +381,17 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       '0'.repeat(64);
   }
 
+  /** Mapa SIG-FROTA: georreferenciamento padrão ou abastecimento reserva (mesmo fluxo foto + GPS). */
+  get isFuelGeoView(): boolean {
+    return this.activeView === 'fuel-map' || this.activeView === 'fuel-reserve';
+  }
+
   /** Fuel module: governance, geo audit, integrity */
   get isFuelModuleView(): boolean {
     return (
       this.activeView === 'governance' ||
       this.activeView === 'fuel-map' ||
+      this.activeView === 'fuel-reserve' ||
       this.activeView === 'fuel-integrity'
     );
   }
@@ -404,6 +411,8 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         return 'Monitoramento e Inteligência Fiscal';
       case 'fuel-map':
         return 'Georreferenciamento de Prova';
+      case 'fuel-reserve':
+        return 'Abastecimento Reserva';
       case 'fuel-integrity':
         return 'Relatórios e Trilha de Auditoria';
       case 'assets-map':
@@ -421,6 +430,9 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (this.activeView === 'fuel-integrity') {
       return 'Fecho jurídico para o auditor — relatório, QR de validação e SHA-256 com fé pública.';
     }
+    if (this.activeView === 'fuel-reserve') {
+      return 'Combustível extra em galões para trechos sem posto — mesma prova pericial com foto e GPS.';
+    }
     if (this.isFuelModuleView) {
       return 'Auditoria, feixe de integridade e SHA-256 para imutabilidade dos dados.';
     }
@@ -437,7 +449,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   goToHub(): void {
-    if (this.activeView === 'fuel-map' || this.activeView === 'assets-map') {
+    if (this.activeView === 'fuel-map' || this.activeView === 'fuel-reserve' || this.activeView === 'assets-map') {
       this.destroyMap();
     }
     this.stopAp04LiveStamp();
@@ -475,8 +487,11 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     }
 
     if (
-      (this.activeView === 'fuel-map' || this.activeView === 'assets-map') &&
+      (this.activeView === 'fuel-map' ||
+        this.activeView === 'fuel-reserve' ||
+        this.activeView === 'assets-map') &&
       view !== 'fuel-map' &&
+      view !== 'fuel-reserve' &&
       view !== 'assets-map'
     ) {
       this.destroyMap();
@@ -499,7 +514,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       this.lockHubFooterScratch();
     }
 
-    if (view !== 'fuel-map') {
+    if (view !== 'fuel-map' && view !== 'fuel-reserve') {
       this.fuelProofPreviewUrl = null;
     }
 
@@ -513,7 +528,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       this.dashboardChartsAnimated = false;
     }
 
-    if (view === 'fuel-map' || view === 'assets-map') {
+    if (view === 'fuel-map' || view === 'fuel-reserve' || view === 'assets-map') {
       this.assetsMapDataSkeleton = true;
       setTimeout(() => {
         this.ensureMapInitialized();
@@ -534,7 +549,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
       this.startIntegrityVisualEffects();
     }
 
-    if (view === 'governance' || view === 'fuel-map' || view === 'fuel-integrity') {
+    if (view === 'governance' || view === 'fuel-map' || view === 'fuel-reserve' || view === 'fuel-integrity') {
       this.pushScreenAuditContext(view);
     }
 
@@ -762,7 +777,8 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
         ctx.drawImage(img, 0, 0);
         const lat = this.selectedMapRecord?.postoLat ?? -15.601;
         const lng = this.selectedMapRecord?.postoLng ?? -56.097;
-        const stamp = `${new Date().toISOString()} · GPS ${lat.toFixed(5)}, ${lng.toFixed(5)} (WGS-84)`;
+        const reserveTag = this.activeView === 'fuel-reserve' ? ' · Abastecimento reserva (galões)' : '';
+        const stamp = `${new Date().toISOString()} · GPS ${lat.toFixed(5)}, ${lng.toFixed(5)} (WGS-84)${reserveTag}`;
         const barH = Math.max(40, Math.round(canvas.height * 0.08));
         ctx.fillStyle = 'rgba(15, 23, 42, 0.72)';
         ctx.fillRect(0, canvas.height - barH, canvas.width, barH);
@@ -1257,7 +1273,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   selectRecord(record: MotorResult): void {
     this.selectedMapRecord = record;
-    if (this.activeView === 'fuel-map' || this.activeView === 'assets-map') {
+    if (this.isFuelGeoView || this.activeView === 'assets-map') {
       const vehicleLat = record.postoLat + (record.id % 2 ? 0.0028 : 0.0095);
       const vehicleLng = record.postoLng + (record.id % 2 ? 0.0015 : 0.009);
       this.map?.panTo([vehicleLat, vehicleLng], { animate: true, duration: 0.6 });
@@ -1391,7 +1407,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (!this.demoData || !document.getElementById(mapId)) {
       return;
     }
-    if (this.activeView !== 'fuel-map' && this.activeView !== 'assets-map') {
+    if (!this.isFuelGeoView && this.activeView !== 'assets-map') {
       return;
     }
     if (this.mapReady && this.map) {
