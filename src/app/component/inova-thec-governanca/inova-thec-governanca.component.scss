@@ -5311,6 +5311,33 @@
   color: #e5e7eb;
 }
 
+/* Letreiro sob o logotipo no menu SIG-PATRIMÔNIO — paridade com a tagline do portal (`.m1-hub-tagline`) */
+.it-menu.it-menu--pat .m1-wrapper.it-menu__m1-shell > .it-typewriter {
+  margin: 0 auto 0.5rem;
+  max-width: 36rem;
+  min-height: 0;
+  font-size: 0.75rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.it-menu.it-menu--pat .m1-wrapper.it-menu__m1-shell:not(.dark) > .it-typewriter {
+  color: var(--m1-text-muted);
+}
+
+.it-menu.it-menu--pat .m1-wrapper.it-menu__m1-shell.dark > .it-typewriter {
+  color: #e5e7eb;
+}
+
+.it-root.it-root--light .it-menu.it-menu--pat .m1-wrapper.it-menu__m1-shell:not(.dark) > .it-typewriter {
+  color: var(--m1-text-muted) !important;
+  -webkit-text-fill-color: var(--m1-text-muted) !important;
+}
+
 /* Dois botões do hub com a mesma altura (rótulos com comprimentos diferentes) */
 .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-tile {
   min-height: 6.75rem !important;
