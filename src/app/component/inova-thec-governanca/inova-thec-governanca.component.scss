@@ -360,6 +360,60 @@
   margin-bottom: 0;
 }
 
+/* Shell Marco 1 dentro do menu: sem segunda “página” nem fundo extra */
+.it-menu > .m1-wrapper.it-menu__m1-shell {
+  min-height: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.it-menu > .m1-wrapper.it-menu__m1-shell::before,
+.it-menu > .m1-wrapper.it-menu__m1-shell::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Primeiro cartão (painel / central) em largura total, como faixa de destaque */
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile--menu-master {
+  grid-column: 1 / -1;
+}
+
+/* Módulo: altura idêntica em todos os hub-tiles + texto mais pequeno (Marco 1 base com override) */
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile.ant-btn {
+  min-height: 4.75rem !important;
+  height: 4.75rem !important;
+  max-height: 4.75rem !important;
+  box-sizing: border-box !important;
+  padding: 0.45rem 0.8rem !important;
+}
+
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile .m1-hub-tile__row {
+  flex: 1;
+  align-items: center;
+  align-self: stretch;
+  min-height: 0;
+}
+
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile .m1-hub-tile-title {
+  font-size: 0.72rem !important;
+  line-height: 1.25 !important;
+  font-weight: 700 !important;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+}
+
+/* Ícone ligeiramente mais compacto para caber na altura fixa */
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile .m1-hub-tile__icon-wrap {
+  width: 2.25rem !important;
+  height: 2.25rem !important;
+  font-size: 1.05rem !important;
+}
+
 .it-menu-head__doc-ref {
   margin: 0;
   font-size: 0.58rem;
@@ -723,8 +777,7 @@
   .it-menu .it-menu-head,
   .it-menu .it-menu-hub-brand,
   .it-menu > .it-typewriter,
-  .it-menu > .it-master,
-  .it-nav-grid .it-tile,
+  .it-menu .m1-wrapper .m1-hub-tile,
   .it-bar,
   .it-main .m1-audit-ticker,
   .m1-footer-integrity-marquee,
@@ -1135,10 +1188,12 @@
   max-width: min(100%, 22rem);
 }
 
-.it-bar__stack .it-home-btn {
+.it-bar__stack .milestone-back-btn {
   width: 100%;
   box-sizing: border-box;
 }
+
+/* Estilo do Menu principal: ver `styles.scss` (paridade com app-milestone1-demo) + body.inova-thec-theme-dark */
 
 /* Mesmo tamanho que Início + conteúdo centrado (ícone circular + texto) */
 :host ::ng-deep .it-bar__theme-btn.m1-theme-toggle--modern.ant-btn {
@@ -1417,43 +1472,43 @@
   animation: it-enter-soft 0.54s cubic-bezier(0.22, 1, 0.36, 1) 0.11s both;
 }
 
-.it-menu > .it-nav-grid {
+.it-menu .it-menu__m1-hub-grid {
   animation: it-enter-fade 0.45s ease-out 0.12s both;
 }
 
-.it-nav-grid .it-tile:nth-child(1) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(1) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
 }
 
-.it-nav-grid .it-tile:nth-child(2) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(2) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
 }
 
-.it-nav-grid .it-tile:nth-child(3) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(3) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both;
 }
 
-.it-nav-grid .it-tile:nth-child(4) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(4) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
 }
 
-.it-nav-grid .it-tile:nth-child(5) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(5) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.34s both;
 }
 
-.it-nav-grid .it-tile:nth-child(6) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(6) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
 }
 
-.it-nav-grid .it-tile:nth-child(7) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(7) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.42s both;
 }
 
-.it-nav-grid .it-tile:nth-child(8) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(8) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.46s both;
 }
 
-.it-nav-grid .it-tile:nth-child(n + 9) {
+.it-menu .it-menu__m1-hub-grid .m1-hub-tile:nth-child(n + 9) {
   animation: it-enter-soft 0.48s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
 }
 
@@ -1693,94 +1748,11 @@
   color: var(--m1-text-muted);
 }
 
-/* Module menus (SIG-FROTA / SIG-PAT): one centered column, rail + chevron + badge — reads as a modern command list */
-.it-menu .it-nav-grid {
+/* Menus módulo: grelha Marco 1 (`m1-hub-grid`) centrada na coluna do `.it-main` */
+.it-menu .m1-hub-sections .m1-hub-grid {
   grid-template-columns: 1fr;
   max-width: min(28.5rem, 100%);
   margin-inline: auto;
-  padding-top: 1.125rem;
-  margin-top: 0.45rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.14);
-  gap: 0.72rem;
-}
-
-.it-root.it-root--light .it-menu .it-nav-grid {
-  border-top-color: rgba(15, 23, 42, 0.08);
-}
-
-.it-menu .it-nav-grid .it-tile {
-  padding: 0.5rem 0.75rem;
-  min-height: 4.75rem !important;
-  height: 4.75rem !important;
-  box-sizing: border-box;
-  border-radius: 14px;
-  gap: 0.55rem;
-  align-items: center;
-}
-
-.it-menu .it-nav-grid .it-tile .it-tile__text {
-  flex: 1;
-  min-height: 0;
-  justify-content: center;
-}
-
-.it-menu .it-nav-grid .it-tile::before {
-  background: linear-gradient(118deg, rgba(255, 255, 255, 0.09) 0%, transparent 46%, transparent 100%);
-  opacity: 0.9;
-}
-
-/* LED e seta passam a ser elementos (igual ao portal), não pseudo-elementos */
-.it-menu .it-nav-grid .it-tile::after {
-  display: none !important;
-}
-
-.it-menu .it-nav-grid .it-tile .it-tile__ico {
-  position: relative;
-  width: 2.35rem;
-  height: 2.35rem;
-  font-size: 1.05rem;
-}
-
-.it-menu:not(.it-menu--pat) .it-nav-grid .it-tile .it-tile__ico::after,
-.it-menu--pat .it-nav-grid .it-tile .it-tile__ico::after {
-  display: none !important;
-}
-
-.it-menu .it-nav-grid .it-tile .it-tile__s {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  margin-top: 0.2rem;
-  padding: 0.18rem 0.55rem;
-  border-radius: 999px;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  line-height: 1.2;
-}
-
-.it-menu:not(.it-menu--pat) .it-nav-grid .it-tile .it-tile__s {
-  background: rgba(6, 78, 59, 0.38);
-  color: #d1fae5 !important;
-  -webkit-text-fill-color: #d1fae5 !important;
-}
-
-.it-menu--pat .it-nav-grid .it-tile .it-tile__s {
-  background: rgba(15, 23, 42, 0.28);
-  color: #bae6fd !important;
-  -webkit-text-fill-color: #bae6fd !important;
-}
-
-.it-root.it-root--light .it-menu:not(.it-menu--pat) .it-nav-grid .it-tile .it-tile__s {
-  background: rgba(22, 163, 74, 0.14);
-  color: #166534 !important;
-  -webkit-text-fill-color: #166534 !important;
-}
-
-.it-root.it-root--light .it-menu--pat .it-nav-grid .it-tile .it-tile__s {
-  background: rgba(37, 99, 235, 0.12);
-  color: #1d4ed8 !important;
-  -webkit-text-fill-color: #1d4ed8 !important;
 }
 
 .it-typewriter {
@@ -5385,6 +5357,12 @@
   /* Offset fixo do tema em relação aos cartões SIG-* (igual em qualquer largura ≤768px) */
   .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools {
     margin-top: calc(var(--it-portal-block-gap) + 1rem);
+  }
+
+  /* Hub portal: dois botões um pouco mais baixos em telemóvel */
+  .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-tile {
+    min-height: 5.85rem !important;
+    height: 5.85rem !important;
   }
 
   .it-main > .it-main-stack > .it-menu {

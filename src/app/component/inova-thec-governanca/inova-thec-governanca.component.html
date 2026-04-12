@@ -168,9 +168,18 @@
     <div class="it-main-stack">
     <header class="it-bar" *ngIf="showHomeInModule">
       <div class="it-bar__stack">
-        <button type="button" class="it-home-btn" (click)="goPortal()">
-          <span nz-icon nzType="home" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
-          Home — Portal de Acesso
+        <button
+          nz-button
+          nzType="default"
+          type="button"
+          class="milestone-back-btn m1-back-hub-btn m1-ripple-target"
+          (mousedown)="playRipple($event)"
+          (click)="goPortal()"
+        >
+          <span class="m1-back-hub-btn__inner">
+            <span nz-icon nzType="arrow-left" nzTheme="outline" class="m1-back-hub-btn__ico" aria-hidden="true"></span>
+            <span class="m1-back-hub-btn__label">Menu principal</span>
+          </span>
         </button>
         <button
           nz-button
@@ -190,8 +199,9 @@
       <span class="it-bar__gps it-bar__gps--short" role="status" aria-hidden="true">Anti-GPS falso · 100%</span>
     </header>
 
-    <!-- MENU SIG-FROTA -->
+    <!-- MENU SIG-FROTA (paridade Marco 1: secções + m1-hub-tile) -->
     <div class="it-menu" *ngIf="view === 'frota-menu'">
+      <div class="m1-wrapper it-menu__m1-shell" [class.dark]="darkMode">
       <header class="it-menu-hub-brand" aria-label="Identidade INOVA THEC">
         <div class="m1-hub-header">
           <div class="m1-logo-plain m1-logo-fx">
@@ -202,72 +212,136 @@
           </div>
         </div>
       </header>
-      <button type="button" class="it-master it-master--frota it-master--row" (click)="goFrotaTela('homologacao')">
-        <span class="it-master__ico" aria-hidden="true"><span nz-icon nzType="bank" nzTheme="outline"></span></span>
-        <span class="it-master__label">PAINEL DE HOMOLOGAÇÃO DO ORDENADOR</span>
-        <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-        <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-      </button>
-      <nav class="it-nav-grid" aria-label="SIG-FROTA">
-        <button type="button" class="it-tile" (click)="goFrotaTela('vetoracao')">
-          <span class="it-tile__ico"><span nz-icon nzType="global" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">VETORAÇÃO GEOGRÁFICA</span>
-            <span class="it-tile__s">Tela 1</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile" (click)="goFrotaTela('pericia')">
-          <span class="it-tile__ico"><span nz-icon nzType="camera" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">PERÍCIA DE IMAGEM</span>
-            <span class="it-tile__s">Tela 2</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile" (click)="goFrotaTela('trilha')">
-          <span class="it-tile__ico"><span nz-icon nzType="file-text" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">TRILHA DE AUDITORIA</span>
-            <span class="it-tile__s">Tela 3</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile" (click)="goFrotaTela('tribunal')">
-          <span class="it-tile__ico"><span nz-icon nzType="safety-certificate" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">TRIBUNAL DE GLOSAS</span>
-            <span class="it-tile__s">Tela 4</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile" (click)="goFrotaTela('economicidade')">
-          <span class="it-tile__ico"><span nz-icon nzType="line-chart" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">ANÁLISE DE ECONOMICIDADE</span>
-            <span class="it-tile__s">Tela 5</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile" (click)="goFrotaTela('certificacao')">
-          <span class="it-tile__ico"><span nz-icon nzType="file-done" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">CERTIFICAÇÃO DE FÉ PÚBLICA</span>
-            <span class="it-tile__s">Tela 6</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-      </nav>
+      <div class="m1-hub-sections it-menu__m1-hub-sections">
+        <section
+          class="m1-hub-section m1-hub-section--fuel m1-hub-section--from-left"
+          aria-labelledby="m2-frota-hub-heading"
+        >
+          <h2 id="m2-frota-hub-heading" class="m1-hub-section-title m1-hub-section-title--fuel">
+            SIG-FROTA — GESTÃO DE COMBUSTÍVEL
+          </h2>
+          <nav class="m1-hub-grid m1-hub-grid--fuel it-menu__m1-hub-grid" aria-label="SIG-FROTA — gestão de combustível">
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--fuel m1-hub-tile--menu-master m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaTela('homologacao')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="bank" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">PAINEL DE HOMOLOGAÇÃO DO ORDENADOR</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--fuel m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaTela('vetoracao')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="global" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">VETORAÇÃO GEOGRÁFICA — Tela 1</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--fuel m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaTela('pericia')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="camera" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">PERÍCIA DE IMAGEM — Tela 2</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--fuel m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaTela('trilha')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="file-text" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">TRILHA DE AUDITORIA — Tela 3</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--fuel m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaTela('tribunal')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">TRIBUNAL DE GLOSAS — Tela 4</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--fuel m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaTela('economicidade')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="line-chart" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">ANÁLISE DE ECONOMICIDADE — Tela 5</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--fuel m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaTela('certificacao')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="file-done" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">CERTIFICAÇÃO DE FÉ PÚBLICA — Tela 6</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+          </nav>
+        </section>
+      </div>
+      </div>
     </div>
 
-    <!-- MENU SIG-PATRIMÔNIO -->
+    <!-- MENU SIG-PATRIMÔNIO (paridade Marco 1: secções + m1-hub-tile) -->
     <div class="it-menu it-menu--pat" *ngIf="view === 'patrimonio-menu'">
+      <div class="m1-wrapper it-menu__m1-shell" [class.dark]="darkMode">
       <header class="it-menu-hub-brand" aria-label="Identidade INOVA THEC">
         <div class="m1-hub-header">
           <div class="m1-logo-plain m1-logo-fx">
@@ -279,68 +353,131 @@
         </div>
       </header>
       <p class="it-typewriter" aria-live="polite">{{ typewriterText }}<span class="it-caret"></span></p>
-      <button type="button" class="it-master it-master--pat it-master--row" (click)="goPatrimonioTela('central')">
-        <span class="it-master__ico" aria-hidden="true"><span nz-icon nzType="safety-certificate" nzTheme="outline"></span></span>
-        <span class="it-master__label">CENTRAL DE FISCALIZAÇÃO TJ / CGE</span>
-        <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-        <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-      </button>
-      <nav class="it-nav-grid" aria-label="SIG-PATRIMÔNIO">
-        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('registro')">
-          <span class="it-tile__ico"><span nz-icon nzType="idcard" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">REGISTRO DE FÉ PÚBLICA</span>
-            <span class="it-tile__s">Tela 1</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('cautelas')">
-          <span class="it-tile__ico"><span nz-icon nzType="team" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">ACERVO DE CAUTELAS</span>
-            <span class="it-tile__s">Tela 2</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('custodia')">
-          <span class="it-tile__ico"><span nz-icon nzType="history" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">CADEIA DE CUSTÓDIA</span>
-            <span class="it-tile__s">Tela 3</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('residual')">
-          <span class="it-tile__ico"><span nz-icon nzType="calculator" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">AVALIAÇÃO RESIDUAL</span>
-            <span class="it-tile__s">Tela 4</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('georef')">
-          <span class="it-tile__ico"><span nz-icon nzType="global" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">GEORREFERENCIAMENTO</span>
-            <span class="it-tile__s">Tela 5</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-        <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('extrator')">
-          <span class="it-tile__ico"><span nz-icon nzType="audit" nzTheme="outline"></span></span>
-          <span class="it-tile__text">
-            <span class="it-tile__t">EXTRATOR DE PROVA</span>
-            <span class="it-tile__s">Tela 6</span>
-          </span>
-          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
-        </button>
-      </nav>
+      <div class="m1-hub-sections it-menu__m1-hub-sections">
+        <section
+          class="m1-hub-section m1-hub-section--patrimony m1-hub-section--from-right"
+          aria-labelledby="m2-pat-hub-heading"
+        >
+          <h2 id="m2-pat-hub-heading" class="m1-hub-section-title m1-hub-section-title--asset">
+            SIG-PATRIMÔNIO — GESTÃO DE ATIVOS
+          </h2>
+          <nav class="m1-hub-grid m1-hub-grid--asset it-menu__m1-hub-grid" aria-label="SIG-PATRIMÔNIO — gestão de ativos">
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--asset m1-hub-tile--menu-master m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioTela('central')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">CENTRAL DE FISCALIZAÇÃO TJ / CGE</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--asset m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioTela('registro')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="idcard" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">REGISTRO DE FÉ PÚBLICA — Tela 1</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--asset m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioTela('cautelas')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="team" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">ACERVO DE CAUTELAS — Tela 2</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--asset m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioTela('custodia')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="history" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">CADEIA DE CUSTÓDIA — Tela 3</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--asset m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioTela('residual')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="calculator" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">AVALIAÇÃO RESIDUAL — Tela 4</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--asset m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioTela('georef')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="global" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">GEORREFERENCIAMENTO — Tela 5</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              class="m1-hub-tile m1-hub-tile--asset m1-ripple-target"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioTela('extrator')"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="audit" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">EXTRATOR DE PROVA — Tela 6</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
+              </span>
+            </button>
+          </nav>
+        </section>
+      </div>
+      </div>
     </div>
 
     <!-- TELAS FROTA -->

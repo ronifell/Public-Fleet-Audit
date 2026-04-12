@@ -86,6 +86,8 @@ type ItView =
 })
 export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly bodyClass = 'inova-thec-body';
+  /** Espelha `body.milestone1-demo-dark` para estilos globais do botão Menu principal (Marco 1). */
+  private static readonly bodyThemeDarkClass = 'inova-thec-theme-dark';
   private static readonly themeStorageKey = 'vehicle-management-theme';
 
   loading = true;
@@ -171,6 +173,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   ngOnInit(): void {
     this.restoreThemeMode();
     this.renderer.addClass(this.document.body, InovaThecGovernancaComponent.bodyClass);
+    this.syncBodyThemeDarkClass();
     this.router.events.pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd)).subscribe((e) => {
       const path = (e.urlAfterRedirects || e.url || '').split('?')[0];
       this.syncFromUrl(path);
@@ -215,6 +218,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   ngOnDestroy(): void {
     this.mapScheduleGen++;
     this.renderer.removeClass(this.document.body, InovaThecGovernancaComponent.bodyClass);
+    this.renderer.removeClass(this.document.body, InovaThecGovernancaComponent.bodyThemeDarkClass);
     this.destroyMap();
     this.stopPericiaGps();
     if (this.typewriterTimer) {
@@ -548,7 +552,16 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     }
     this.darkMode = !this.darkMode;
     this.persistThemeMode();
+    this.syncBodyThemeDarkClass();
     this.cdr.markForCheck();
+  }
+
+  private syncBodyThemeDarkClass(): void {
+    if (this.darkMode) {
+      this.renderer.addClass(this.document.body, InovaThecGovernancaComponent.bodyThemeDarkClass);
+    } else {
+      this.renderer.removeClass(this.document.body, InovaThecGovernancaComponent.bodyThemeDarkClass);
+    }
   }
 
   private restoreThemeMode(): void {

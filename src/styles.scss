@@ -14,8 +14,10 @@ nz-layout.layout-content {
   height: 100%;
 }
 
-/* Milestone 1 — Menu principal: pílula vidro + acento SIG-FROTA (teal) */
-body app-milestone1-demo .milestone-back-btn.ant-btn {
+/* Milestone 1 — Menu principal: pílula vidro + acento SIG-FROTA (teal)
+   Mesmas regras para INOVA THEC (app-inova-thec-governanca). */
+body app-milestone1-demo .milestone-back-btn.ant-btn,
+body app-inova-thec-governanca .milestone-back-btn.ant-btn {
   height: auto !important;
   min-height: 44px;
   padding: 0.5rem 1.35rem 0.5rem 1rem !important;
@@ -41,21 +43,25 @@ body app-milestone1-demo .milestone-back-btn.ant-btn {
     color 0.2s ease !important;
 }
 
-body app-milestone1-demo .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__inner {
+body app-milestone1-demo .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__inner,
+body app-inova-thec-governanca .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__inner {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
 }
 
-body app-milestone1-demo .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__ico {
+body app-milestone1-demo .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__ico,
+body app-inova-thec-governanca .milestone-back-btn.m1-back-hub-btn .m1-back-hub-btn__ico {
   font-size: 1.05rem;
   line-height: 0;
   opacity: 0.92;
 }
 
 body app-milestone1-demo .milestone-back-btn.ant-btn:hover,
-body app-milestone1-demo .milestone-back-btn.ant-btn:focus {
+body app-milestone1-demo .milestone-back-btn.ant-btn:focus,
+body app-inova-thec-governanca .milestone-back-btn.ant-btn:hover,
+body app-inova-thec-governanca .milestone-back-btn.ant-btn:focus {
   border-color: rgba(13, 148, 136, 0.42) !important;
   color: #047857 !important;
   background: linear-gradient(168deg, #fff 0%, #ecfdf5 55%, #d1fae5 100%) !important;
@@ -65,16 +71,19 @@ body app-milestone1-demo .milestone-back-btn.ant-btn:focus {
   transform: translateY(-2px);
 }
 
-body app-milestone1-demo .milestone-back-btn.ant-btn:active {
+body app-milestone1-demo .milestone-back-btn.ant-btn:active,
+body app-inova-thec-governanca .milestone-back-btn.ant-btn:active {
   transform: translateY(0) scale(0.985);
 }
 
-body app-milestone1-demo .milestone-back-btn.ant-btn:focus-visible {
+body app-milestone1-demo .milestone-back-btn.ant-btn:focus-visible,
+body app-inova-thec-governanca .milestone-back-btn.ant-btn:focus-visible {
   outline: 2px solid rgba(13, 148, 136, 0.55);
   outline-offset: 3px;
 }
 
-body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn {
+body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn,
+body.inova-thec-theme-dark app-inova-thec-governanca .milestone-back-btn.ant-btn {
   border: 1px solid rgba(45, 212, 191, 0.22) !important;
   background: linear-gradient(168deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
   color: #ecfdf5 !important;
@@ -85,7 +94,9 @@ body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn {
 }
 
 body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:hover,
-body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:focus {
+body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:focus,
+body.inova-thec-theme-dark app-inova-thec-governanca .milestone-back-btn.ant-btn:hover,
+body.inova-thec-theme-dark app-inova-thec-governanca .milestone-back-btn.ant-btn:focus {
   border-color: rgba(52, 211, 153, 0.45) !important;
   color: #f8fafc !important;
   background: linear-gradient(168deg, rgba(51, 65, 85, 0.98) 0%, rgba(30, 41, 59, 0.99) 100%) !important;
@@ -95,22 +106,28 @@ body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:focus 
   transform: translateY(-2px);
 }
 
-body.milestone1-demo-dark .milestone-back-btn.ant-btn .anticon {
+body.milestone1-demo-dark .milestone-back-btn.ant-btn .anticon,
+body.inova-thec-theme-dark app-inova-thec-governanca .milestone-back-btn.ant-btn .anticon {
   color: #5eead4;
 }
 
 @media (prefers-reduced-motion: reduce) {
   body app-milestone1-demo .milestone-back-btn.ant-btn:hover,
   body app-milestone1-demo .milestone-back-btn.ant-btn:focus,
+  body app-inova-thec-governanca .milestone-back-btn.ant-btn:hover,
+  body app-inova-thec-governanca .milestone-back-btn.ant-btn:focus,
   body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:hover,
-  body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:focus {
+  body.milestone1-demo-dark app-milestone1-demo .milestone-back-btn.ant-btn:focus,
+  body.inova-thec-theme-dark app-inova-thec-governanca .milestone-back-btn.ant-btn:hover,
+  body.inova-thec-theme-dark app-inova-thec-governanca .milestone-back-btn.ant-btn:focus {
     transform: none;
   }
 }
 
 /* Mobile: barra de ações do hero em largura total (emparelha com .m1-hero-actions no componente) */
 @media (max-width: 640px) {
-  body app-milestone1-demo .m1-module-topbar .milestone-back-btn.ant-btn {
+  body app-milestone1-demo .m1-module-topbar .milestone-back-btn.ant-btn,
+  body app-inova-thec-governanca .it-bar .milestone-back-btn.ant-btn {
     height: auto !important;
     min-height: 40px;
     white-space: normal;
