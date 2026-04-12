@@ -1,5 +1,7 @@
 @import './inova-m1-shell';
 @import './inova-m1-brand-wordmark';
+/* Marco 1 — hub, tiles, ripple, tema (paridade visual com /milestone1-demo) */
+@import '../milestone1-demo/milestone1-demo.component.scss';
 
 :host {
   display: block;
@@ -713,17 +715,13 @@
   .it-menu > .it-master,
   .it-nav-grid .it-tile,
   .it-bar,
-  .it-portal .it-portal__glow-logo,
-  .it-portal .it-portal-head,
-  .it-portal .m1-logo-plain,
-  .it-portal .it-portal__project,
   .it-main .m1-audit-ticker,
   .m1-footer-integrity-marquee,
   .m1-hub-footer-scratch__hash,
   .m1-tce-seal__text::after,
   .m1-audit-ticker-track,
-  .it-portal > .it-portal__cta,
-  .it-portal__cta .it-module-btn,
+  .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-section,
+  .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-tile,
   .it-screen > *,
   .it-screen > .it-map-wrap,
   .it-screen .it-kpis .it-kpi,
@@ -1088,41 +1086,13 @@
   }
 }
 
-.it-portal .it-portal__glow-logo {
-  animation: it-enter-fade 0.85s ease-out both;
-}
-
-.it-portal .it-portal-head {
-  animation: it-enter-from-top 0.62s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.it-portal .it-portal-head__glass .m1-logo-plain {
-  animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
-}
-
-.it-portal .it-portal-head__glass .it-portal__project {
-  animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
-}
-
-.it-portal > .it-portal__cta {
-  animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
-}
-
-.it-root.it-root--portal .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
+.it-root.it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools {
   animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
 }
 
 .it-root.it-root--portal .it-main > .it-portal-stack > .m1-audit-ticker,
 .it-root:not(.it-root--portal) .it-main > .it-main-stack > .m1-audit-ticker {
   animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
-}
-
-.it-portal__cta .it-portal-paragraph:nth-child(1) .it-module-btn {
-  animation: it-enter-soft 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
-}
-
-.it-portal__cta .it-portal-paragraph:nth-child(2) .it-module-btn {
-  animation: it-enter-soft 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
 }
 
 /* ——— Bar / menus ——— */
@@ -5088,7 +5058,7 @@
     margin-bottom: 0.2rem;
   }
 
-  .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
+  .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
     margin-top: 0;
     margin-bottom: 0;
   }
@@ -5098,10 +5068,6 @@
     left: max(0.35rem, env(safe-area-inset-left));
     min-height: 38px;
     padding: 0.45rem 0.85rem;
-  }
-
-  .it-portal__cta {
-    max-width: none;
   }
 
   .it-marquee__text {
@@ -5292,16 +5258,16 @@
 }
 
 /* Portal home: rounded shell; background split frota/pat via theme rules below */
-.it-main > .it-portal-stack > .it-portal {
-  /* Mesmo valor que o gap entre SIG-FROTA e SIG-PATRIMÔNIO (`.it-portal__cta`) */
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
+  /* Mesmo valor que o gap entre secções do hub (`.m1-hub-sections`) e o tema */
   --it-portal-block-gap: 0.78rem;
   --it-portal-pad-x: clamp(0.9rem, 2.1vw, 1.4rem);
   --it-portal-pad-y: clamp(1.25rem, 2.6vw, 2rem);
   --it-portal-pad-bottom: var(--it-portal-block-gap);
   position: relative;
   z-index: 1;
-  /* Altura = conteúdo (evita faixa branca enorme até o letreiro; sobrepõe .it-portal 100vh) */
-  min-height: 0;
+  /* Altura = conteúdo (evita faixa branca enorme até o letreiro) */
+  min-height: 0 !important;
   height: fit-content;
   width: 100%;
   margin: 0 auto;
@@ -5311,18 +5277,10 @@
   border: 1px solid transparent;
   box-sizing: border-box;
   box-shadow: 0 10px 26px rgba(15, 23, 42, 0.1);
-  /* Keeps `.it-portal::before` drift clipped; same-element box-shadow still paints outside */
   overflow: hidden;
 }
 
-.it-main > .it-portal-stack > .it-portal > .it-portal__cta {
-  /* Só altura intrínseca: evita faixa vazia alta entre os cartões e o tema */
-  flex: 0 1 auto;
-  min-height: 0;
-  gap: var(--it-portal-block-gap);
-}
-
-.it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools {
   flex-shrink: 0;
   align-self: stretch;
   max-width: none;
@@ -5331,9 +5289,33 @@
 }
 
 /* Sem margens extra no botão: PAT→tema e tema→letreiro usam só block-gap + pad-bottom */
-.it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
   margin-top: 0;
   margin-bottom: 0;
+}
+
+/* Tagline sob o logotipo — mesmos tamanho e estilo que Marco 1 (`.m1-hub-tagline` em milestone1-demo) */
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-header .m1-hub-tagline {
+  margin: 0;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 36rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home:not(.dark) .m1-hub-header .m1-hub-tagline {
+  color: var(--m1-text-muted);
+}
+
+/* Marco 1: no escuro `.m1-wrapper.dark p` ganha da regra base de `.m1-hub-tagline` → cor do texto principal */
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home.dark .m1-hub-header .m1-hub-tagline {
+  color: #e5e7eb;
 }
 
 .it-main > .it-main-stack > .it-menu {
@@ -5347,7 +5329,7 @@
 }
 
 @media (max-width: 768px) {
-  .it-main > .it-portal-stack > .it-portal {
+  .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
     --it-portal-pad-x: 0.75rem;
     --it-portal-pad-y: 1rem;
     --it-portal-block-gap: 0.78rem;
@@ -5366,7 +5348,7 @@
   }
 
   /* Offset fixo do tema em relação aos cartões SIG-* (igual em qualquer largura ≤768px) */
-  .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
+  .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools {
     margin-top: calc(var(--it-portal-block-gap) + 1rem);
   }
 
@@ -5381,7 +5363,7 @@
 
 /* Smaller phones: extra top offset (Voltar / portal spacing) — sem alterar gap tema/rodapé (herda ≤768px) */
 @media (max-width: 520px) {
-  .it-main > .it-portal-stack > .it-portal {
+  .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
     margin-top: 2.85rem;
   }
 
@@ -5424,7 +5406,7 @@
     --it-main-pad-x: 0.75rem;
     width: min(100%, calc(100vw - 1rem));
     box-sizing: border-box !important;
-    /* Match portal home (`.it-main > .it-portal-stack > .it-portal`) bottom spacing / min-height */
+    /* Match portal home (`.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home`) bottom spacing / min-height */
     min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 3.35rem) !important;
     min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 3.35rem) !important;
     border-radius: 0 !important;
@@ -5518,7 +5500,7 @@
 }
 
 /* Portal home: frota (top) + pat (bottom) harmonized blend; subpages keep flat fills */
-.it-root.it-root--light.it-root--portal .it-main > .it-portal-stack > .it-portal {
+.it-root.it-root--light.it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
   background:
     linear-gradient(
       180deg,
@@ -5540,7 +5522,7 @@
   background-color: transparent !important;
 }
 
-.it-root:not(.it-root--light).it-root--portal .it-main > .it-portal-stack > .it-portal {
+.it-root:not(.it-root--light).it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
   background:
     linear-gradient(
       180deg,
@@ -5580,11 +5562,11 @@
   isolation: isolate;
 }
 
-.it-root.it-root--light.it-root--portal .it-main > .it-portal-stack > .it-portal {
+.it-root.it-root--light.it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
   animation: it-portal-m1-patrimony-aura-light 11s ease-in-out infinite;
 }
 
-.it-root:not(.it-root--light).it-root--portal .it-main > .it-portal-stack > .it-portal {
+.it-root:not(.it-root--light).it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
   animation: it-portal-m1-patrimony-aura-dark 11s ease-in-out infinite;
 }
 
@@ -5674,7 +5656,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .it-root.it-root--portal .it-main > .it-portal-stack > .it-portal {
+  .it-root.it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home {
     animation: none !important;
   }
 }

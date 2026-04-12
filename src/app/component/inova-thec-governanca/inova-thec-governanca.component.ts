@@ -526,6 +526,17 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     void this.router.navigate(['/']);
   }
 
+  playRipple(ev: MouseEvent): void {
+    const el = ev.currentTarget as HTMLElement | null;
+    if (!el) {
+      return;
+    }
+    el.classList.remove('m1-ripple-active');
+    void el.offsetWidth;
+    el.classList.add('m1-ripple-active');
+    window.setTimeout(() => el.classList.remove('m1-ripple-active'), 650);
+  }
+
   toggleDarkMode(): void {
     this.themeIconSpinning = true;
     window.setTimeout(() => {

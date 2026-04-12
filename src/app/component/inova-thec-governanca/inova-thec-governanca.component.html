@@ -70,64 +70,85 @@
   <!-- TELA 00 — Portal: cartão + letreiro na mesma coluna (largura idêntica a `.it-main`) -->
   <ng-container *ngIf="view === 'portal'">
     <div class="it-portal-stack">
-    <div class="it-portal">
-      <header class="it-portal-head" aria-label="Identidade INOVA THEC">
-        <div class="it-portal-head__glass">
-          <div class="it-portal__glow-logo" aria-hidden="true"></div>
-          <div class="m1-logo-plain m1-logo-fx">
-            <div class="m1-brand-wordmark" role="img" aria-label="Inova Thec Soluções Ltda">
-              <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
-              <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
-            </div>
+    <div
+      class="m1-wrapper m1-wrapper--hub-home m1-has-ticker"
+      [class.dark]="darkMode"
+    >
+      <header class="m1-hub-header">
+        <div class="m1-logo-plain m1-logo-fx">
+          <div class="m1-brand-wordmark" role="img" aria-label="Inova Thec Soluções Ltda">
+            <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+            <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
           </div>
-          <p class="it-portal__project">PROJETO INOVA THEC: PLATAFORMA INTEGRADA DE GOVERNANÇA</p>
         </div>
+        <p class="m1-hub-tagline">
+          PROJETO INOVA THEC: PLATAFORMA INTEGRADA DE GOVERNANÇA
+        </p>
       </header>
-      <div class="it-portal__cta">
-        <section class="it-portal-paragraph it-portal-paragraph--frota" aria-labelledby="it-portal-frota-title">
-          <p id="it-portal-frota-title" class="it-portal-paragraph__title">SIG-FROTA — GESTÃO DE COMBUSTÍVEL</p>
-          <button type="button" class="it-module-btn it-module-btn--portal it-module-btn--frota" (click)="goFrotaMenu()">
-            <span class="it-module-btn__row">
-              <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--frota" aria-hidden="true">
-                <span nz-icon nzType="dashboard" nzTheme="outline"></span>
+
+      <div class="m1-hub-sections">
+        <section
+          class="m1-hub-section m1-hub-section--fuel m1-hub-section--from-left"
+          aria-labelledby="m2-hub-fuel-heading"
+        >
+          <h2 id="m2-hub-fuel-heading" class="m1-hub-section-title m1-hub-section-title--fuel">
+            SIG-FROTA — GESTÃO DE COMBUSTÍVEL
+          </h2>
+          <nav class="m1-hub-grid m1-hub-grid--fuel" aria-label="SIG-FROTA — gestão de combustível">
+            <button
+              nz-button
+              nzType="default"
+              class="m1-hub-tile m1-hub-tile--fuel m1-ripple-target"
+              type="button"
+              (mousedown)="playRipple($event)"
+              (click)="goFrotaMenu()"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--fuel" aria-hidden="true">
+                  <span nz-icon nzType="dashboard" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">Gestão e Perícia de Combustível</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
               </span>
-              <span class="it-module-btn__text">
-                <span class="it-module-btn__title">SIG-FROTA</span>
-                <span class="it-module-btn__sub">Gestão e Perícia de Combustível</span>
-              </span>
-              <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-              <span class="it-module-btn__chevron" aria-hidden="true">
-                <span nz-icon nzType="right" nzTheme="outline"></span>
-              </span>
-            </span>
-          </button>
+            </button>
+          </nav>
         </section>
-        <section class="it-portal-paragraph it-portal-paragraph--pat" aria-labelledby="it-portal-pat-title">
-          <p id="it-portal-pat-title" class="it-portal-paragraph__title">SIG-PATRIMÔNIO — GESTÃO DE ATIVOS</p>
-          <button type="button" class="it-module-btn it-module-btn--portal it-module-btn--pat" (click)="goPatrimonioMenu()">
-            <span class="it-module-btn__row">
-              <span class="it-module-btn__icon-wrap it-module-btn__icon-wrap--pat" aria-hidden="true">
-                <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+
+        <section
+          class="m1-hub-section m1-hub-section--patrimony m1-hub-section--from-right"
+          aria-labelledby="m2-hub-asset-heading"
+        >
+          <h2 id="m2-hub-asset-heading" class="m1-hub-section-title m1-hub-section-title--asset">
+            SIG-PATRIMÔNIO — GESTÃO DE ATIVOS
+          </h2>
+          <nav class="m1-hub-grid m1-hub-grid--asset" aria-label="SIG-PATRIMÔNIO — gestão de ativos">
+            <button
+              nz-button
+              nzType="default"
+              class="m1-hub-tile m1-hub-tile--asset m1-ripple-target"
+              type="button"
+              (mousedown)="playRipple($event)"
+              (click)="goPatrimonioMenu()"
+            >
+              <span class="m1-hub-tile__row">
+                <span class="m1-hub-tile__icon-wrap m1-hub-tile__icon-wrap--asset" aria-hidden="true">
+                  <span nz-icon nzType="safety-certificate" nzTheme="outline"></span>
+                </span>
+                <span class="m1-hub-tile-title">Imutabilidade e Rastreabilidade de Ativos</span>
+                <span class="m1-hub-online-dot" title="Online e monitorando"></span>
               </span>
-              <span class="it-module-btn__text">
-                <span class="it-module-btn__title">SIG-PATRIMÔNIO</span>
-                <span class="it-module-btn__sub">Imutabilidade e Rastreabilidade de Ativos</span>
-              </span>
-              <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
-              <span class="it-module-btn__chevron" aria-hidden="true">
-                <span nz-icon nzType="right" nzTheme="outline"></span>
-              </span>
-            </span>
-          </button>
+            </button>
+          </nav>
         </section>
       </div>
-      <!-- Marco 1: tema dentro do cartão -->
+
       <div class="m1-hub-footer-tools">
         <button
           nz-button
           nzType="default"
-          class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-theme-toggle--portal-bottom it-ripple-target"
+          class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-theme-toggle--portal-bottom m1-ripple-target"
           type="button"
+          (mousedown)="playRipple($event)"
           (click)="toggleDarkMode()"
           [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
         >
