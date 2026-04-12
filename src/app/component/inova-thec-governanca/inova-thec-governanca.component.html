@@ -182,6 +182,7 @@
           </span>
         </button>
         <button
+          *ngIf="view !== 'frota-menu' && view !== 'patrimonio-menu'"
           nz-button
           nzType="default"
           class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-bar__theme-btn it-ripple-target"
@@ -336,6 +337,22 @@
           </nav>
         </section>
       </div>
+      <div class="m1-hub-footer-tools">
+        <button
+          nz-button
+          nzType="default"
+          class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-theme-toggle--portal-bottom m1-ripple-target"
+          type="button"
+          (mousedown)="playRipple($event)"
+          (click)="toggleDarkMode()"
+          [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
+        >
+          <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+            <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+          </span>
+          <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
+        </button>
+      </div>
       </div>
     </div>
 
@@ -476,6 +493,22 @@
             </button>
           </nav>
         </section>
+      </div>
+      <div class="m1-hub-footer-tools">
+        <button
+          nz-button
+          nzType="default"
+          class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-theme-toggle--portal-bottom m1-ripple-target"
+          type="button"
+          (mousedown)="playRipple($event)"
+          (click)="toggleDarkMode()"
+          [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
+        >
+          <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+            <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+          </span>
+          <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
+        </button>
       </div>
       </div>
     </div>

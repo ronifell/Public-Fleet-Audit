@@ -777,6 +777,7 @@
   .it-menu .it-menu-head,
   .it-menu .it-menu-hub-brand,
   .it-menu > .it-typewriter,
+  .it-menu .m1-wrapper .m1-hub-footer-tools,
   .it-menu .m1-wrapper .m1-hub-tile,
   .it-bar,
   .it-main .m1-audit-ticker,
@@ -1151,6 +1152,10 @@
 }
 
 .it-root.it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools {
+  animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+}
+
+.it-main > .it-main-stack .it-menu > .m1-wrapper.it-menu__m1-shell > .m1-hub-footer-tools {
   animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
 }
 
@@ -5056,6 +5061,11 @@
     margin-bottom: 0;
   }
 
+  .it-main > .it-main-stack .it-menu > .m1-wrapper.it-menu__m1-shell > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
   .it-portal-back {
     top: max(0.78rem, env(safe-area-inset-top));
     left: max(0.35rem, env(safe-area-inset-left));
@@ -5287,6 +5297,20 @@
   margin-bottom: 0;
 }
 
+/* Menus hub (dois botões da home): tema no rodapé do shell — paridade com o portal */
+.it-main > .it-main-stack .it-menu > .m1-wrapper.it-menu__m1-shell > .m1-hub-footer-tools {
+  flex-shrink: 0;
+  align-self: stretch;
+  max-width: none;
+  margin-top: var(--it-portal-block-gap, 0.78rem);
+  margin-bottom: 0;
+}
+
+.it-main > .it-main-stack .it-menu > .m1-wrapper.it-menu__m1-shell > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 /* Tagline sob o logotipo — mesmos tamanho e estilo que Marco 1 (`.m1-hub-tagline` em milestone1-demo) */
 .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-header .m1-hub-tagline {
   margin: 0;
@@ -5384,6 +5408,11 @@
   /* Offset fixo do tema em relação aos cartões SIG-* (igual em qualquer largura ≤768px) */
   .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools {
     margin-top: calc(var(--it-portal-block-gap) + 1rem);
+  }
+
+  /* Mesmo offset portal→tema (0,78rem + 1rem) — variável só existe no cartão hub-home */
+  .it-main > .it-main-stack .it-menu > .m1-wrapper.it-menu__m1-shell > .m1-hub-footer-tools {
+    margin-top: calc(0.78rem + 1rem);
   }
 
   /* Hub portal: dois botões um pouco mais baixos em telemóvel */
