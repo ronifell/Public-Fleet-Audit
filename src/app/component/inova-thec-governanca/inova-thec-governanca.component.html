@@ -3,6 +3,30 @@
   [class.it-root--portal]="view === 'portal'"
   [class.it-root--light]="!darkMode"
 >
+  <ng-template #itAuditMarqueeFooter>
+    <div class="it-marquee it-marquee--audit-strip" aria-label="Letreiro de protocolo e auditoria">
+      <div class="it-marquee__track">
+        <span class="it-marquee__text it-marquee__text--audit">{{ marqueeText }}</span>
+        <span class="it-marquee__text it-marquee__text--audit" aria-hidden="true">{{ marqueeText }}</span>
+      </div>
+    </div>
+    <footer class="it-audit-footer" role="contentinfo" aria-label="Rodapé técnico de auditoria e fé pública">
+      <p class="it-audit-footer__fe">
+        <strong class="it-audit-footer__fe-strong">FÉ PÚBLICA</strong>
+        <span class="it-audit-footer__fe-sub"> — integridade documental em tempo real</span>
+      </p>
+      <div class="it-audit-footer__hash-block">
+        <span class="it-audit-footer__hash-label">SHA-256 (trilha ativa)</span>
+        <code class="it-audit-footer__hash">{{ auditFooterHashDisplay }}</code>
+      </div>
+      <p class="it-audit-footer__pericia">
+        Auditoria em curso · Georreferenciamento validado
+        <code class="it-audit-footer__geo">{{ geoAuditRefCode }}</code>
+      </p>
+      <p class="it-audit-footer__tce" role="note">Metodologia apresentada ao TCE-AC</p>
+    </footer>
+  </ng-template>
+
   <button
     *ngIf="!loading && view === 'portal'"
     type="button"
@@ -41,14 +65,18 @@
   <!-- TELA 00 — Portal -->
   <ng-container *ngIf="view === 'portal'">
     <div class="it-portal">
-      <div class="it-portal__glow-logo" aria-hidden="true"></div>
-      <div class="m1-logo-plain m1-logo-fx">
-        <div class="m1-brand-wordmark" role="img" aria-label="Inova Thec Soluções Ltda">
-          <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
-          <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+      <header class="it-portal-head" aria-label="Identidade INOVA THEC">
+        <div class="it-portal-head__glass">
+          <div class="it-portal__glow-logo" aria-hidden="true"></div>
+          <div class="m1-logo-plain m1-logo-fx">
+            <div class="m1-brand-wordmark" role="img" aria-label="Inova Thec Soluções Ltda">
+              <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+              <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+            </div>
+          </div>
+          <p class="it-portal__project">PROJETO INOVA THEC: PLATAFORMA INTEGRADA DE GOVERNANÇA</p>
         </div>
-      </div>
-      <p class="it-portal__project">PROJETO INOVA THEC: PLATAFORMA INTEGRADA DE GOVERNANÇA</p>
+      </header>
       <div class="it-portal__cta">
         <section class="it-portal-paragraph it-portal-paragraph--frota" aria-labelledby="it-portal-frota-title">
           <p id="it-portal-frota-title" class="it-portal-paragraph__title">SIG-FROTA — GESTÃO DE COMBUSTÍVEL</p>
@@ -87,7 +115,8 @@
           </button>
         </section>
       </div>
-      <div class="m1-hub-footer-tools">
+      <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
+      <div class="m1-hub-footer-tools m1-hub-footer-tools--after-audit">
         <button
           nz-button
           nzType="default"
@@ -101,12 +130,6 @@
           </span>
           <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
         </button>
-      </div>
-      <div class="it-marquee it-marquee--below-theme" aria-label="Letreiro digital">
-        <div class="it-marquee__track">
-          <span class="it-marquee__text">{{ marqueeText }}</span>
-          <span class="it-marquee__text" aria-hidden="true">{{ marqueeText }}</span>
-        </div>
       </div>
     </div>
   </ng-container>
@@ -139,16 +162,23 @@
 
     <!-- MENU SIG-FROTA -->
     <div class="it-menu" *ngIf="view === 'frota-menu'">
-      <div class="it-menu-brand m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
-        <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
-          <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
-          <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+      <header class="it-menu-head" aria-label="Cabeçalho do módulo">
+        <div class="it-menu-head__glass">
+          <div class="it-menu-brand m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
+            <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
+              <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+              <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+            </div>
+          </div>
+          <h1 class="it-doc-title">SIG-FROTA — Gestão de Combustível</h1>
+          <p class="it-menu-head__doc-ref" aria-hidden="true">DOCUMENTO 01 — MÓDULO SIG-FROTA (Combustível)</p>
         </div>
-      </div>
-      <h1 class="it-doc-title">DOCUMENTO 01 — MÓDULO SIG-FROTA (Combustível)</h1>
-      <button type="button" class="it-master it-master--frota" (click)="goFrotaTela('homologacao')">
-        <span nz-icon nzType="bank" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
-        PAINEL DE HOMOLOGAÇÃO DO ORDENADOR
+      </header>
+      <button type="button" class="it-master it-master--frota it-master--row" (click)="goFrotaTela('homologacao')">
+        <span class="it-master__ico" aria-hidden="true"><span nz-icon nzType="bank" nzTheme="outline"></span></span>
+        <span class="it-master__label">PAINEL DE HOMOLOGAÇÃO DO ORDENADOR</span>
+        <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+        <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
       </button>
       <nav class="it-nav-grid" aria-label="SIG-FROTA">
         <button type="button" class="it-tile" (click)="goFrotaTela('vetoracao')">
@@ -157,6 +187,8 @@
             <span class="it-tile__t">VETORAÇÃO GEOGRÁFICA</span>
             <span class="it-tile__s">Tela 1</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('pericia')">
           <span class="it-tile__ico"><span nz-icon nzType="camera" nzTheme="outline"></span></span>
@@ -164,6 +196,8 @@
             <span class="it-tile__t">PERÍCIA DE IMAGEM</span>
             <span class="it-tile__s">Tela 2</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('trilha')">
           <span class="it-tile__ico"><span nz-icon nzType="file-text" nzTheme="outline"></span></span>
@@ -171,6 +205,8 @@
             <span class="it-tile__t">TRILHA DE AUDITORIA</span>
             <span class="it-tile__s">Tela 3</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('tribunal')">
           <span class="it-tile__ico"><span nz-icon nzType="safety-certificate" nzTheme="outline"></span></span>
@@ -178,6 +214,8 @@
             <span class="it-tile__t">TRIBUNAL DE GLOSAS</span>
             <span class="it-tile__s">Tela 4</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('economicidade')">
           <span class="it-tile__ico"><span nz-icon nzType="line-chart" nzTheme="outline"></span></span>
@@ -185,6 +223,8 @@
             <span class="it-tile__t">ANÁLISE DE ECONOMICIDADE</span>
             <span class="it-tile__s">Tela 5</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile" (click)="goFrotaTela('certificacao')">
           <span class="it-tile__ico"><span nz-icon nzType="file-done" nzTheme="outline"></span></span>
@@ -192,23 +232,33 @@
             <span class="it-tile__t">CERTIFICAÇÃO DE FÉ PÚBLICA</span>
             <span class="it-tile__s">Tela 6</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
       </nav>
+      <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
     </div>
 
     <!-- MENU SIG-PATRIMÔNIO -->
     <div class="it-menu it-menu--pat" *ngIf="view === 'patrimonio-menu'">
-      <div class="it-menu-brand m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
-        <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
-          <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
-          <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+      <header class="it-menu-head" aria-label="Cabeçalho do módulo">
+        <div class="it-menu-head__glass">
+          <div class="it-menu-brand m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
+            <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
+              <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+              <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+            </div>
+          </div>
+          <h1 class="it-doc-title">SIG-PATRIMÔNIO — Gestão de Ativos</h1>
+          <p class="it-menu-head__doc-ref" aria-hidden="true">DOCUMENTO 02 — MÓDULO SIG-PATRIMÔNIO (Ativos)</p>
         </div>
-      </div>
+      </header>
       <p class="it-typewriter" aria-live="polite">{{ typewriterText }}<span class="it-caret"></span></p>
-      <h1 class="it-doc-title">DOCUMENTO 02 — MÓDULO SIG-PATRIMÔNIO (Ativos)</h1>
-      <button type="button" class="it-master it-master--pat" (click)="goPatrimonioTela('central')">
-        <span nz-icon nzType="safety-certificate" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
-        CENTRAL DE FISCALIZAÇÃO TJ / CGE
+      <button type="button" class="it-master it-master--pat it-master--row" (click)="goPatrimonioTela('central')">
+        <span class="it-master__ico" aria-hidden="true"><span nz-icon nzType="safety-certificate" nzTheme="outline"></span></span>
+        <span class="it-master__label">CENTRAL DE FISCALIZAÇÃO TJ / CGE</span>
+        <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+        <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
       </button>
       <nav class="it-nav-grid" aria-label="SIG-PATRIMÔNIO">
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('registro')">
@@ -217,6 +267,8 @@
             <span class="it-tile__t">REGISTRO DE FÉ PÚBLICA</span>
             <span class="it-tile__s">Tela 1</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('cautelas')">
           <span class="it-tile__ico"><span nz-icon nzType="team" nzTheme="outline"></span></span>
@@ -224,6 +276,8 @@
             <span class="it-tile__t">ACERVO DE CAUTELAS</span>
             <span class="it-tile__s">Tela 2</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('custodia')">
           <span class="it-tile__ico"><span nz-icon nzType="history" nzTheme="outline"></span></span>
@@ -231,6 +285,8 @@
             <span class="it-tile__t">CADEIA DE CUSTÓDIA</span>
             <span class="it-tile__s">Tela 3</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('residual')">
           <span class="it-tile__ico"><span nz-icon nzType="calculator" nzTheme="outline"></span></span>
@@ -238,6 +294,8 @@
             <span class="it-tile__t">AVALIAÇÃO RESIDUAL</span>
             <span class="it-tile__s">Tela 4</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('georef')">
           <span class="it-tile__ico"><span nz-icon nzType="global" nzTheme="outline"></span></span>
@@ -245,6 +303,8 @@
             <span class="it-tile__t">GEORREFERENCIAMENTO</span>
             <span class="it-tile__s">Tela 5</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
         <button type="button" class="it-tile it-tile--pat" (click)="goPatrimonioTela('extrator')">
           <span class="it-tile__ico"><span nz-icon nzType="audit" nzTheme="outline"></span></span>
@@ -252,8 +312,11 @@
             <span class="it-tile__t">EXTRATOR DE PROVA</span>
             <span class="it-tile__s">Tela 6</span>
           </span>
+          <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+          <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
       </nav>
+      <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
     </div>
 
     <!-- TELAS FROTA -->

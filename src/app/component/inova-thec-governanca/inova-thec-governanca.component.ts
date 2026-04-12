@@ -151,8 +151,26 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   extratorPreview: string | null = null;
   extratorSweep = false;
 
+  /**
+   * Letreiro contínuo (portal + menus): repetição amplia a faixa para o efeito marquee.
+   * Conteúdo alinhado ao protocolo AP04 / SHA-256 / anti-fraude / custódia.
+   */
   marqueeText =
-    'SEGURANÇA JURÍDICA E TRANSPARÊNCIA FISCAL ATIVA • PROTOCOLO AP04 • MONITORAMENTO SHA-256';
+    '• PROTOCOLO AP04 ATIVO • MONITORAMENTO SHA-256 • GEORREFERENCIAMENTO ANTI-FRAUDE • CADEIA DE CUSTÓDIA ASSEGURADA • '.repeat(
+      5
+    );
+
+  /** Código de referência exibido no rodapé técnico (georreferenciamento validado). */
+  readonly geoAuditRefCode = 'WGS84 · SIRGAS2000 · selo pericial AC-AP04';
+
+  /** Linha SHA-256 do rodapé (digest da primeira trilha carregada ou placeholder de demonstração). */
+  get auditFooterHashDisplay(): string {
+    const h = this.integrityRows[0]?.calculatedHash;
+    if (h && h.length > 20) {
+      return `${h.slice(0, 10)}…${h.slice(-8)}`;
+    }
+    return 'a9574b080f3c2e1d…9fe8c1ab';
+  }
 
   gpsLockBanner = 'Trava anti-GPS falso ativa — alta precisão obrigatória em 100% do tempo.';
 
