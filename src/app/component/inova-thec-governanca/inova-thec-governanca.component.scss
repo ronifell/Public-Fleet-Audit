@@ -1132,8 +1132,9 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem max(1rem, env(safe-area-inset-left)) 0.75rem max(1rem, env(safe-area-inset-right));
-  position: sticky;
-  top: 0;
+  /* relative: a barra rola com a página (sticky fixava Home + tema ao scroll) */
+  position: relative;
+  top: auto;
   z-index: 40;
   background: transparent;
   backdrop-filter: none;
