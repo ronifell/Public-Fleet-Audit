@@ -396,6 +396,11 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+/* Home portal: letreiro colado ao cartão; o vazio vem só do padding-bottom (= mesmo eixo que PAT → tema) */
+.it-main > .it-portal-stack > .m1-audit-ticker {
+  margin-top: 0;
+}
+
 /* Módulos: letreiro com a mesma largura da caixa branca externa (`.it-main` incl. padding horizontal) */
 .it-root:not(.it-root--portal) .it-main > .it-main-stack > .m1-audit-ticker {
   width: calc(100% + 2 * var(--it-main-pad-x, 0.75rem));
@@ -742,7 +747,7 @@
 
 .it-portal__cta {
   display: grid;
-  gap: 1.2rem;
+  gap: 0.78rem;
   width: 100%;
   max-width: min(28.5rem, 100%);
   z-index: 1;
@@ -754,7 +759,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   margin-left: 0;
   margin-right: 0;
-  padding: 1.05rem 1.1rem 1.15rem;
+  padding: 0.72rem 0.95rem 0.8rem;
   background: rgba(15, 23, 42, 0.35);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.06) inset,
@@ -790,7 +795,7 @@
 }
 
 .it-portal-paragraph__title {
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.35rem;
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.1em;
@@ -829,12 +834,31 @@
   align-items: stretch;
   text-align: left;
   min-height: 0;
-  padding: 1.05rem 1.15rem;
+  padding: 0.78rem 1rem;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.12) inset,
     0 16px 36px -14px rgba(0, 0, 0, 0.35);
+}
+
+.it-module-btn--portal .it-module-btn__row {
+  gap: 0.65rem;
+}
+
+.it-module-btn--portal .it-module-btn__icon-wrap {
+  width: 2.45rem;
+  height: 2.45rem;
+  font-size: 1.12rem;
+}
+
+.it-module-btn--portal .it-module-btn__text {
+  gap: 0.12rem;
+}
+
+.it-module-btn--portal .it-module-btn__sub {
+  font-size: 0.74rem;
+  line-height: 1.28;
 }
 
 .it-module-btn__row {
@@ -5060,7 +5084,12 @@
 @media (max-width: 520px) {
   .it-theme-toggle--portal-bottom {
     margin-top: 1.45rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
+    margin-top: 0;
+    margin-bottom: 0;
   }
 
   .it-portal-back {
@@ -5263,14 +5292,19 @@
 
 /* Portal home: rounded shell; background split frota/pat via theme rules below */
 .it-main > .it-portal-stack > .it-portal {
+  /* Mesmo valor que o gap entre SIG-FROTA e SIG-PATRIMÔNIO (`.it-portal__cta`) */
+  --it-portal-block-gap: 0.78rem;
   --it-portal-pad-x: clamp(0.9rem, 2.1vw, 1.4rem);
   --it-portal-pad-y: clamp(1.25rem, 2.6vw, 2rem);
+  --it-portal-pad-bottom: var(--it-portal-block-gap);
   position: relative;
   z-index: 1;
-  min-height: clamp(520px, 82vh, 700px);
+  /* Altura = conteúdo (evita faixa branca enorme até o letreiro; sobrepõe .it-portal 100vh) */
+  min-height: 0;
+  height: fit-content;
   width: 100%;
   margin: 0 auto;
-  padding: var(--it-portal-pad-y) var(--it-portal-pad-x);
+  padding: var(--it-portal-pad-y) var(--it-portal-pad-x) var(--it-portal-pad-bottom);
   background: #ffffff;
   border-radius: 0;
   border: 1px solid transparent;
@@ -5281,15 +5315,24 @@
 }
 
 .it-main > .it-portal-stack > .it-portal > .it-portal__cta {
-  flex: 1 1 auto;
+  /* Só altura intrínseca: evita faixa vazia alta entre os cartões e o tema */
+  flex: 0 1 auto;
   min-height: 0;
+  gap: var(--it-portal-block-gap);
 }
 
 .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
   flex-shrink: 0;
   align-self: stretch;
   max-width: none;
-  margin-top: clamp(0.25rem, 1.5vw, 0.65rem);
+  margin-top: var(--it-portal-block-gap);
+  margin-bottom: 0;
+}
+
+/* Sem margens extra no botão: PAT→tema e tema→letreiro usam só block-gap + pad-bottom */
+.it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools .it-theme-toggle--portal-bottom {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .it-main > .it-main-stack > .it-menu {
@@ -5306,13 +5349,22 @@
   .it-main > .it-portal-stack > .it-portal {
     --it-portal-pad-x: 0.75rem;
     --it-portal-pad-y: 1rem;
+    --it-portal-block-gap: 0.78rem;
+    /* Mais espaço que o gap entre cartões: respira entre Modo escuro e o letreiro */
+    --it-portal-pad-bottom: clamp(1.1rem, 4vw, 1.5rem);
     width: 100%;
     box-sizing: border-box;
-    /* Taller panel downward ≈ less green “margin” under the box (like wider width) */
-    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 3.35rem);
-    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 3.35rem);
+    /* Caixa branca ~altura do dispositivo (ligeiramente menor que viewport cheio) */
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4rem);
+    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4rem);
+    height: auto;
     border-radius: 0;
-    padding: var(--it-portal-pad-y) var(--it-portal-pad-x);
+    padding: var(--it-portal-pad-y) var(--it-portal-pad-x) var(--it-portal-pad-bottom);
+  }
+
+  /* Página principal: desce um pouco o Modo escuro em relação aos cartões SIG-* */
+  .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
+    margin-top: calc(var(--it-portal-block-gap) + 0.95rem);
   }
 
   .it-main > .it-main-stack > .it-menu {
@@ -5321,13 +5373,36 @@
     border-radius: 0;
     padding: 0.9rem var(--it-menu-pad-x) 1rem;
   }
+
+  /* Sobe o rodapé só na home (portal). Nos módulos, margin negativo sobrepõe tiles/menu. */
+  .it-main > .it-portal-stack > .m1-audit-ticker {
+    margin-top: -11rem;
+  }
+
+  .it-main > .it-main-stack > .m1-audit-ticker {
+    margin-top: 0;
+  }
 }
 
-/* Smaller phones: extra top offset (Voltar / portal spacing) — subtract a bit more for min-height */
+/* Smaller phones: extra top offset (Voltar / portal spacing) */
 @media (max-width: 520px) {
   .it-main > .it-portal-stack > .it-portal {
-    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4.85rem);
-    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4.85rem);
+    margin-top: 2.85rem;
+    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 5.5rem);
+    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 5.5rem);
+    --it-portal-pad-bottom: clamp(1.15rem, 4.2vw, 1.55rem);
+  }
+
+  .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
+    margin-top: calc(var(--it-portal-block-gap) + 1.15rem);
+  }
+
+  .it-main > .it-portal-stack > .m1-audit-ticker {
+    margin-top: -12.5rem;
+  }
+
+  .it-main > .it-main-stack > .m1-audit-ticker {
+    margin-top: 0;
   }
 
   /* Same bottom “margin” / panel height as portal home */
@@ -5446,13 +5521,6 @@
     0 1px 0 rgba(255, 255, 255, 1) inset,
     0 6px 20px -10px rgba(15, 23, 42, 0.28) !important;
   transform: none !important;
-}
-
-/* On mobile, push default-page white box down to avoid overlap */
-@media (max-width: 520px) {
-  .it-main > .it-portal-stack > .it-portal {
-    margin-top: 2.85rem;
-  }
 }
 
 /* Mode switch should only affect the main box and its inner elements */
