@@ -1,4 +1,5 @@
 @import './inova-m1-shell';
+@import './inova-m1-brand-wordmark';
 
 :host {
   display: block;
@@ -218,34 +219,25 @@
   pointer-events: none;
 }
 
-.it-logo {
-  position: relative;
-  z-index: 1;
-  text-align: center;
+/* Logotipo: mesmo wordmark da Etapa 1 (ver inova-m1-brand-wordmark.scss) */
+
+.it-menu-brand {
+  display: flex;
+  justify-content: center;
+  width: 100%;
   margin-bottom: 0.75rem;
 }
 
-.it-logo--hero .it-logo__name {
-  display: block;
-  font-size: clamp(1.75rem, 5vw, 2.35rem);
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  color: #f8fafc;
-  text-shadow: 0 1px 20px rgba(15, 23, 42, 0.55);
+.it-menu-brand.m1-logo-plain--compact {
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.it-logo__sub {
-  display: block;
-  font-size: 0.75rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  color: #94a3b8;
-  margin-top: 0.35rem;
-}
-
-.it-logo--sm .it-logo__name {
-  font-size: 1.15rem;
-  letter-spacing: 0.1em;
+.it-loading-shell__brand-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 0.65rem;
+  max-width: min(300px, 92vw);
 }
 
 .it-portal__project {
@@ -351,14 +343,14 @@
     transform: none;
   }
 
-  .it-menu > .it-logo,
+  .it-menu > .it-menu-brand,
   .it-menu > .it-typewriter,
   .it-menu > .it-doc-title,
   .it-menu > .it-master,
   .it-nav-grid .it-tile,
   .it-bar,
   .it-portal > .it-portal__glow-logo,
-  .it-portal > .it-logo--hero,
+  .it-portal > .m1-logo-plain,
   .it-portal > .it-portal__project,
   .it-portal > .it-marquee,
   .it-portal > .it-portal__cta,
@@ -647,7 +639,7 @@
   animation: it-enter-fade 0.85s ease-out both;
 }
 
-.it-portal > .it-logo--hero {
+.it-portal > .m1-logo-plain {
   animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -866,7 +858,7 @@
   margin: 0 auto;
 }
 
-.it-menu > .it-logo {
+.it-menu > .it-menu-brand {
   animation: it-enter-soft 0.54s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
 }
 
@@ -3897,16 +3889,26 @@
   justify-content: center;
   padding: 2rem max(1rem, env(safe-area-inset-left)) max(2rem, env(safe-area-inset-bottom))
     max(1rem, env(safe-area-inset-right));
-  background:
-    radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.18) 0%, transparent 42%),
-    radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.08) 0%, transparent 38%),
-    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(15, 118, 110, 0.08), transparent 50%),
-    #0b1220;
+  background: transparent;
   color: var(--m1-text-muted);
   overflow: hidden;
 }
 
 .it-loading-shell__mesh {
+  display: none;
+}
+
+/* Só em /inova-thec (portal): restaura fundo + malha do loader */
+.it-loading-shell--main {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(67, 56, 202, 0.18) 0%, transparent 42%),
+    radial-gradient(circle at 88% 72%, rgba(15, 118, 110, 0.08) 0%, transparent 38%),
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(15, 118, 110, 0.08), transparent 50%),
+    #0b1220;
+}
+
+.it-loading-shell--main .it-loading-shell__mesh {
+  display: block;
   position: absolute;
   inset: 0;
   background-image:
@@ -3993,15 +3995,6 @@
   }
 }
 
-.it-loading-shell__brand {
-  margin: 0 0 0.35rem;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.35em;
-  color: #f8fafc;
-  text-transform: uppercase;
-}
-
 .it-loading-shell__msg {
   margin: 0 0 1.25rem;
   font-size: 0.88rem;
@@ -4067,7 +4060,6 @@
 }
 
 .it-root.it-root--light .it-main h2.it-screen__h,
-.it-root.it-root--light .it-logo--hero .it-logo__name,
 .it-root.it-root--light .it-screen__h,
 .it-root.it-root--light .it-doc-title,
 .it-root.it-root--light .it-tile__t,
@@ -4253,11 +4245,24 @@
   -webkit-text-fill-color: #334155 !important;
 }
 
-.it-root.it-root--light .it-logo__sub,
-.it-root.it-root--light .it-portal__project,
-.it-root.it-root--light .it-loading-shell__msg,
-.it-root.it-root--light .it-loading-shell__hint {
+.it-root.it-root--light .it-portal__project {
   color: #475569 !important;
+}
+
+/* Loader sem fundo (rotas que não são a principal): texto escuro sobre plano claro */
+.it-root.it-root--light .it-loading-shell:not(.it-loading-shell--main) .it-loading-shell__msg,
+.it-root.it-root--light .it-loading-shell:not(.it-loading-shell--main) .it-loading-shell__hint {
+  color: #475569 !important;
+}
+
+.it-root.it-root--light .it-loading-shell:not(.it-loading-shell--main) .it-loading-shell__bar {
+  background: rgba(15, 23, 42, 0.1);
+}
+
+/* Loader com fundo escuro na página principal + modo claro no app: texto claro */
+.it-root.it-root--light .it-loading-shell--main .it-loading-shell__msg,
+.it-root.it-root--light .it-loading-shell--main .it-loading-shell__hint {
+  color: #cbd5e1 !important;
 }
 
 .it-root.it-root--light .it-tile__t,
@@ -4717,10 +4722,6 @@
 }
 
 @media (max-width: 380px) {
-  .it-logo--hero .it-logo__name {
-    letter-spacing: 0.08em;
-  }
-
   .it-module-btn__title {
     font-size: 1.05rem;
   }

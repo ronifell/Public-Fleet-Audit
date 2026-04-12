@@ -29,8 +29,15 @@
     <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
   </button>
 
-  <!-- Loader inicial -->
-  <div *ngIf="loading" class="it-loading-shell" aria-busy="true" aria-live="polite" role="status">
+  <!-- Loader inicial: fundo completo só na página principal; demais rotas = transparente -->
+  <div
+    *ngIf="loading"
+    class="it-loading-shell"
+    [class.it-loading-shell--main]="view === 'portal'"
+    aria-busy="true"
+    aria-live="polite"
+    role="status"
+  >
     <div class="it-loading-shell__mesh" aria-hidden="true"></div>
     <div class="it-loading-shell__orb" aria-hidden="true">
       <span class="it-loading-shell__ring it-loading-shell__ring--a"></span>
@@ -38,7 +45,12 @@
       <span class="it-loading-shell__ring it-loading-shell__ring--c"></span>
       <span class="it-loading-shell__core">⚖</span>
     </div>
-    <p class="it-loading-shell__brand">INOVA THEC</p>
+    <div class="it-loading-shell__brand-wrap m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
+      <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
+        <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+        <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+      </div>
+    </div>
     <p class="it-loading-shell__msg">Sincronizando protocolo de governança…</p>
     <div class="it-loading-shell__bar" aria-hidden="true">
       <span class="it-loading-shell__bar-fill"></span>
@@ -52,9 +64,11 @@
   <ng-container *ngIf="view === 'portal'">
     <div class="it-portal">
       <div class="it-portal__glow-logo" aria-hidden="true"></div>
-      <div class="it-logo it-logo--hero" role="img" aria-label="INOVA THEC SOLUÇÕES LTDA">
-        <span class="it-logo__name">INOVA THEC</span>
-        <span class="it-logo__sub">SOLUÇÕES LTDA</span>
+      <div class="m1-logo-plain m1-logo-fx">
+        <div class="m1-brand-wordmark" role="img" aria-label="Inova Thec Soluções Ltda">
+          <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+          <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+        </div>
       </div>
       <p class="it-portal__project">PROJETO INOVA THEC: PLATAFORMA INTEGRADA DE GOVERNANÇA</p>
       <div class="it-portal__cta">
@@ -124,9 +138,11 @@
 
     <!-- MENU SIG-FROTA -->
     <div class="it-menu" *ngIf="view === 'frota-menu'">
-      <div class="it-logo it-logo--sm">
-        <span class="it-logo__name">INOVA THEC</span>
-        <span class="it-logo__sub">SOLUÇÕES LTDA</span>
+      <div class="it-menu-brand m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
+        <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
+          <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+          <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+        </div>
       </div>
       <h1 class="it-doc-title">DOCUMENTO 01 — MÓDULO SIG-FROTA (Combustível)</h1>
       <button type="button" class="it-master it-master--frota" (click)="goFrotaTela('homologacao')">
@@ -181,9 +197,11 @@
 
     <!-- MENU SIG-PATRIMÔNIO -->
     <div class="it-menu it-menu--pat" *ngIf="view === 'patrimonio-menu'">
-      <div class="it-logo it-logo--sm">
-        <span class="it-logo__name">INOVA THEC</span>
-        <span class="it-logo__sub">SOLUÇÕES LTDA</span>
+      <div class="it-menu-brand m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
+        <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
+          <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
+          <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
+        </div>
       </div>
       <p class="it-typewriter" aria-live="polite">{{ typewriterText }}<span class="it-caret"></span></p>
       <h1 class="it-doc-title">DOCUMENTO 02 — MÓDULO SIG-PATRIMÔNIO (Ativos)</h1>
