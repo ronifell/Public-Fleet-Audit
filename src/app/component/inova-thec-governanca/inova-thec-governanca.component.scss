@@ -7,13 +7,6 @@
   box-sizing: border-box;
 }
 
-.it-root--nav-pending .it-main {
-  pointer-events: none;
-  user-select: none;
-  opacity: 0.42;
-  transition: opacity 0.22s ease;
-}
-
 .it-main {
   min-height: 100vh;
   min-height: 100dvh;
@@ -3911,22 +3904,6 @@
     #0b1220;
   color: var(--m1-text-muted);
   overflow: hidden;
-}
-
-/* Transição entre rotas INOVA THEC: mesmo shell, cobre o viewport */
-.it-loading-shell--route {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  min-height: 100dvh;
-  padding-top: max(2rem, env(safe-area-inset-top));
-  background: rgba(5, 10, 24, 0.52);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-}
-
-.it-loading-shell--route .it-loading-shell__mesh {
-  display: none;
 }
 
 .it-loading-shell__mesh {
