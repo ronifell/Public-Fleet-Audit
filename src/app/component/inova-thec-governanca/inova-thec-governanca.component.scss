@@ -5351,21 +5351,23 @@
     --it-portal-pad-x: 0.75rem;
     --it-portal-pad-y: 1rem;
     --it-portal-block-gap: 0.78rem;
-    /* Mais espaço que o gap entre cartões: respira entre Modo escuro e o letreiro */
-    --it-portal-pad-bottom: clamp(1.1rem, 4vw, 1.5rem);
+    /*
+     * Espaço Modo escuro → letreiro: fixo em rem (sem clamp/vw) para ser igual em todos os telemóveis.
+     * min-height em dvh esticava o cartão e criava faixa branca variável consoante a altura do ecrã.
+     */
+    --it-portal-theme-footer-gap: 1rem;
+    --it-portal-pad-bottom: var(--it-portal-theme-footer-gap);
     width: 100%;
     box-sizing: border-box;
-    /* Caixa branca ~altura do dispositivo (ligeiramente menor que viewport cheio) */
-    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4rem);
-    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 4rem);
-    height: auto;
+    min-height: 0;
+    height: fit-content;
     border-radius: 0;
     padding: var(--it-portal-pad-y) var(--it-portal-pad-x) var(--it-portal-pad-bottom);
   }
 
-  /* Página principal: desce um pouco o Modo escuro em relação aos cartões SIG-* */
+  /* Offset fixo do tema em relação aos cartões SIG-* (igual em qualquer largura ≤768px) */
   .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
-    margin-top: calc(var(--it-portal-block-gap) + 0.95rem);
+    margin-top: calc(var(--it-portal-block-gap) + 1rem);
   }
 
   .it-main > .it-main-stack > .it-menu {
@@ -5375,35 +5377,12 @@
     padding: 0.9rem var(--it-menu-pad-x) 1rem;
   }
 
-  /* Sobe o rodapé só na home (portal). Nos módulos, margin negativo sobrepõe tiles/menu. */
-  .it-main > .it-portal-stack > .m1-audit-ticker {
-    margin-top: -11rem;
-  }
-
-  .it-main > .it-main-stack > .m1-audit-ticker {
-    margin-top: 0;
-  }
 }
 
-/* Smaller phones: extra top offset (Voltar / portal spacing) */
+/* Smaller phones: extra top offset (Voltar / portal spacing) — sem alterar gap tema/rodapé (herda ≤768px) */
 @media (max-width: 520px) {
   .it-main > .it-portal-stack > .it-portal {
     margin-top: 2.85rem;
-    min-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 5.5rem);
-    min-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 5.5rem);
-    --it-portal-pad-bottom: clamp(1.15rem, 4.2vw, 1.55rem);
-  }
-
-  .it-main > .it-portal-stack > .it-portal > .m1-hub-footer-tools {
-    margin-top: calc(var(--it-portal-block-gap) + 1.15rem);
-  }
-
-  .it-main > .it-portal-stack > .m1-audit-ticker {
-    margin-top: -12.5rem;
-  }
-
-  .it-main > .it-main-stack > .m1-audit-ticker {
-    margin-top: 0;
   }
 
   /* Same bottom “margin” / panel height as portal home */
