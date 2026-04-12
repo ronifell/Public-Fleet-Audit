@@ -1013,7 +1013,7 @@
 .it-menu {
   padding: 1.5rem max(0.85rem, env(safe-area-inset-left)) calc(2.25rem + env(safe-area-inset-bottom))
     max(0.85rem, env(safe-area-inset-right));
-  max-width: 980px;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -1394,8 +1394,9 @@
 .it-screen {
   padding: 1.25rem max(0.85rem, env(safe-area-inset-left)) calc(2.75rem + env(safe-area-inset-bottom))
     max(0.85rem, env(safe-area-inset-right));
-  max-width: 1024px;
-  margin: 0 auto;
+  /* Largura da coluna: só `.it-main` (Marco 1 parity); evita caixa mais estreita que o portal */
+  max-width: 100%;
+  margin: 0;
 }
 
 .it-screen > * {
@@ -4734,16 +4735,18 @@
   }
 }
 
-/* ===== Milestone 1 parity override (main center box) ===== */
+/* ===== Milestone 1 parity override (main center box — mesma largura que .m1-wrapper: 1400px) ===== */
 .it-root .it-main {
   background: none;
   background-color: transparent;
-  width: min(1260px, calc(100vw - 400px));
+  width: 100%;
+  max-width: var(--it-shell-max, 1400px);
   min-height: auto;
   margin: clamp(1.8rem, 3.6vw, 2.5rem) auto;
   padding: 0;
   border-radius: 0;
   box-shadow: none;
+  box-sizing: border-box;
 }
 
 .it-root .it-main::before,
@@ -4855,7 +4858,7 @@
   position: relative;
   z-index: 1;
   min-height: clamp(520px, 82vh, 700px);
-  width: min(980px, 100%);
+  width: 100%;
   margin: 0 auto;
   padding: clamp(1.25rem, 2.6vw, 2rem) clamp(0.9rem, 2.1vw, 1.4rem);
   background: #ffffff;
@@ -4868,7 +4871,7 @@
 }
 
 .it-main > .it-menu {
-  width: min(1100px, 100%);
+  width: 100%;
   margin: 0 auto;
   padding: clamp(1rem, 2.2vw, 1.5rem);
   background: transparent;
@@ -4908,11 +4911,12 @@
   }
 }
 
-/* All non-portal inova-thec subpages inside one white main box */
+/* All non-portal inova-thec subpages inside one white main box (largura alinhada ao Marco 1: 1400px) */
 .it-root:not(.it-root--portal) .it-main {
-  width: min(1120px, calc(100vw - 2.75rem));
-  /* Bottom margin matches portal `.it-root .it-main` (same clamp as main page) */
-  margin: clamp(1rem, 2.5vw, 1.8rem) auto clamp(1.8rem, 3.6vw, 2.5rem);
+  width: 100%;
+  max-width: var(--it-shell-max, 1400px);
+  /* Mesmo eixo vertical/horizontal que o portal — mesma “caixa” em largura */
+  margin: clamp(1.8rem, 3.6vw, 2.5rem) auto;
   padding: clamp(0.9rem, 1.8vw, 1.25rem);
   background: #ffffff !important;
   background-color: #ffffff !important;
