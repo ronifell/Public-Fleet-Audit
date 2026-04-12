@@ -350,6 +350,16 @@
   line-height: 1.35;
 }
 
+/* Logotipo dos menus módulo = mesmo bloco visual da página principal (hub), sem caixa de documento */
+.it-menu .it-menu-hub-brand .m1-hub-header {
+  margin-bottom: 1.25rem;
+  text-align: center;
+}
+
+.it-menu .it-menu-hub-brand .m1-logo-plain {
+  margin-bottom: 0;
+}
+
 .it-menu-head__doc-ref {
   margin: 0;
   font-size: 0.58rem;
@@ -711,6 +721,7 @@
   }
 
   .it-menu .it-menu-head,
+  .it-menu .it-menu-hub-brand,
   .it-menu > .it-typewriter,
   .it-menu > .it-master,
   .it-nav-grid .it-tile,
@@ -1393,7 +1404,8 @@
   margin: 0 auto;
 }
 
-.it-menu .it-menu-head {
+.it-menu .it-menu-head,
+.it-menu .it-menu-hub-brand {
   animation: it-enter-soft 0.54s cubic-bezier(0.22, 1, 0.36, 1) 0.04s both;
 }
 
@@ -1698,9 +1710,18 @@
 
 .it-menu .it-nav-grid .it-tile {
   padding: 0.62rem 0.85rem;
-  min-height: 54px;
+  min-height: 6rem !important;
+  height: 6rem !important;
+  box-sizing: border-box;
   border-radius: 14px;
   gap: 0.65rem;
+  align-items: center;
+}
+
+.it-menu .it-nav-grid .it-tile .it-tile__text {
+  flex: 1;
+  min-height: 0;
+  justify-content: center;
 }
 
 .it-menu .it-nav-grid .it-tile::before {
@@ -5316,6 +5337,20 @@
 /* Marco 1: no escuro `.m1-wrapper.dark p` ganha da regra base de `.m1-hub-tagline` → cor do texto principal */
 .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home.dark .m1-hub-header .m1-hub-tagline {
   color: #e5e7eb;
+}
+
+/* Dois botões do hub com a mesma altura (rótulos com comprimentos diferentes) */
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-tile {
+  min-height: 6.75rem !important;
+  height: 6.75rem !important;
+  box-sizing: border-box;
+}
+
+.it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home .m1-hub-tile__row {
+  flex: 1;
+  align-items: center;
+  align-self: stretch;
+  min-height: 0;
 }
 
 .it-main > .it-main-stack > .it-menu {
