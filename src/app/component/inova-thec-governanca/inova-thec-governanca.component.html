@@ -14,21 +14,6 @@
     Voltar
   </button>
 
-  <button
-    *ngIf="view !== 'portal'"
-    nz-button
-    nzType="default"
-    class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-ripple-target"
-    type="button"
-    (click)="toggleDarkMode()"
-    [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
-  >
-    <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
-      <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
-    </span>
-    <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
-  </button>
-
   <!-- Loader inicial: fundo transparente (incl. página principal) -->
   <div *ngIf="loading" class="it-loading-shell" aria-busy="true" aria-live="polite" role="status">
     <div class="it-loading-shell__mesh" aria-hidden="true"></div>
@@ -77,6 +62,9 @@
                 <span class="it-module-btn__sub">Gestão e Perícia de Combustível</span>
               </span>
               <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+              <span class="it-module-btn__chevron" aria-hidden="true">
+                <span nz-icon nzType="right" nzTheme="outline"></span>
+              </span>
             </span>
           </button>
         </section>
@@ -92,23 +80,28 @@
                 <span class="it-module-btn__sub">Imutabilidade e Rastreabilidade de Ativos</span>
               </span>
               <span class="it-online-dot" title="Online e monitorando" aria-hidden="true"></span>
+              <span class="it-module-btn__chevron" aria-hidden="true">
+                <span nz-icon nzType="right" nzTheme="outline"></span>
+              </span>
             </span>
           </button>
         </section>
       </div>
-      <button
-        nz-button
-        nzType="default"
-        class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-theme-toggle--portal-bottom it-ripple-target"
-        type="button"
-        (click)="toggleDarkMode()"
-        [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
-      >
-        <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
-          <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
-        </span>
-        <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
-      </button>
+      <div class="m1-hub-footer-tools">
+        <button
+          nz-button
+          nzType="default"
+          class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-theme-toggle--portal-bottom it-ripple-target"
+          type="button"
+          (click)="toggleDarkMode()"
+          [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
+        >
+          <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+            <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+          </span>
+          <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
+        </button>
+      </div>
       <div class="it-marquee it-marquee--below-theme" aria-label="Letreiro digital">
         <div class="it-marquee__track">
           <span class="it-marquee__text">{{ marqueeText }}</span>
@@ -121,10 +114,25 @@
   <!-- Menus e telas módulo -->
   <ng-container *ngIf="view !== 'portal'">
     <header class="it-bar" *ngIf="showHomeInModule">
-      <button type="button" class="it-home-btn" (click)="goPortal()">
-        <span nz-icon nzType="home" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
-        Home — Portal de Acesso
-      </button>
+      <div class="it-bar__stack">
+        <button type="button" class="it-home-btn" (click)="goPortal()">
+          <span nz-icon nzType="home" nzTheme="outline" class="it-inline-icon" aria-hidden="true"></span>
+          Home — Portal de Acesso
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          class="m1-theme-toggle m1-theme-toggle--modern it-theme-toggle it-bar__theme-btn it-ripple-target"
+          type="button"
+          (click)="toggleDarkMode()"
+          [attr.aria-label]="darkMode ? 'Ativar modo claro' : 'Ativar modo escuro'"
+        >
+          <span class="m1-theme-toggle__icon" [class.m1-theme-toggle__icon--spin]="themeIconSpinning" aria-hidden="true">
+            <span nz-icon [nzType]="darkMode ? 'sun' : 'moon'" nzTheme="outline"></span>
+          </span>
+          <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
+        </button>
+      </div>
       <span class="it-bar__gps" role="status">{{ gpsLockBanner }}</span>
       <span class="it-bar__gps it-bar__gps--short" role="status" aria-hidden="true">Anti-GPS falso · 100%</span>
     </header>
@@ -250,15 +258,19 @@
 
     <!-- TELAS FROTA -->
     <div class="it-screen" *ngIf="isFrotaTela && demoData">
-      <button type="button" class="it-back it-back--frota" (click)="goFrotaMenu()">
-        <span class="it-back-frota__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </span>
-        <span class="it-back-frota__text">
-          <span class="it-back-frota__kicker">Voltar ao módulo</span>
-          <span class="it-back-frota__title">Cardápio SIG-FROTA</span>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        class="m1-compare-hashes-btn it-back-module it-back-module--frota"
+        (click)="goFrotaMenu()"
+      >
+        <span class="m1-compare-hashes-btn__inner it-back-module__inner">
+          <span nz-icon nzType="arrow-left" nzTheme="outline" class="m1-compare-hashes-btn__ico" aria-hidden="true"></span>
+          <span class="it-back-module__col">
+            <span class="it-back-module__kicker">Voltar ao módulo</span>
+            <span class="it-back-module__title">Cardápio SIG-FROTA</span>
+          </span>
         </span>
       </button>
 
@@ -503,15 +515,19 @@
 
     <!-- TELAS PATRIMÔNIO -->
     <div class="it-screen it-screen--pat" *ngIf="isPatrimonioTela && demoData">
-      <button type="button" class="it-back it-back--pat" (click)="goPatrimonioMenu()">
-        <span class="it-back-pat__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </span>
-        <span class="it-back-pat__text">
-          <span class="it-back-pat__kicker">Voltar ao módulo</span>
-          <span class="it-back-pat__title">Menu SIG-PATRIMÔNIO</span>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        class="m1-compare-hashes-btn it-back-module it-back-module--pat"
+        (click)="goPatrimonioMenu()"
+      >
+        <span class="m1-compare-hashes-btn__inner it-back-module__inner">
+          <span nz-icon nzType="arrow-left" nzTheme="outline" class="m1-compare-hashes-btn__ico" aria-hidden="true"></span>
+          <span class="it-back-module__col">
+            <span class="it-back-module__kicker">Voltar ao módulo</span>
+            <span class="it-back-module__title">Menu SIG-PATRIMÔNIO</span>
+          </span>
         </span>
       </button>
 
