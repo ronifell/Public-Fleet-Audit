@@ -29,15 +29,8 @@
     <span class="m1-theme-toggle__label">{{ darkMode ? 'Modo claro' : 'Modo escuro' }}</span>
   </button>
 
-  <!-- Loader inicial: fundo completo só na página principal; demais rotas = transparente -->
-  <div
-    *ngIf="loading"
-    class="it-loading-shell"
-    [class.it-loading-shell--main]="view === 'portal'"
-    aria-busy="true"
-    aria-live="polite"
-    role="status"
-  >
+  <!-- Loader inicial: fundo transparente (incl. página principal) -->
+  <div *ngIf="loading" class="it-loading-shell" aria-busy="true" aria-live="polite" role="status">
     <div class="it-loading-shell__mesh" aria-hidden="true"></div>
     <div class="it-loading-shell__orb" aria-hidden="true">
       <span class="it-loading-shell__ring it-loading-shell__ring--a"></span>
