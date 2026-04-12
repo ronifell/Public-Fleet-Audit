@@ -3,27 +3,32 @@
   [class.it-root--portal]="view === 'portal'"
   [class.it-root--light]="!darkMode"
 >
+  <!-- Rodapé idêntico ao Marco 1 (/milestone1-demo): mesmas classes, textos e estrutura -->
   <ng-template #itAuditMarqueeFooter>
-    <div class="it-marquee it-marquee--audit-strip" aria-label="Letreiro de protocolo e auditoria">
-      <div class="it-marquee__track">
-        <span class="it-marquee__text it-marquee__text--audit">{{ marqueeText }}</span>
-        <span class="it-marquee__text it-marquee__text--audit" aria-hidden="true">{{ marqueeText }}</span>
+    <footer
+      class="m1-audit-ticker"
+      id="m1-sha256-footer-anchor"
+      role="status"
+      aria-live="polite"
+      aria-label="Trilha de auditoria e integridade"
+    >
+      <div class="m1-footer-integrity-strip">
+        <div class="m1-footer-integrity-marquee">
+          <span class="m1-footer-integrity-marquee__text">SHA-256 · TRILHA DE AUDITORIA E INTEGRIDADE DOCUMENTAL · FÉ PÚBLICA</span>
+          <span class="m1-footer-integrity-marquee__text" aria-hidden="true">SHA-256 · TRILHA DE AUDITORIA E INTEGRIDADE DOCUMENTAL · FÉ PÚBLICA</span>
+        </div>
       </div>
-    </div>
-    <footer class="it-audit-footer" role="contentinfo" aria-label="Rodapé técnico de auditoria e fé pública">
-      <p class="it-audit-footer__fe">
-        <strong class="it-audit-footer__fe-strong">FÉ PÚBLICA</strong>
-        <span class="it-audit-footer__fe-sub"> — integridade documental em tempo real</span>
-      </p>
-      <div class="it-audit-footer__hash-block">
-        <span class="it-audit-footer__hash-label">SHA-256 (trilha ativa)</span>
-        <code class="it-audit-footer__hash">{{ auditFooterHashDisplay }}</code>
+      <div class="m1-hub-footer-scratch" *ngIf="m1ShowHubFooterScratch">
+        <span class="m1-hub-footer-scratch__label">Resto (SHA-256)</span>
+        <code class="m1-hub-footer-scratch__hash">{{ hubFooterHashLocked ? hubFixedFooterHash : hubLiveFooterHash }}</code>
       </div>
-      <p class="it-audit-footer__pericia">
-        Auditoria em curso · Georreferenciamento validado
-        <code class="it-audit-footer__geo">{{ geoAuditRefCode }}</code>
-      </p>
-      <p class="it-audit-footer__tce" role="note">Metodologia apresentada ao TCE-AC</p>
+      <div class="m1-audit-ticker-track">
+        <span class="m1-audit-ticker-text">{{ m1AuditTickerText }}</span>
+        <span class="m1-audit-ticker-text" aria-hidden="true">{{ m1AuditTickerText }}</span>
+      </div>
+      <div class="m1-tce-seal" role="note">
+        <span class="m1-tce-seal__text">Metodologia apresentada ao TCE-AC</span>
+      </div>
     </footer>
   </ng-template>
 
@@ -62,8 +67,9 @@
 
   <!-- Conteúdo com transição entre páginas -->
   <div *ngIf="!loading" class="it-main">
-  <!-- TELA 00 — Portal -->
+  <!-- TELA 00 — Portal: cartão + letreiro na mesma coluna (largura idêntica a `.it-main`) -->
   <ng-container *ngIf="view === 'portal'">
+    <div class="it-portal-stack">
     <div class="it-portal">
       <header class="it-portal-head" aria-label="Identidade INOVA THEC">
         <div class="it-portal-head__glass">
@@ -115,8 +121,8 @@
           </button>
         </section>
       </div>
-      <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
-      <div class="m1-hub-footer-tools m1-hub-footer-tools--after-audit">
+      <!-- Marco 1: tema dentro do cartão -->
+      <div class="m1-hub-footer-tools">
         <button
           nz-button
           nzType="default"
@@ -132,10 +138,13 @@
         </button>
       </div>
     </div>
+    <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
+    </div>
   </ng-container>
 
-  <!-- Menus e telas módulo -->
+  <!-- Menus e telas módulo: mesmo padrão da home — coluna + letreiro irmão (`.it-main-stack`) -->
   <ng-container *ngIf="view !== 'portal'">
+    <div class="it-main-stack">
     <header class="it-bar" *ngIf="showHomeInModule">
       <div class="it-bar__stack">
         <button type="button" class="it-home-btn" (click)="goPortal()">
@@ -236,7 +245,6 @@
           <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
       </nav>
-      <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
     </div>
 
     <!-- MENU SIG-PATRIMÔNIO -->
@@ -316,7 +324,6 @@
           <span class="it-tile__chevron" aria-hidden="true"><span nz-icon nzType="right" nzTheme="outline"></span></span>
         </button>
       </nav>
-      <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
     </div>
 
     <!-- TELAS FROTA -->
@@ -693,6 +700,8 @@
         <button type="button" class="it-primary" (click)="triggerExtratorCam()">Capturar imagem</button>
         <button type="button" class="it-exarar" (click)="exararCertificado()">EXARAR CERTIFICADO</button>
       </ng-container>
+    </div>
+    <ng-container *ngTemplateOutlet="itAuditMarqueeFooter"></ng-container>
     </div>
   </ng-container>
   </div>

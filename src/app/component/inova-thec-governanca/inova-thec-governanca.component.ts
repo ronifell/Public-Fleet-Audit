@@ -151,26 +151,11 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   extratorPreview: string | null = null;
   extratorSweep = false;
 
-  /**
-   * Letreiro contínuo (portal + menus): repetição amplia a faixa para o efeito marquee.
-   * Conteúdo alinhado ao protocolo AP04 / SHA-256 / anti-fraude / custódia.
-   */
-  marqueeText =
-    '• PROTOCOLO AP04 ATIVO • MONITORAMENTO SHA-256 • GEORREFERENCIAMENTO ANTI-FRAUDE • CADEIA DE CUSTÓDIA ASSEGURADA • '.repeat(
-      5
-    );
-
-  /** Código de referência exibido no rodapé técnico (georreferenciamento validado). */
-  readonly geoAuditRefCode = 'WGS84 · SIRGAS2000 · selo pericial AC-AP04';
-
-  /** Linha SHA-256 do rodapé (digest da primeira trilha carregada ou placeholder de demonstração). */
-  get auditFooterHashDisplay(): string {
-    const h = this.integrityRows[0]?.calculatedHash;
-    if (h && h.length > 20) {
-      return `${h.slice(0, 10)}…${h.slice(-8)}`;
-    }
-    return 'a9574b080f3c2e1d…9fe8c1ab';
-  }
+  /** Rodapé Marco 1 — “resto” SHA (mesmo comportamento do hub em /milestone1-demo) */
+  hubFooterHashLocked = false;
+  hubLiveFooterHash = '';
+  hubFixedFooterHash = '';
+  private hubFooterHashTimer?: ReturnType<typeof setInterval>;
 
   gpsLockBanner = 'Trava anti-GPS falso ativa — alta precisão obrigatória em 100% do tempo.';
 
@@ -218,6 +203,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   /** Encerra o loader inicial assim que a carga de dados termina (ou em erro). */
   private finishInitialLoad(): void {
     this.loading = false;
+    this.syncHubFooterScratchLifecycle();
     this.cdr.markForCheck();
     this.scheduleEnsureMap();
   }
@@ -234,6 +220,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     if (this.typewriterTimer) {
       clearInterval(this.typewriterTimer);
     }
+    this.clearHubFooterHashScratch();
     this.cancelKpiCountUpAnimation();
   }
 
@@ -257,6 +244,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       this.stopPericiaGps();
       this.applyMapLifecycle();
       this.syncKpiCountUpAfterNavigate();
+      this.syncHubFooterScratchLifecycle();
       return;
     }
     if (parts[1] === 'sig-frota') {
@@ -277,6 +265,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       }
       this.applyMapLifecycle();
       this.syncKpiCountUpAfterNavigate();
+      this.syncHubFooterScratchLifecycle();
       return;
     }
     if (parts[1] === 'sig-patrimonio') {
@@ -293,7 +282,21 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       }
       this.applyMapLifecycle();
       this.syncKpiCountUpAfterNavigate();
+      this.syncHubFooterScratchLifecycle();
       return;
+    }
+  }
+
+  /** Marco 1: `m1-hub-footer-scratch` só no hub; aqui só no portal. */
+  get m1ShowHubFooterScratch(): boolean {
+    return this.view === 'portal';
+  }
+
+  private syncHubFooterScratchLifecycle(): void {
+    if (this.view === 'portal' && !this.hubFooterHashLocked && !this.loading) {
+      this.startHubFooterHashScratch();
+    } else if (this.view !== 'portal') {
+      this.clearHubFooterHashScratch();
     }
   }
 
@@ -529,6 +532,9 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       this.themeIconSpinning = false;
       this.cdr.markForCheck();
     }, 700);
+    if (this.view === 'portal') {
+      this.lockHubFooterScratch();
+    }
     this.darkMode = !this.darkMode;
     this.persistThemeMode();
     this.cdr.markForCheck();
@@ -664,6 +670,104 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       parts.push(`[${r.placa}] ${r.transacaoId} · ${r.glosaStatus}`);
     });
     return parts.join('      ◆      ') || '[SISTEMA] Trilha ativa…';
+  }
+
+  /** Texto do segundo letreiro do rodapé — mesma lógica que `auditTickerText` no Marco 1 */
+  get m1AuditTickerText(): string {
+    if (this.view === 'portal') {
+      return this.m1AuditTickerHub;
+    }
+    if (this.module === 'patrimonio') {
+      return this.m1AuditTickerAssets;
+    }
+    return this.m1AuditTickerFuel;
+  }
+
+  /** Cópia literal dos getters `auditTickerFuel` / `auditTickerAssets` / `auditTickerHub` de milestone1-demo */
+  private get m1AuditTickerFuel(): string {
+    const parts: string[] = [];
+    const supplies = this.demoData?.abastecimentos || [];
+    supplies.forEach((s) => {
+      parts.push(
+        `[${s.license_plate}] R$ ${s.emission_value.toFixed(2)} · ${s.liters} L · ${s.cidade}/${s.UF ?? '—'}`
+      );
+      parts.push(`[${s.license_plate}] ${(s.nome_estabelecimento || 'Posto').slice(0, 22)}… confirmado`);
+    });
+    (this.demoData?.resultados_motor_glosa || []).forEach((r) => {
+      parts.push(`[${r.placa}] Motor glosa: ${r.glosaStatus} · R$ ${r.valorTotal.toFixed(2)} · ${r.volumeLitros} L`);
+    });
+    this.integrityRows.slice(0, 4).forEach((row) => {
+      const shortHash = row.calculatedHash.slice(0, 8).toUpperCase();
+      parts.push(`[${row.plate}] SHA-256 ${shortHash}… trilha ativa`);
+    });
+    if (!parts.length) {
+      return '[SISTEMA] Aguardando registros de auditoria…';
+    }
+    return parts.join('      ◆      ');
+  }
+
+  private get m1AuditTickerAssets(): string {
+    const labels = ['PREDIO-01', 'MONUMENTO-05', 'SITIO-03', 'MUSEU-07', 'CENTRO-12'];
+    const items = (this.demoData?.resultados_motor_glosa || []).slice(0, 6);
+    const parts: string[] = [];
+    items.forEach((r, i) => {
+      const tag = labels[i % labels.length];
+      parts.push(`[${tag}] Tombo ${r.placa} · R$ ${r.valorTotal.toFixed(2)} (referência patrimonial)`);
+      parts.push(`[${tag}] Vistoria AO VIVO · conservação sincronizada · Acre`);
+    });
+    return parts.join('      ◆      ') || '[SIG-PATRIMÔNIO] Monitoramento em tempo real…';
+  }
+
+  private get m1AuditTickerHub(): string {
+    const parts: string[] = [
+      'TORRE DE CONTROLE · Inovathec · Governança SEAGRI',
+      'SIG-FROTA — combustível · SIG-PATRIMÔNIO · SHA-256 · tempo real',
+    ];
+    const supplies = this.demoData?.abastecimentos || [];
+    supplies.forEach((s) => {
+      parts.push(`[${s.license_plate}] R$ ${s.emission_value.toFixed(2)} · auditoria em curso`);
+    });
+    (this.demoData?.resultados_motor_glosa || []).slice(0, 5).forEach((r) => {
+      parts.push(`[${r.placa}] Georef. validado · R$ ${r.valorTotal.toFixed(2)}`);
+    });
+    return parts.join('      ◆      ');
+  }
+
+  private tickHubFooterHash(): void {
+    const hex = '0123456789abcdef';
+    let s = '';
+    for (let i = 0; i < 64; i++) {
+      s += hex[Math.floor(Math.random() * 16)];
+    }
+    this.hubLiveFooterHash = s;
+    this.cdr.markForCheck();
+  }
+
+  private clearHubFooterHashScratch(): void {
+    if (this.hubFooterHashTimer != null) {
+      clearInterval(this.hubFooterHashTimer);
+      this.hubFooterHashTimer = undefined;
+    }
+  }
+
+  private startHubFooterHashScratch(): void {
+    this.clearHubFooterHashScratch();
+    if (this.hubFooterHashLocked || this.loading) {
+      return;
+    }
+    this.tickHubFooterHash();
+    this.hubFooterHashTimer = setInterval(() => this.tickHubFooterHash(), 100);
+  }
+
+  private lockHubFooterScratch(): void {
+    this.clearHubFooterHashScratch();
+    this.hubFooterHashLocked = true;
+    const fromData =
+      this.demoData?.abastecimentos?.[0]?.integrityHash ?? this.integrityRows?.[0]?.calculatedHash;
+    this.hubFixedFooterHash =
+      (fromData && String(fromData).replace(/\s/g, '')) ||
+      this.hubLiveFooterHash ||
+      '0'.repeat(64);
   }
 
   /** Leaflet */
