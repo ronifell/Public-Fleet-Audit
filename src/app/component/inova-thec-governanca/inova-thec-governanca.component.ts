@@ -51,6 +51,23 @@ interface DemoData {
     valor_glosado: number;
     total_transacoes: number;
   };
+  bens_patrimonio?: Array<{
+    id: number;
+    tombo: string;
+    descricao: string;
+    conservacaoPercent: number;
+    responsavel: string;
+    situacao: string;
+    valorPatrimonial: number;
+    integrityHash: string;
+  }>;
+  resumo_patrimonio?: {
+    total_bens_catalogados: number;
+    total_vistorias_realizadas: number;
+    valor_patrimonial_total: number;
+    bens_sincronizados: number;
+    bens_em_revisao: number;
+  };
 }
 
 interface IntegrityRow {
@@ -373,8 +390,9 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   }
 
   private startCentralKpiCountUp(): void {
-    const custody = this.demoData!.resultados_motor_glosa.length;
-    const audits = this.demoData!.abastecimentos.length;
+    const resumoPat = this.demoData!.resumo_patrimonio;
+    const custody = resumoPat?.total_bens_catalogados ?? this.demoData!.resultados_motor_glosa.length;
+    const audits = resumoPat?.total_vistorias_realizadas ?? this.demoData!.abastecimentos.length;
     if (this.kpiCountUpPrefersReducedMotion()) {
       this.centralDisplay = { custody, audits };
       this.cdr.markForCheck();
@@ -1059,7 +1077,9 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
 
   /** Residual */
   updateResidual(): void {
-    const base = this.demoData?.resumo_dashboard.valor_total_transacoes || 1_200_000;
+    const base = this.demoData?.resumo_patrimonio?.valor_patrimonial_total
+      ?? this.demoData?.resumo_dashboard.valor_total_transacoes
+      ?? 1_200_000;
     const anos = this.residualAnos;
     const factor = Math.max(0.15, 1 - anos * 0.12);
     this.residualValor = base * factor;

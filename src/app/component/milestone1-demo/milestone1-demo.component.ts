@@ -42,6 +42,34 @@ interface Supply {
   integrityHash: string;
 }
 
+interface PatrimonyAsset {
+  id: number;
+  tombo: string;
+  descricao: string;
+  categoria: string;
+  inpiRegistro: string;
+  lat: number;
+  lng: number;
+  conservacaoPercent: number;
+  responsavel: string;
+  situacao: string;
+  valorPatrimonial: number;
+  dataRegistro: string;
+  integrityHash: string;
+}
+
+interface CustodyChainEvent {
+  id: number;
+  tombo: string;
+  etapa: string;
+  titulo: string;
+  descricao: string;
+  data: string;
+  responsavel: string;
+  integrityHash: string;
+  tampered?: boolean;
+}
+
 interface DemoData {
   abastecimentos: Supply[];
   resultados_motor_glosa: MotorResult[];
@@ -50,6 +78,16 @@ interface DemoData {
     valor_total_transacoes: number;
     valor_glosado: number;
     total_transacoes: number;
+  };
+  bens_patrimonio?: PatrimonyAsset[];
+  cadeia_custodia_patrimonio?: CustodyChainEvent[];
+  resumo_patrimonio?: {
+    total_bens_catalogados: number;
+    total_vistorias_realizadas: number;
+    total_transferencias: number;
+    valor_patrimonial_total: number;
+    bens_sincronizados: number;
+    bens_em_revisao: number;
   };
 }
 
@@ -799,8 +837,11 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
     if (!this.demoData) {
       return;
     }
-    this.assetsReportCatalogedTotal = this.demoData.resultados_motor_glosa.length;
-    this.assetsReportAuditTotal = this.demoData.abastecimentos.length;
+    const resumoPat = this.demoData.resumo_patrimonio;
+    this.assetsReportCatalogedTotal = resumoPat?.total_bens_catalogados
+      ?? this.demoData.resultados_motor_glosa.length;
+    this.assetsReportAuditTotal = resumoPat?.total_vistorias_realizadas
+      ?? this.demoData.abastecimentos.length;
     this.assetsKpiOdometerRollKey++;
     this.cdr.markForCheck();
   }
@@ -1020,6 +1061,16 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   get patrimonyChainRows(): PatrimonyChainRow[] {
+    const bens = this.demoData?.bens_patrimonio;
+    if (bens?.length) {
+      return bens.map((b) => ({
+        tombo: b.tombo,
+        descricao: b.descricao,
+        inpiRegistro: b.inpiRegistro,
+        integrityHash: b.integrityHash,
+        situacao: b.situacao,
+      }));
+    }
     const rows = this.demoData?.resultados_motor_glosa || [];
     const labels = ['Imóvel histórico', 'Monumento tombado', 'Bem móvel catalogado', 'Acervo museológico', 'Patrimônio público'];
     return rows.slice(0, 8).map((r, i) => ({
@@ -1036,6 +1087,19 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   }
 
   private rebuildPatrimonyTimelineEvents(): void {
+    const cadeia = this.demoData?.cadeia_custodia_patrimonio;
+    if (cadeia?.length) {
+      this.timelineEvents = cadeia.map((ev, i) => ({
+        id: `ev-${ev.id}`,
+        kind: (ev.etapa as PatrimonyTimelineKind) || 'vistoria',
+        title: ev.titulo,
+        detail: ev.descricao,
+        at: ev.data,
+        integrityHash: ev.integrityHash,
+        tampered: ev.tampered,
+      }));
+      return;
+    }
     if (!this.demoData?.resultados_motor_glosa?.length) {
       this.timelineEvents = [];
       return;
