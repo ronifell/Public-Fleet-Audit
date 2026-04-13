@@ -159,6 +159,8 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
   private static readonly timelineFlashTotalMs = 3000;
   private static readonly timelineCompareResetMs =
     Milestone1DemoComponent.timelineFlashTotalMs + 220;
+  private static cachedDemoData?: DemoData;
+  private static cachedIntegrityRows?: IntegrityRow[];
 
   loading = true;
   /** Governance Center hub or a module screen */
@@ -284,45 +286,87 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   async ngOnInit(): Promise<void> {
     this.refreshIntegrityMobileLayout();
+    const hasCache =
+      !!Milestone1DemoComponent.cachedDemoData &&
+      !!Milestone1DemoComponent.cachedIntegrityRows;
+    if (hasCache) {
+      this.applyLoadedData(
+        Milestone1DemoComponent.cachedDemoData!,
+        Milestone1DemoComponent.cachedIntegrityRows!
+      );
+      this.finishInitialLoad();
+      this.fetchDemoData(false);
+      return;
+    }
+    this.fetchDemoData(true);
+  }
+
+  private fetchDemoData(finishWithLoader: boolean): void {
     this.http
       .get<DemoData>(`${environment.API_URL}/auditoria/motor`)
       .pipe(
         timeout(8000),
         catchError(() => this.http.get<DemoData>('assets/mock/DB.json')),
-        catchError(() => of({ abastecimentos: [], resultados_motor_glosa: [], resumo_dashboard: { economia_gerada: 0, valor_total_transacoes: 0, valor_glosado: 0, total_transacoes: 0 } } as DemoData))
+        catchError(() =>
+          of({
+            abastecimentos: [],
+            resultados_motor_glosa: [],
+            resumo_dashboard: {
+              economia_gerada: 0,
+              valor_total_transacoes: 0,
+              valor_glosado: 0,
+              total_transacoes: 0,
+            },
+          } as DemoData)
+        )
       )
       .subscribe({
-      next: async (data) => {
-        this.demoData = data;
-        this.selectedMapRecord = data.resultados_motor_glosa[0];
-        this.viewportRecords = data.resultados_motor_glosa;
-        this.integrityRows = await this.buildIntegrityRows(data);
-        this.loading = false;
-        if (this.activeView === 'hub') {
-          this.hubFooterHashLocked = false;
-          this.startHubFooterHashScratch();
-        }
-        if (this.activeView === 'assets-report') {
-          setTimeout(() => {
-            this.triggerAssetsKpiOdometerRoll();
-            this.cdr.markForCheck();
-          }, 0);
-        }
-        if (this.activeView === 'governance') {
-          this.queueKpiAnimation();
-          setTimeout(() => {
-            this.dashboardChartsAnimated = true;
-            this.cdr.markForCheck();
-          }, 80);
-        }
-        this.syncControlTowerToasts();
-        this.rebuildPatrimonyTimelineEvents();
-        setTimeout(() => this.ensureMapInitialized(), 0);
-      },
-      error: () => {
-        this.loading = false;
-      },
+        next: async (data) => {
+          const integrityRows = await this.buildIntegrityRows(data);
+          Milestone1DemoComponent.cachedDemoData = data;
+          Milestone1DemoComponent.cachedIntegrityRows = integrityRows;
+          this.applyLoadedData(data, integrityRows);
+          if (finishWithLoader) {
+            this.finishInitialLoad();
+          }
+        },
+        error: () => {
+          if (finishWithLoader) {
+            this.loading = false;
+          }
+        },
       });
+  }
+
+  private applyLoadedData(data: DemoData, integrityRows: IntegrityRow[]): void {
+    this.demoData = data;
+    this.selectedMapRecord = data.resultados_motor_glosa[0];
+    this.viewportRecords = data.resultados_motor_glosa;
+    this.integrityRows = integrityRows;
+  }
+
+  private finishInitialLoad(): void {
+    this.loading = false;
+    if (this.activeView === 'hub') {
+      this.hubFooterHashLocked = false;
+      this.startHubFooterHashScratch();
+    }
+    if (this.activeView === 'assets-report') {
+      setTimeout(() => {
+        this.triggerAssetsKpiOdometerRoll();
+        this.cdr.markForCheck();
+      }, 0);
+    }
+    if (this.activeView === 'governance') {
+      this.queueKpiAnimation();
+      setTimeout(() => {
+        this.dashboardChartsAnimated = true;
+        this.cdr.markForCheck();
+      }, 80);
+    }
+    this.syncControlTowerToasts();
+    this.rebuildPatrimonyTimelineEvents();
+    setTimeout(() => this.ensureMapInitialized(), 0);
   }
 
   ngAfterViewInit(): void {

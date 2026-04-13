@@ -4,6 +4,10 @@ import { LoginService } from './service/login.service';
 import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { StoragesService } from './service/storages.service';
 import { Location } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
+import { of } from 'rxjs';
+import { catchError, timeout } from 'rxjs/operators';
 
 @Component({
     selector: 'app-root',
@@ -60,6 +64,7 @@ export class AppComponent implements OnInit {
         private loginService: LoginService,
         private storagesService: StoragesService,
         private location: Location,
+        private http: HttpClient,
     ) {
         router.events.subscribe(event => {
             if (event instanceof NavigationEnd) {
@@ -101,6 +106,17 @@ export class AppComponent implements OnInit {
         this.isAdmin = this.storagesService.validateUserPermission('ADMIN');
         this.user = this.storagesService.getUser();
         this.loadPermissions()
+        this.prefetchAuditData();
+    }
+
+    private prefetchAuditData(): void {
+        this.http
+            .get(`${environment.API_URL}/auditoria/motor`)
+            .pipe(
+                timeout(6000),
+                catchError(() => of(null))
+            )
+            .subscribe();
     }
 
     goBack() {

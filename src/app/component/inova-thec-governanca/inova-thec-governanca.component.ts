@@ -122,6 +122,8 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   centralDisplay = { custody: 0, audits: 0 };
   private kpiCountUpRaf = 0;
   private static readonly KPI_COUNT_UP_MS = 950;
+  private static cachedDemoData?: DemoData;
+  private static cachedIntegrityRows?: IntegrityRow[];
 
   demoData?: DemoData;
   integrityRows: IntegrityRow[] = [];
@@ -205,28 +207,66 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       this.syncKpiCountUpAfterNavigate();
       this.cdr.markForCheck();
     });
+    const hasCache =
+      !!InovaThecGovernancaComponent.cachedDemoData &&
+      !!InovaThecGovernancaComponent.cachedIntegrityRows;
+    if (hasCache) {
+      this.applyLoadedData(
+        InovaThecGovernancaComponent.cachedDemoData!,
+        InovaThecGovernancaComponent.cachedIntegrityRows!
+      );
+      this.finishInitialLoad();
+      this.fetchDemoData(false);
+      return;
+    }
+    this.fetchDemoData(true);
+  }
+
+  private fetchDemoData(finishWithLoader: boolean): void {
     this.http
       .get<DemoData>(`${environment.API_URL}/auditoria/motor`)
       .pipe(
         timeout(8000),
         catchError(() => this.http.get<DemoData>('assets/mock/DB.json')),
-        catchError(() => of({ abastecimentos: [], resultados_motor_glosa: [], resumo_dashboard: { economia_gerada: 0, valor_total_transacoes: 0, valor_glosado: 0, total_transacoes: 0 } } as DemoData))
+        catchError(() =>
+          of({
+            abastecimentos: [],
+            resultados_motor_glosa: [],
+            resumo_dashboard: {
+              economia_gerada: 0,
+              valor_total_transacoes: 0,
+              valor_glosado: 0,
+              total_transacoes: 0,
+            },
+          } as DemoData)
+        )
       )
       .subscribe({
-      next: async (data) => {
-        this.demoData = data;
-        this.selectedMapRecord = data.resultados_motor_glosa[0];
-        this.integrityRows = await this.buildIntegrityRows(data);
-        this.glosas = this.buildGlosasMock(data);
-        this.updateResidual();
-        this.syncKpiCountUpAfterNavigate();
-        this.cdr.markForCheck();
-        this.finishInitialLoad();
-      },
-      error: () => {
-        this.finishInitialLoad();
-      },
+        next: async (data) => {
+          const integrityRows = await this.buildIntegrityRows(data);
+          InovaThecGovernancaComponent.cachedDemoData = data;
+          InovaThecGovernancaComponent.cachedIntegrityRows = integrityRows;
+          this.applyLoadedData(data, integrityRows);
+          if (finishWithLoader) {
+            this.finishInitialLoad();
+          }
+        },
+        error: () => {
+          if (finishWithLoader) {
+            this.finishInitialLoad();
+          }
+        },
       });
+  }
+
+  private applyLoadedData(data: DemoData, integrityRows: IntegrityRow[]): void {
+    this.demoData = data;
+    this.selectedMapRecord = data.resultados_motor_glosa[0];
+    this.integrityRows = integrityRows;
+    this.glosas = this.buildGlosasMock(data);
+    this.updateResidual();
+    this.syncKpiCountUpAfterNavigate();
+    this.cdr.markForCheck();
   }
 
   /** Encerra o loader inicial assim que a carga de dados termina (ou em erro). */
