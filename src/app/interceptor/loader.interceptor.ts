@@ -16,7 +16,8 @@ export class LoaderInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     // Recursos estáticos (ex.: mock JSON em /assets/) têm loader próprio nas telas — evita sobrepor ao app-loader
     const skipLoader =
-      request.url.includes('/assets/') || request.url.startsWith('assets/');
+      request.url.includes('/assets/') || request.url.startsWith('assets/')
+      || request.url.includes('/auditoria/');
     if (!skipLoader) {
       this.loaderService.isLoading.next(true);
     }

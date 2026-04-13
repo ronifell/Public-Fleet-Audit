@@ -11,6 +11,7 @@ import {
   Renderer2,
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import * as L from 'leaflet';
 
 interface MotorResult {
@@ -243,7 +244,7 @@ export class Milestone1DemoComponent implements OnInit, AfterViewInit, OnDestroy
 
   async ngOnInit(): Promise<void> {
     this.refreshIntegrityMobileLayout();
-    this.http.get<DemoData>('assets/mock/auditoria_motor_exemplo.json').subscribe({
+    this.http.get<DemoData>(`${environment.API_URL}/auditoria/motor`).subscribe({
       next: async (data) => {
         this.demoData = data;
         this.selectedMapRecord = data.resultados_motor_glosa[0];

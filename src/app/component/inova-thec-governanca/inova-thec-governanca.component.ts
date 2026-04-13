@@ -11,6 +11,7 @@ import {
   Renderer2,
 } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import * as L from 'leaflet';
@@ -186,7 +187,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       this.syncKpiCountUpAfterNavigate();
       this.cdr.markForCheck();
     });
-    this.http.get<DemoData>('assets/mock/auditoria_motor_exemplo.json').subscribe({
+    this.http.get<DemoData>(`${environment.API_URL}/auditoria/motor`).subscribe({
       next: async (data) => {
         this.demoData = data;
         this.selectedMapRecord = data.resultados_motor_glosa[0];
