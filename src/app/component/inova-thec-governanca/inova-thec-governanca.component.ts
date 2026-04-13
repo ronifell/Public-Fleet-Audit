@@ -13,7 +13,8 @@ import {
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { NavigationEnd, Router } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, filter, timeout } from 'rxjs/operators';
 import * as L from 'leaflet';
 
 interface MotorResult {
@@ -204,7 +205,14 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       this.syncKpiCountUpAfterNavigate();
       this.cdr.markForCheck();
     });
-    this.http.get<DemoData>(`${environment.API_URL}/auditoria/motor`).subscribe({
+    this.http
+      .get<DemoData>(`${environment.API_URL}/auditoria/motor`)
+      .pipe(
+        timeout(8000),
+        catchError(() => this.http.get<DemoData>('assets/mock/DB.json')),
+        catchError(() => of({ abastecimentos: [], resultados_motor_glosa: [], resumo_dashboard: { economia_gerada: 0, valor_total_transacoes: 0, valor_glosado: 0, total_transacoes: 0 } } as DemoData))
+      )
+      .subscribe({
       next: async (data) => {
         this.demoData = data;
         this.selectedMapRecord = data.resultados_motor_glosa[0];
@@ -218,7 +226,7 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
       error: () => {
         this.finishInitialLoad();
       },
-    });
+      });
   }
 
   /** Encerra o loader inicial assim que a carga de dados termina (ou em erro). */
