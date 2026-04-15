@@ -180,13 +180,8 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   hubFixedFooterHash = '';
   private hubFooterHashTimer?: ReturnType<typeof setInterval>;
 
-  /** Sincronização inicial: duração mínima + flash de saída (Milestone 2). */
-  private static readonly SYNC_SCREEN_MS = 4000;
-  private loadEpochMs = 0;
-  private loadRevealTimer?: ReturnType<typeof setTimeout>;
-  private initialRevealScheduled = false;
-  /** Flash branco sutil antes de exibir o conteúdo principal. */
-  loaderExitFlash = false;
+  /** Estado de carregamento inicial (sem animação forçada). */
+  private initialRevealDone = false;
 
   gpsLockBanner = 'Trava anti-GPS falso ativa — alta precisão obrigatória em 100% do tempo.';
 
@@ -200,7 +195,6 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   ) {}
 
   ngOnInit(): void {
-    this.loadEpochMs = Date.now();
     this.restoreThemeMode();
     this.renderer.addClass(this.document.body, InovaThecGovernancaComponent.bodyClass);
     this.syncBodyThemeDarkClass();
@@ -278,27 +272,16 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
     this.cdr.markForCheck();
   }
 
-  /** Encerra o loader após dados prontos e tempo mínimo de sincronização (4s). */
+  /** Encerra o carregamento assim que os dados iniciais estiverem prontos. */
   private finishInitialLoad(): void {
-    if (this.initialRevealScheduled) {
+    if (this.initialRevealDone) {
       return;
     }
-    this.initialRevealScheduled = true;
-    const minEnd = this.loadEpochMs + InovaThecGovernancaComponent.SYNC_SCREEN_MS;
-    const wait = Math.max(0, minEnd - Date.now());
-    this.loadRevealTimer = window.setTimeout(() => this.runLoaderExitReveal(), wait);
-  }
-
-  private runLoaderExitReveal(): void {
-    this.loaderExitFlash = true;
+    this.initialRevealDone = true;
+    this.loading = false;
+    this.syncHubFooterScratchLifecycle();
     this.cdr.markForCheck();
-    window.setTimeout(() => {
-      this.loading = false;
-      this.loaderExitFlash = false;
-      this.syncHubFooterScratchLifecycle();
-      this.cdr.markForCheck();
-      this.scheduleEnsureMap();
-    }, 280);
+    this.scheduleEnsureMap();
   }
 
   ngAfterViewInit(): void {
@@ -306,9 +289,6 @@ export class InovaThecGovernancaComponent implements OnInit, AfterViewInit, OnDe
   }
 
   ngOnDestroy(): void {
-    if (this.loadRevealTimer) {
-      clearTimeout(this.loadRevealTimer);
-    }
     this.mapScheduleGen++;
     this.renderer.removeClass(this.document.body, InovaThecGovernancaComponent.bodyClass);
     this.renderer.removeClass(this.document.body, InovaThecGovernancaComponent.bodyThemeDarkClass);

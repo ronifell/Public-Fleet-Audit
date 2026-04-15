@@ -1152,16 +1152,16 @@
 }
 
 .it-root.it-root--portal .it-main > .it-portal-stack > .m1-wrapper.m1-wrapper--hub-home > .m1-hub-footer-tools {
-  animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+  animation: none;
 }
 
 .it-main > .it-main-stack .it-menu > .m1-wrapper.it-menu__m1-shell > .m1-hub-footer-tools {
-  animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+  animation: none;
 }
 
 .it-root.it-root--portal .it-main > .it-portal-stack > .m1-audit-ticker,
 .it-root:not(.it-root--portal) .it-main > .it-main-stack > .m1-audit-ticker {
-  animation: it-enter-soft 0.58s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+  animation: none;
 }
 
 /* ——— Bar / menus ——— */
@@ -1180,7 +1180,7 @@
   -webkit-backdrop-filter: none;
   border-bottom: none;
   box-shadow: none;
-  animation: it-enter-from-top 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: none;
 }
 
 .it-bar__stack {
@@ -1790,63 +1790,12 @@
 }
 
 .it-screen > * {
-  animation: it-enter-soft 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.it-screen > *:nth-child(1) {
-  animation-delay: 0.04s;
-}
-
-.it-screen > *:nth-child(2) {
-  animation-delay: 0.09s;
-}
-
-.it-screen > *:nth-child(3) {
-  animation-delay: 0.14s;
-}
-
-.it-screen > *:nth-child(4) {
-  animation-delay: 0.19s;
-}
-
-.it-screen > *:nth-child(5) {
-  animation-delay: 0.24s;
-}
-
-.it-screen > *:nth-child(6) {
-  animation-delay: 0.29s;
-}
-
-.it-screen > *:nth-child(7) {
-  animation-delay: 0.34s;
-}
-
-.it-screen > *:nth-child(8) {
-  animation-delay: 0.39s;
-}
-
-.it-screen > *:nth-child(9) {
-  animation-delay: 0.44s;
-}
-
-.it-screen > *:nth-child(10) {
-  animation-delay: 0.49s;
-}
-
-.it-screen > *:nth-child(11) {
-  animation-delay: 0.54s;
-}
-
-.it-screen > *:nth-child(n + 12) {
-  animation-delay: 0.58s;
+  animation: none;
 }
 
 /* Mapa Leaflet: só opacidade (mantém animation-delay do nth-child de .it-screen > *) */
 .it-screen > .it-map-wrap {
-  animation-name: it-enter-fade;
-  animation-duration: 0.65s;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  animation-fill-mode: both;
+  animation: none;
   transform: none;
 }
 
@@ -1857,60 +1806,60 @@
 }
 
 .it-screen .it-kpis .it-kpi:nth-child(1) {
-  animation: it-enter-soft 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+  animation: none;
 }
 
 .it-screen .it-kpis .it-kpi:nth-child(2) {
-  animation: it-enter-soft 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+  animation: none;
 }
 
 .it-screen .it-kpis .it-kpi:nth-child(3) {
-  animation: it-enter-soft 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+  animation: none;
 }
 
 .it-screen .it-kpis .it-kpi:nth-child(4) {
-  animation: it-enter-soft 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both;
+  animation: none;
 }
 
 .it-screen .it-kpis .it-kpi:nth-child(n + 5) {
-  animation: it-enter-soft 0.46s cubic-bezier(0.22, 1, 0.36, 1) 0.32s both;
+  animation: none;
 }
 
 /* Chips da lista (vetoracao / georef) */
 .it-rec-list .it-chip:nth-child(1) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(2) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(3) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(4) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.18s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(5) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.22s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(6) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.26s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(7) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.3s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(8) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.34s both;
+  animation: none;
 }
 
 .it-rec-list .it-chip:nth-child(n + 9) {
-  animation: it-enter-soft 0.42s cubic-bezier(0.22, 1, 0.36, 1) 0.38s both;
+  animation: none;
 }
 
 /* Lista de chips: animar só os botões, não o contentor */

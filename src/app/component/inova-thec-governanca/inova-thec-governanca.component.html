@@ -47,29 +47,17 @@
   <div
     *ngIf="loading"
     class="it-loading-shell"
-    [class.it-loading-shell--exit-flash]="loaderExitFlash"
     aria-busy="true"
     aria-live="polite"
     role="status"
   >
-    <div class="it-loading-shell__flash" aria-hidden="true"></div>
-    <div class="it-loading-shell__mesh" aria-hidden="true"></div>
-    <div class="it-loading-shell__orb" aria-hidden="true">
-      <span class="it-loading-shell__ring it-loading-shell__ring--outer"></span>
-      <span class="it-loading-shell__ring it-loading-shell__ring--inner"></span>
-      <span class="it-loading-shell__core">⚖</span>
-    </div>
     <div class="it-loading-shell__brand-wrap m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
       <div class="m1-brand-wordmark m1-brand-wordmark--compact" role="img" aria-label="Inova Thec Soluções Ltda">
         <span class="m1-brand-wordmark__name" data-text="INOVA THEC">INOVA THEC</span>
         <span class="m1-brand-wordmark__tagline">Soluções Ltda</span>
       </div>
     </div>
-    <p class="it-loading-shell__msg">Sincronizando protocolo de governança…</p>
-    <div class="it-loading-shell__bar" aria-hidden="true">
-      <span class="it-loading-shell__bar-fill"></span>
-    </div>
-    <p class="it-loading-shell__hint">HASH (SHA-256) | AP04 | FÉ PÚBLICA</p>
+    <p class="it-loading-shell__msg">Carregando dados de governança...</p>
   </div>
 
   <!-- Conteúdo com transição entre páginas -->
