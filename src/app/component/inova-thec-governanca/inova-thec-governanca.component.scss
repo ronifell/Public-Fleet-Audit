@@ -4403,6 +4403,31 @@
   overflow: hidden;
 }
 
+.it-loading-shell__flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  background: #fff;
+  opacity: 0;
+}
+
+.it-loading-shell--exit-flash .it-loading-shell__flash {
+  animation: it-loader-white-flash 280ms ease-out forwards;
+}
+
+@keyframes it-loader-white-flash {
+  0% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.26;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 .it-loading-shell__mesh {
   display: none;
 }
@@ -4421,33 +4446,27 @@
   position: absolute;
   border-radius: 50%;
   border: 2px solid transparent;
-  border-top-color: rgba(20, 184, 166, 0.85);
-  border-right-color: rgba(20, 184, 166, 0.2);
-  animation: it-orbit 1.35s linear infinite;
 }
 
-.it-loading-shell__ring--a {
+/* Anel externo (verde): 2 voltas para a esquerda em 4s → período 2s, sentido anti-horário */
+.it-loading-shell__ring--outer {
   width: 112px;
   height: 112px;
-  animation-duration: 1.4s;
+  border-top-color: rgba(34, 197, 94, 0.88);
+  border-right-color: rgba(34, 197, 94, 0.18);
+  animation: it-orbit-cw 2s linear infinite reverse;
 }
 
-.it-loading-shell__ring--b {
-  width: 88px;
-  height: 88px;
-  border-top-color: rgba(45, 206, 137, 0.75);
-  animation-duration: 1.1s;
-  animation-direction: reverse;
-}
-
-.it-loading-shell__ring--c {
+/* Anel interno (azul): 1 volta para a direita em 4s */
+.it-loading-shell__ring--inner {
   width: 64px;
   height: 64px;
-  border-top-color: rgba(56, 189, 248, 0.75);
-  animation-duration: 0.85s;
+  border-top-color: rgba(56, 189, 248, 0.82);
+  border-right-color: rgba(56, 189, 248, 0.2);
+  animation: it-orbit-cw 4s linear infinite;
 }
 
-@keyframes it-orbit {
+@keyframes it-orbit-cw {
   to {
     transform: rotate(360deg);
   }
@@ -4494,30 +4513,51 @@
 .it-loading-shell__bar-fill {
   display: block;
   height: 100%;
-  width: 40%;
+  width: 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, #0f766e, #14b8a6, #2dce89);
-  background-size: 200% 100%;
-  animation: it-bar-shimmer 1.15s ease-in-out infinite;
+  background: linear-gradient(90deg, #0f766e, #14b8a6, #22c55e, #38bdf8);
+  background-size: 140% 100%;
+  transform-origin: left center;
+  animation: it-bar-sync 4s linear forwards;
 }
 
-@keyframes it-bar-shimmer {
+/* “Validação”: rápido até ~30%, pausa ~0,5s, depois completa */
+@keyframes it-bar-sync {
   0% {
-    transform: translateX(-100%);
-    background-position: 0% 50%;
+    width: 0%;
+  }
+  25% {
+    width: 30%;
+  }
+  37.5% {
+    width: 30%;
   }
   100% {
-    transform: translateX(250%);
-    background-position: 100% 50%;
+    width: 100%;
   }
 }
 
 .it-loading-shell__hint {
   margin: 0;
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #64748b;
+  animation-name: it-hint-seal;
+  animation-duration: 1s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 4;
+  animation-fill-mode: both;
+}
+
+@keyframes it-hint-seal {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .it-root.it-root--light {
@@ -4707,7 +4747,9 @@
   .it-loading-shell__mesh,
   .it-loading-shell__ring,
   .it-loading-shell__core,
-  .it-loading-shell__bar-fill {
+  .it-loading-shell__bar-fill,
+  .it-loading-shell__hint,
+  .it-loading-shell__flash {
     animation: none;
   }
   .it-loading-shell__mesh {
@@ -4716,7 +4758,10 @@
   .it-loading-shell__bar-fill {
     width: 100%;
     transform: none;
-    opacity: 0.7;
+    opacity: 0.85;
+  }
+  .it-loading-shell__hint {
+    opacity: 0.85;
   }
 
   .it-online-dot,

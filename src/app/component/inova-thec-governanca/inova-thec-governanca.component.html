@@ -44,12 +44,19 @@
   </button>
 
   <!-- Loader inicial: fundo transparente (incl. página principal) -->
-  <div *ngIf="loading" class="it-loading-shell" aria-busy="true" aria-live="polite" role="status">
+  <div
+    *ngIf="loading"
+    class="it-loading-shell"
+    [class.it-loading-shell--exit-flash]="loaderExitFlash"
+    aria-busy="true"
+    aria-live="polite"
+    role="status"
+  >
+    <div class="it-loading-shell__flash" aria-hidden="true"></div>
     <div class="it-loading-shell__mesh" aria-hidden="true"></div>
     <div class="it-loading-shell__orb" aria-hidden="true">
-      <span class="it-loading-shell__ring it-loading-shell__ring--a"></span>
-      <span class="it-loading-shell__ring it-loading-shell__ring--b"></span>
-      <span class="it-loading-shell__ring it-loading-shell__ring--c"></span>
+      <span class="it-loading-shell__ring it-loading-shell__ring--outer"></span>
+      <span class="it-loading-shell__ring it-loading-shell__ring--inner"></span>
       <span class="it-loading-shell__core">⚖</span>
     </div>
     <div class="it-loading-shell__brand-wrap m1-logo-plain m1-logo-plain--compact m1-logo-fx m1-logo-fx--compact">
@@ -62,7 +69,7 @@
     <div class="it-loading-shell__bar" aria-hidden="true">
       <span class="it-loading-shell__bar-fill"></span>
     </div>
-    <p class="it-loading-shell__hint">SHA-256 · AP04 · Fé pública</p>
+    <p class="it-loading-shell__hint">HASH (SHA-256) | AP04 | FÉ PÚBLICA</p>
   </div>
 
   <!-- Conteúdo com transição entre páginas -->
